@@ -1,0 +1,105 @@
+---
+title: "STAT3120 Assignment 1"
+author: "Benjamin G. Moran, c3076448@uon.edu.au"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    includes: 
+      before_body: eqnnumber.js
+    mathjax: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<center> !(figures/header.jpg) </center>
+
+##ASSIGNMENT  1
+
+Due Monday 22 August 2016 (on-campus by 3pm, distance by 5pm)
+
+Late assignments will not be accepted without prior written permission of the lecturer.
+
+***
+
+###Total marks: 50
+
+Marking Criteria:
+
+1.	Answers must be written in clear English with all appropriate working and/or supporting computer output shown.
+2.	Raw computer output without explanatory text is unacceptable.
+3.	Students are required to understand the content in Weeks 1-4 to answer these questions.
+4.	As part of your workings you should include applicable R-code.
+
+***
+
+**Question 1	[Total: 15 marks]**
+
+**Law case (taken from Rossman and Short, 1995, Journal of Statistics Education).**
+
+Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in the US. DNA evidence from the scenes of the crimes revealed that the attacker displayed the genetic marker PGM2+1- in his DNA. This marker has only a 0.32% prevalence in the general population.
+
+(a) Discuss how you might choose a prior probability that Jameison is guilty. Explain and defend your choice (do not set a specific number yet).	[2 marks]
+
+(b) Update your prior with the observed information. Display the full formula for Bayes’ rule in terms of the as yet unknown prior Pr(guilty).	[3 marks]
+ 
+(c) Display the posterior probability of guilt using a range of suitable values for the prior Pr(guilty). [3 marks]
+
+(d) Say that a jury wants to be at least 97.5% sure of guilt before returning a guilty verdict. What is the smallest prior probability of guilt that could be chosen to ensure this level of probability. [2 marks]
+
+(e)	Suppose there are 4,622 males living in Allegheny County. Given that we have found 1 male with PGM2+1- in his DNA, what is the probability that other males in the county also display this marker?	[3 marks]
+
+(f) Should Jameison be found guilty on the DNA evidence alone? Discuss.	[2 marks]
+
+**Question 2	[Total : 10 marks]**
+
+*Part 1:* ABC book distributors have a new book that they hope will be popular with their customers. To obtain an idea of how popular it will be they choose a random sample of 40 customers, ring them, give them a brief description and ask whether they would like to buy the book. 15 of the sample decided to buy the book. What inference can we make about the true proportion of the population of customers that will buy the new book based on this sample?
+
+(a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. [2 marks]
+
+(b) Is ABC likely to achieve 50% of their population of customers buying the new book? [2 marks]
+
+*Part 2:* In past ABC new book promotions they have found that on average 23.5% of their customers buy the book being promoted. In fact, the proportion of customers buying new books after phone promotions has a histogram that closely matches a beta(4,13) density.
+
+(c) Can we use this as a prior density? Discuss.	[2 marks]
+
+(d) Assume the answer in (c) is yes and derive the corresponding posterior.	[2 marks]
+
+(e) How did this prior information affect the likelihood of at least 50% of ABC’s population of customers buying the new book?	[2 marks]
+ 
+**Question 3	[Total: 4 marks]**
+
+Suppose you have a Beta(6,6) prior on the probability $\theta$ that a coin will yield a head when spun in a specified manner. The coin is independently spun 5 times. All you are told is that all 5 results were the same, i.e. either 5 heads or 5 tails. Derive your posterior density (up to a proportionality constant) for $\theta$ and sketch it.
+
+**Question 4	[Total: 9 marks]**
+
+A treatment vs control group example discussed at various times in the literature is based on 11 successes in 11 treatments (i.e. 11/11), and a single failure in the control group (i.e. 0/1).
+
+(a) Find a classical solution to the question of whether the treatment is successful. Bare output from a statistical package is acceptable, but without understanding the
+procedure, it may be difficult to obtain full marks at (c).	[3 marks]
+
+(b) Apply a Bayesian approach to this question, trying both the Bayes-Laplace and Jeffreys priors.	[4 marks]
+
+(c) Briefly explain possible reasons behind the various differences.	[2 marks]
+
+**Question 5	[Total: 4 marks]**
+
+A random sample of n students is drawn from a large population, and their weights are measured. The average weight of the n sampled students is y = 150 pounds. Assume the weights in the population are Normally distributed with unknown mean $\theta$ and known standard deviation of 20 pounds. Suppose your prior distribution for $\theta$ is Normal with mean 180 and known standard deviation of 40 pounds.
+
+
+Give your posterior distribution for $\theta$ . (Note that your answer will be a function of n.)
+ 
+**Question 6	[Total: 8 marks]**
+
+Consider the Uniform(0, $\theta$) distribution, i.e. $$p(x | \theta) = 1/\theta,	0 < x < \theta $$ from which a random sample $\{x_1,...,x_n\}$ is obtained. Note that $y_n = \text{max}\{x_1,...,x_n\}$ is a sufficient statistic.
+
+(a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) ∝ 1/ \theta.$ Be careful to use the correct likelihood and range!	[3 marks]
+
+(b) Plot this posterior for $y_n = 5$ and $n = 20$.	[2 marks]
+
+(c) For the data at (b), derive 95% credible intervals, both central and HPD. Which would you prefer and why? [3 marks]
+
+
+
+####End of Assignment 1
