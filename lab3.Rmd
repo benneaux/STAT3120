@@ -207,10 +207,10 @@ males <- 511
 mu <- 0.5
 sig2 <- 0.01
 a <- mu*(mu*(1-mu)/sig2 -1)
-b <- (1-mu)*(mu*(1-mu)/sig2 -1) 
-theta.males <- rbeta(births, males + a, births - males + b)
-sum(theta.males>0.5)/births
+b <- (1-mu)*(mu*(1-mu)/sig2 -1)
+
 1 - pbeta(0.5, males + a, births - males + b)
+1 - pbeta(0.5, births - males + a, males + b)
 
 ```
 
@@ -224,17 +224,21 @@ Let $y~N(\theta,4)$, so  that y is  Normally  distributed  with  unknown  mean  
 
 y <- 1
 sig <- 2
-x.1 <- dnorm(y,1,sig)
-x.1
-x.2 <- dnorm(y, 1, sig)*0.5
-x.2
-x.3 <- dnorm(y, 2, sig)
-x.3
-x.4 <- dnorm(y, 2, sig)*0.5
-x.4
+lik.theta1 <- dnorm(y,1,sig)
+lik.theta1
+prod.theta1 <- dnorm(y, 1, sig)*0.5
+prod.theta1
+lik.theta2 <- dnorm(y, 2, sig)
+lik.theta2
+prod.theta2 <- dnorm(y, 2, sig)*0.5
+prod.theta2
 
-# theta1.post
-# theta2.post
+post.theta1 <- prod.theta1/sum(prod.theta1,prod.theta2)
+post.theta2 <- prod.theta2/sum(prod.theta1,prod.theta2)
+
+post.theta1
+post.theta2
+
 
 ```
 (b) A single observation of $y = 1.5$ is observed. Update the prior, ignoring the data point in part (a).
