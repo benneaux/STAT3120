@@ -67,6 +67,24 @@ Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in t
 
 Suppose you have a Beta(6,6) prior on the probability $\theta$ that a coin will yield a head when spun in a specified manner. The coin is independently spun 5 times. All you are told is that all 5 results were the same, i.e. either 5 heads or 5 tails. Derive your posterior density (up to a proportionality constant) for $\theta$ and sketch it.
 
+**Answer:** We are given that the prior probability of $\theta$ is proportional to a $Beta(6,6)$ distribution:
+$$f(\theta) \propto \theta^5(1-\theta)^5$$ We are also given that the data could represent only two possible outcomes - either all heads or all tails. Therefore, the likelihood of the data is equal to:
+$$\begin{aligned} Pr(x|\theta) &= \binom{5}{0}(1-\theta)^5 + \binom{5}{5}\theta^5 \\ 
+&= (1-\theta)^5 + \theta^5
+\end{aligned}$$
+So, we can derive the posterior by multiplying the prior by the likelihood:
+$$\begin{aligned} f(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
+&\propto \theta^5(1-\theta)^5*\left((1-\theta)^5 + \theta^5\right) \\
+&\propto \theta^5(1-\theta)^{10} + \theta^{10}(1-\theta)^5
+\end{aligned}$$
+Now let's sketch the distribution
+```{r Q3}
+theta <- seq(0,1,0.01)
+dens  <- theta^5*(1-theta)^10 + theta^10*(1-theta)^5
+plot(theta,dens,ylim=c(0,1.1*max(dens)),type="l",xlab="theta",ylab="",
+xaxs="i",yaxs="i",yaxt="n",bty="n",cex=1)
+```
+
 ***
 
 **Question 4	[Total: 9 marks]**
