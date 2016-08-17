@@ -46,11 +46,21 @@ Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in t
 (e)	Suppose there are 4,622 males living in Allegheny County. Given that we have found 1 male with PGM2+1- in his DNA, what is the probability that other males in the county also display this marker?	[3 marks]
 (f) Should Jameison be found guilty on the DNA evidence alone? Discuss.	[2 marks]
 
+*Q1: is just like a Pr(disease | positive test result) type of problem*
+
 **Question 2	[Total : 10 marks]**
 
 *Part 1:* ABC book distributors have a new book that they hope will be popular with their customers. To obtain an idea of how popular it will be they choose a random sample of 40 customers, ring them, give them a brief description and ask whether they would like to buy the book. 15 of the sample decided to buy the book. What inference can we make about the true proportion of the population of customers that will buy the new book based on this sample?
+```{r 2.Part1, include = TRUE}
+n <- 40
+y <- 15
+dbinom(15,40, prob = 0.5)
 
+  
+```
 (a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. [2 marks]
+    $$\begin{align} p(\theta | y = `r y`) &\propto Pr(y = `r y` | \theta)p(\theta) \\
+    &\propto \theta^ {`r y`}(1-\theta)^ {`r n-y`} \end{align}$$
 (b) Is ABC likely to achieve 50% of their population of customers buying the new book? [2 marks]
 
 *Part 2:* In past ABC new book promotions they have found that on average 23.5% of their customers buy the book being promoted. In fact, the proportion of customers buying new books after phone promotions has a histogram that closely matches a beta(4,13) density.
@@ -80,6 +90,7 @@ procedure, it may be difficult to obtain full marks at (c).	[3 marks]
 
 (c) Briefly explain possible reasons behind the various differences.	[2 marks]
 
+*Q4: re "classical solution", remember that the data from two sample proportions can be put in a 2x2 table, for which various tests are available (mostly not suitable for this extreme data!)*
 ***
 
 **Question 5	[Total: 4 marks]**
@@ -100,6 +111,8 @@ Consider the Uniform(0, $\theta$) distribution, i.e. $$p(x | \theta) = 1/\theta,
 (b) Plot this posterior for $y_n = 5$ and $n = 20$.	[2 marks]
 
 (c) For the data at (b), derive 95% credible intervals, both central and HPD. Which would you prefer and why? [3 marks]
+
+*Q6: tests application of the Bayesian approach to a "general" problem (covered in many introductory stats books but not in the lecture notes), AND shows how it works very well here:-)*
 
 ***
 
