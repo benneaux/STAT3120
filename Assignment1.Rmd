@@ -14,6 +14,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+require(ggplot2)
+require(broom)
 ```
 
 Due Monday 22 August 2016 (on-campus by 3pm, distance by 5pm)
@@ -51,13 +53,56 @@ Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in t
 *Part 1:* ABC book distributors have a new book that they hope will be popular with their customers. To obtain an idea of how popular it will be they choose a random sample of 40 customers, ring them, give them a brief description and ask whether they would like to buy the book. 15 of the sample decided to buy the book. What inference can we make about the true proportion of the population of customers that will buy the new book based on this sample?
 
 (a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. [2 marks]
+
+```{r Q2 - 1a}
+x <- seq(0,1,by = 0.01)
+a = 15
+b = 40
+posterior.dist <- dbeta(x, a + 1, b - a + 1)
+plot(x, posterior.dist, type = 'l')
+
+```
+
 (b) Is ABC likely to achieve 50% of their population of customers buying the new book? [2 marks]
+
+```{r Q2 - 1b}
+x <- seq(0,1,by = 0.01)
+a = 15
+b = 40
+data <- rbeta(10000, a + 1, b - a + 1)
+mean(data>0.5)
+mean(data)
+
+```
 
 *Part 2:* In past ABC new book promotions they have found that on average 23.5% of their customers buy the book being promoted. In fact, the proportion of customers buying new books after phone promotions has a histogram that closely matches a beta(4,13) density.
 
 (c) Can we use this as a prior density? Discuss.	[2 marks]
 
+```{r Q2- 2c}
+a = 3
+b = 15
+data <- rbeta(10000, a + 1, b - a + 1)
+mean(data)
+
+```
+
 (d) Assume the answer in (c) is yes and derive the corresponding posterior.	[2 marks]
+
+```{r Q2- 2d}
+x <- seq(0,1,by = 0.01)
+a1 <- 15
+b1 <- 40
+a2 <-  3
+b2 <-  15
+dist <- dbeta(x, (a1 + a2) + 1, (b1 + b2) - (a1 + a2) + 1)
+plot(x,dist,type='l')
+data <- rbeta(10000, (a1 + a2) + 1, (b1 + b2) - (a1 + a2) + 1)
+mean(data>0.5)
+mean(data)
+
+
+```
 
 (e) How did this prior information affect the likelihood of at least 50% of ABC’s population of customers buying the new book?	[2 marks]
 
@@ -68,10 +113,35 @@ Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in t
 Suppose you have a Beta(6,6) prior on the probability $\theta$ that a coin will yield a head when spun in a specified manner. The coin is independently spun 5 times. All you are told is that all 5 results were the same, i.e. either 5 heads or 5 tails. Derive your posterior density (up to a proportionality constant) for $\theta$ and sketch it.
 
 **Answer:** We are given that the prior probability of $\theta$ is proportional to a $Beta(6,6)$ distribution:
-$$f(\theta) \propto \theta^5(1-\theta)^5$$ We are also given that the data could represent only two possible outcomes - either all heads or all tails. Therefore, the likelihood of the data is equal to:
+$$f(\theta) \propto \theta^5(1-\theta)^5$$
+
+```{r Q3a}
+theta.prior <- seq(0,1,0.01)
+prior.density  <- theta.prior^5*(1-theta.prior)^5 
+prior.data <- as.data.frame(cbind(theta.prior, prior.density))
+
+ggplot(
+  prior.data,
+  aes(theta.prior, prior.density)) + 
+  geom_line()
+```
+
+We are also given that the data could represent only two possible outcomes - either all heads or all tails. Therefore, the likelihood of the data is equal to:
 $$\begin{aligned} Pr(x|\theta) &= \binom{5}{0}(1-\theta)^5 + \binom{5}{5}\theta^5 \\ 
 &= (1-\theta)^5 + \theta^5
 \end{aligned}$$
+
+```{r Q3b}
+theta.like <- seq(0,1,0.01)
+like.density  <- (1-theta.like)^5  + theta.like^5
+like.data <- as.data.frame(cbind(theta.like, like.density))
+
+ggplot(
+  like.data,
+  aes(theta.like, like.density)) + 
+  geom_line()
+```
+
 So, we can derive the posterior by multiplying the prior by the likelihood:
 $$\begin{aligned} f(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
 &\propto \theta^5(1-\theta)^5*\left((1-\theta)^5 + \theta^5\right) \\
@@ -79,10 +149,14 @@ $$\begin{aligned} f(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
 \end{aligned}$$
 Now let's sketch the distribution
 ```{r Q3}
-theta <- seq(0,1,0.01)
-dens  <- theta^5*(1-theta)^10 + theta^10*(1-theta)^5
-plot(theta,dens,ylim=c(0,1.1*max(dens)),type="l",xlab="theta",ylab="",
-xaxs="i",yaxs="i",yaxt="n",bty="n",cex=1)
+theta.coin <- seq(0,1,0.01)
+posterior.density  <- theta.coin^5*(1-theta.coin)^10 + theta.coin^10*(1-theta.coin)^5
+coin.data <- as.data.frame(cbind(theta.coin, posterior.density))
+
+ggplot(
+  coin.data,
+  aes(theta.coin, posterior.density)) + 
+  geom_line()
 ```
 
 ***
@@ -97,6 +171,34 @@ procedure, it may be difficult to obtain full marks at (c).	[3 marks]
 (b) Apply a Bayesian approach to this question, trying both the Bayes-Laplace and Jeffreys priors.	[4 marks]
 
 (c) Briefly explain possible reasons behind the various differences.	[2 marks]
+
+```{r Q4 classical}
+
+treatment.table <- matrix(c(11,0,0,1),ncol=2,byrow=TRUE)
+colnames(treatment.table) <- c("Success","Failure")
+rownames(treatment.table) <- c("Treatment","Control")
+treatment.table <- as.table(treatment.table)
+treatment.table
+treatment.chisq <- broom::tidy(chisq.test(treatment.table))
+treatment.chisq$p.value
+```
+
+```{r Q4 Bayes}
+pt <-  1 # Probability of uccessful treatmetn outcome in Treatment group
+pc <- 0 # Probability of successful treatmetn outcome in Control group
+
+nt <- 11 # Size of Treatment Group
+rt <- 11 # Number of successes for Treatment Group
+nc <- 1 # Size of Control Group
+rc <- 0 # Number of Success for Control Group.
+
+
+like <- (pt^rt*(1-pt)^(nt-rt))*(pc^rc*(1-pc)^(nc-rc))
+
+
+
+
+```
 
 ***
 
