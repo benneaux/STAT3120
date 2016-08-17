@@ -1,0 +1,249 @@
+---
+title: "lab3"
+author: "Benjamin G. Moran"
+date: "8 August 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Question 1
+
+We looked at this question last week. Use Monte Carlo simulation to get the same answers as last week to 2 decimal places.
+
+(a) A  basketball  fan  watches  Michael  Jordan  and  of  100  randomly  chosen  free throws in 20 games,  Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
+(b) The  same  fan  watches  Shaquille  O’Neal  make  only  40  out  of  100  randomly chosen free throws from 20 games. Find the posterior density for his success proportion  using  a  uniform  prior  and  a  95%  credible  interval.  Plot  this  density.
+(c) Use what you know about these two players (if anything) to construct a Beta prior distribution  for  their  success  proportions  at  making  free-throws  and repeat the analysis in (a) and (b).
+(d) What  is  the  probability  that  Jordan’s  free-throw  percentage  is  above  90%  from part (a)? From part (c)?
+(e) How many iterations did you need to get 2 decimal places of accuracy? What about 3 or more? How many places of accuracy do we need?
+(f) How  can  we  compare  the  two  success  proportions?  Is  Jordan  significantly better than O’Neal? What is the probability that Jordan is better than O’Neal? Use MC simulation to answer.
+(g) More interestingly, do this analysis for if O’Neal’s performance had been 80 out of 100. Provide the appropriate graph.
+
+**Answer**
+
+```{r Question 1 Jordan}
+
+a <- 1
+b <- 1
+n <- 100
+factor <- 100
+bounds <- c(0.025, 0.9975)
+
+successes <- 89
+
+
+# a) A binomial(a,n) * a Unif[0,1] -> a Beta(a+1, n-a+1) 
+
+post.CrI <- qbeta(bounds, successes + a, n - successes + b)
+post.CrI
+
+# c) Posterior Densities and quantiles
+
+theta.Jordan <- rbeta(n*factor, successes + 1, n - successes + b)
+quantile(theta.Jordan, bounds)
+
+
+hist(theta.Jordan, 50)
+plot(density(theta.Jordan), col = "red")
+th1 <- seq(0,1,0.001)
+lines(th1,dbeta(th1,successes + a, n - successes + b))
+
+
+dbeta.Jordan <- dbeta(th1,successes + a, n - successes + b)
+
+#Probability of Jordan being 90% accurate with flat priors.
+1-pbeta(0.9, successes + a, n - successes + b)
+
+sum(theta.Jordan>0.9)/10000
+
+```
+
+```{r Question 1 ONeal}
+
+a <- 1
+b <- 1
+
+successes <- 40
+bounds <- c(0.025, 0.9975)
+
+# b) A binomial(a,n) * a Unif[0,1] -> a Beta(a+1, n-a+1) 
+
+post.CrI <- qbeta(bounds, successes + a, n - successes + b)
+post.CrI
+
+# c) Posterior Densities and quantiles
+
+theta.ONeal <- rbeta(n*factor, successes + 1, n - successes + b)
+quantile(theta.ONeal, bounds)
+
+# Plot the histogram and the smoothed density (simulation) overlayed with the function (dbeta)
+
+hist(theta.ONeal, 50)
+plot(density(theta.ONeal), col = "red")
+lines(th1,dbeta(th1,successes + a, n - successes + b))
+
+dbeta.ONeal <- dbeta(th1,successes + a, n - successes + b)
+
+#Probability of ONeal being 40% accurate with flat priors.
+1-pbeta(0.4, successes + a, n - successes + b)
+
+sum(theta.ONeal>0.4)/10000
+
+```
+Now plot both sample densities on the same graph
+```{r Quesiton 1 Jordan and ONeal}
+
+plot(th1, dbeta.Jordan, col = "green", type = 'l', ylab = "Density")
+lines(th1, dbeta.ONeal, col = "red", type = 'l')
+
+# f) the probability that theta.Jordan is greater than theta.ONeal
+
+mean(theta.Jordan>theta.ONeal)
+
+```
+
+```{r Question 1 Shaquille Improves}
+a <- 1
+b <- 1
+
+successes <- 80
+bounds <- c(0.025, 0.9975)
+
+# b) A binomial(a,n) * a Unif[0,1] -> a Beta(a+1, n-a+1) 
+
+post.CrI <- qbeta(bounds, successes + a, n - successes + b)
+post.CrI
+
+# c) Posterior Densities and quantiles
+
+theta.ONeal2 <- rbeta(n*factor, successes + 1, n - successes + b)
+quantile(theta.ONeal2, bounds)
+
+# Plot the histogram and the smoothed density (simulation) overlayed with the function (dbeta)
+
+hist(theta.ONeal, 50)
+plot(density(theta.ONeal2), col = "red")
+lines(th1,dbeta(th1,successes + a, n - successes + b))
+
+dbeta.ONeal2 <- dbeta(th1,successes + a, n - successes + b)
+
+#Probability of ONeal being 40% accurate with flat priors.
+1-pbeta(0.8, successes + a, n - successes + b)
+
+sum(theta.ONeal2>0.8)/10000
+
+```
+
+```{r Quesiton 1 Jordan and ONeal again}
+
+plot(th1, dbeta.Jordan, col = "green", type = 'l', ylab = "Density")
+lines(th1, dbeta.ONeal2, col = "red", type = 'l')
+
+# f) the probability that theta.Jordan is greater than theta.ONeal
+
+mean(theta.Jordan>theta.ONeal2)
+
+```
+
+###Question 2
+Consider again the placenta previa example, where y =  no. of female births and $\theta$ = Pr(female birth);  we will take a sample of $n=1000$. 
+
+(a) After   consultation   with   a   specialist   in   Placenta   previa,   you   place   a $Beta(100,100)$  prior  on $\theta$. Show  that  this  means  that  you  (and  the  doctor)  are  more than $95\%$sure that $0.4 < \theta < 0.6$; but that you are undecided whether $\theta > 0.5$ OR $\theta < 0.5$.
+
+(b) Is this a reasonable prior distribution?
+<!-- (c) -->
+<!-- (Honours -->
+<!-- /postgraduates only). -->
+<!--  What does this prior imply about the possible  -->
+<!-- observations  -->
+<!-- y -->
+<!-- ,  -->
+<!-- before we observe any d -->
+<!-- ata -->
+<!-- ? Does this seem reasonable? -->
+<!-- (d) -->
+<!-- The sample of  -->
+<!-- n -->
+<!-- =1000 is taken and 511 males ar -->
+<!-- e born. Update your opinion  -->
+<!-- about whether  -->
+<!-- θ -->
+<!--  > 0.5 OR  -->
+<!-- θ -->
+<!--  < 0.5.   -->
+<!-- (e) -->
+<!-- Repeat (d) under a  -->
+<!-- a. -->
+<!-- Beta(1,1) prior -->
+<!-- b. -->
+<!-- Beta( -->
+<!-- a -->
+<!-- , -->
+<!-- b -->
+<!-- ) prior where  -->
+<!-- a -->
+<!--  and  -->
+<!-- b -->
+<!--  are chosen so that -->
+<!-- i. -->
+<!-- the prior mean = 0.5 and prior standard deviation = 0.1  -->
+<!-- (f) -->
+<!-- How sensitive are the results to choice of prior?  -->
+
+```{r Quesiton 2}
+
+n <- 1000
+a <- 100
+b <- 100
+pbeta(0.6, a, b) - pbeta(0.4, a, b)
+c <- pbeta(c(0.6,0.4),a,b)
+qbeta(c, a,b)
+
+# e)
+births <- 1000
+males <- 511
+mu <- 0.5
+sig2 <- 0.01
+a <- mu*(mu*(1-mu)/sig2 -1)
+b <- (1-mu)*(mu*(1-mu)/sig2 -1)
+
+1 - pbeta(0.5, males + a, births - males + b)
+1 - pbeta(0.5, births - males + a, males + b)
+
+```
+
+###Question 3
+Let $y~N(\theta,4)$, so  that y is  Normally  distributed  with  unknown  mean  $\theta$ and  known variance 4. Let the prior distribution on the mean $\theta$  be ... .Thus $\theta$  can  only  take  the  values  1  or  2,  both  with  equal  probability.
+
+(a) A single sample of $y=1$  is observed.  Update  the  discrete  probability distribution for $\theta$ using Bayes’ rule. i.e. find $p(\theta|y=1)$.
+
+```{r }
+# THis part is confusing. CHeck the answers on Tuesday night.
+
+y <- 1
+sig <- 2
+lik.theta1 <- dnorm(y,1,sig)
+lik.theta1
+prod.theta1 <- dnorm(y, 1, sig)*0.5
+prod.theta1
+lik.theta2 <- dnorm(y, 2, sig)
+lik.theta2
+prod.theta2 <- dnorm(y, 2, sig)*0.5
+prod.theta2
+
+post.theta1 <- prod.theta1/sum(prod.theta1,prod.theta2)
+post.theta2 <- prod.theta2/sum(prod.theta1,prod.theta2)
+
+post.theta1
+post.theta2
+
+
+```
+(b) A single observation of $y = 1.5$ is observed. Update the prior, ignoring the data point in part (a).
+
+(c) Update  the  prior  using  Bayes’  rule  after  observing  both  sample  points  in  (a)and (b). That is we have a sample of size 2, $y_1 = 1, y_2 = 1.5$.
+
+(d) Use probability  rules  to  find  the  marginal  likelihood $p(y)$,  i.e.  the  likelihood unconditional on $\theta$. Plot this likelihood over a sensible grid of points. θ
+
