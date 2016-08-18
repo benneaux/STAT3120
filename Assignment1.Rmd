@@ -42,10 +42,30 @@ Marking Criteria:
 Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in the US. DNA evidence from the scenes of the crimes revealed that the attacker displayed the genetic marker PGM2+1- in his DNA. This marker has only a 0.32% prevalence in the general population.
 
 (a) Discuss how you might choose a prior probability that Jameison is guilty. Explain and defend your choice (do not set a specific number yet). [2 marks]
+
 (b) Update your prior with the observed information. Display the full formula for Bayes’ rule in terms of the as yet unknown prior Pr(guilty). [3 marks]
+
+```{r Q1b}
+pr.guilty <- seq(0,0.99,by=0.0001)
+pr.marker <- 0.0032
+pr.notguilty <- 1-pr.guilty
+pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
+prob.dens <- as.data.frame(rbind(cbind(pr.guilty, pr.post),c(1,1)))
+
+ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
+  geom_line(data=prob.dens) +
+  geom_hline(yintercept=0.975)
+
+mpr.guilt <- which(pr.post > 0.975)
+pr.guilty[mpr.guilt[1]]
+```
+
 (c) Display the posterior probability of guilt using a range of suitable values for the prior Pr(guilty). [3 marks]
+
 (d) Say that a jury wants to be at least 97.5% sure of guilt before returning a guilty verdict. What is the smallest prior probability of guilt that could be chosen to ensure this level of probability. [2 marks]
+
 (e)	Suppose there are 4,622 males living in Allegheny County. Given that we have found 1 male with PGM2+1- in his DNA, what is the probability that other males in the county also display this marker?	[3 marks]
+
 (f) Should Jameison be found guilty on the DNA evidence alone? Discuss.	[2 marks]
 
 *Q1: is just like a Pr(disease | positive test result) type of problem*
@@ -61,21 +81,22 @@ dbinom(15,40, prob = 0.5)
   
 ```
 (a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. [2 marks]
-<<<<<<< HEAD
-    $$\begin{align} p(\theta | y = `r y`) &\propto Pr(y = `r y` | \theta)p(\theta) \\
-    &\propto \theta^ {`r y`}(1-\theta)^ {`r n-y`} \end{align}$$
-=======
+
+$$\begin{aligned} p(\theta | y = `r y`) &\propto Pr(y = `r y` | \theta)p(\theta) \\
+&\propto \theta^ {`r y`}(1-\theta)^ {`r n-y`}
+\end{aligned}$$
 
 ```{r Q2 - 1a}
 x <- seq(0,1,by = 0.01)
 a = 15
 b = 40
 posterior.dist <- dbeta(x, a + 1, b - a + 1)
-plot(x, posterior.dist, type = 'l')
+posterior.dens <- as.data.frame(cbind(x,posterior.dist))
+ggplot(posterior.dens, aes(x,posterior.dist)) +
+  geom_line()
 
 ```
 
->>>>>>> 837a7ea25253d3512485d5a7b1c41de2f78b18f3
 (b) Is ABC likely to achieve 50% of their population of customers buying the new book? [2 marks]
 
 ```{r Q2 - 1b}
@@ -185,9 +206,8 @@ procedure, it may be difficult to obtain full marks at (c).	[3 marks]
 
 (c) Briefly explain possible reasons behind the various differences.	[2 marks]
 
-<<<<<<< HEAD
+
 *Q4: re "classical solution", remember that the data from two sample proportions can be put in a 2x2 table, for which various tests are available (mostly not suitable for this extreme data!)*
-=======
 ```{r Q4 classical}
 
 treatment.table <- matrix(c(11,0,0,1),ncol=2,byrow=TRUE)
@@ -196,7 +216,7 @@ rownames(treatment.table) <- c("Treatment","Control")
 treatment.table <- as.table(treatment.table)
 treatment.table
 treatment.chisq <- broom::tidy(chisq.test(treatment.table))
-treatment.chisq$p.value
+treatment.chisq
 ```
 
 ```{r Q4 Bayes}
@@ -215,8 +235,6 @@ like <- (pt^rt*(1-pt)^(nt-rt))*(pc^rc*(1-pc)^(nc-rc))
 
 
 ```
-
->>>>>>> 837a7ea25253d3512485d5a7b1c41de2f78b18f3
 ***
 
 **Question 5	[Total: 4 marks]**
