@@ -216,6 +216,16 @@ Give your posterior distribution for $\theta$ . (Note that your answer will be a
 Consider the Uniform(0, $\theta$) distribution, i.e. $$p(x | \theta) = 1/\theta,	0 < x < \theta $$ from which a random sample $\{x_1,...,x_n\}$ is obtained. Note that $y_n = \text{max}\{x_1,...,x_n\}$ is a sufficient statistic.
 
 (a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) ∝ 1/ \theta.$ Be careful to use the correct likelihood and range!	[3 marks]
+$$p(x|\theta)= 1/\theta, 0<x<\theta \implies p(x_i|\theta)= \left\{
+\begin{array}{ll}
+      \frac{1}{\theta^n}\left(max\left\{x_1,...,x_n\right\}\leq \theta\right) & x_i \leq \theta, i=1,2,\cdots \\
+      0 & otherwise
+\end{array} 
+\right.$$
+```{r Q6a}
+
+
+```
 
 (b) Plot this posterior for $y_n = 5$ and $n = 20$.	[2 marks]
 
