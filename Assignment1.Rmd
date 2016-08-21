@@ -14,6 +14,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 require(ggplot2)
 require(broom)
 ```
@@ -74,11 +75,8 @@ pr.guilty[mpr.guilt[1]]
 
 *Part 1:* ABC book distributors have a new book that they hope will be popular with their customers. To obtain an idea of how popular it will be they choose a random sample of 40 customers, ring them, give them a brief description and ask whether they would like to buy the book. 15 of the sample decided to buy the book. What inference can we make about the true proportion of the population of customers that will buy the new book based on this sample?
 ```{r 2.Part1, include = TRUE}
-n <- 40
-y <- 15
+n <- 40; y <- 15
 dbinom(15,40, prob = 0.5)
-
-  
 ```
 (a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. [2 marks]
 
@@ -87,58 +85,113 @@ $$\begin{aligned} p(\theta | y = `r y`) &\propto Pr(y = `r y` | \theta)p(\theta)
 \end{aligned}$$
 
 ```{r Q2 - 1a}
-x <- seq(0,1,by = 0.01)
-a = 15
-b = 40
-posterior.dist <- dbeta(x, a + 1, b - a + 1)
-posterior.dens <- as.data.frame(cbind(x,posterior.dist))
-ggplot(posterior.dens, aes(x,posterior.dist)) +
-  geom_line()
+x <- seq(0,1,by = 0.01); a = 15; b = 40
 
+dens <- dbeta(
+  x,
+  a + 1,
+  b - a + 1
+  )
+
+posterior.dens.unif <- as.data.frame(cbind(x,dens))
+
+ggplot(
+  data = posterior.dens.unif,
+  aes(x,dens)
+  ) +
+  geom_line()
 ```
 
 (b) Is ABC likely to achieve 50% of their population of customers buying the new book? [2 marks]
 
 ```{r Q2 - 1b}
-x <- seq(0,1,by = 0.01)
-a = 15
-b = 40
-data <- rbeta(10000, a + 1, b - a + 1)
-mean(data>0.5)
-mean(data)
+x <- seq(0,1,by = 0.01); a = 15; b = 40
 
+unif.data <- rbeta(
+  10000,
+  a + 1,
+  b - a + 1
+  )
 ```
+Now, if we take the mean of generated data that is greater than $0.5\%$, we get 
+```{r } 
+mean(unif.data>0.5)
+```
+implying that it is not very likely that ABC will achieve their target. We can confirm this be calulating the mean of the whole sample.
+```{r}
+mean(unif.data)
+```
+which implies that the most likely outcome for ABC - using the given prior and likelihood - is that $\approx 38\%$ of their customers will purchase the book.
 
-*Part 2:* In past ABC new book promotions they have found that on average 23.5% of their customers buy the book being promoted. In fact, the proportion of customers buying new books after phone promotions has a histogram that closely matches a beta(4,13) density.
+*Part 2:* In past ABC new book promotions they have found that on average 23.5% of their customers buy the book being promoted. In fact, the proportion of customers buying new books after phone promotions has a histogram that closely matches a $Beta(4,13)$ density.
 
 (c) Can we use this as a prior density? Discuss.	[2 marks]
 
-```{r Q2- 2c}
-a = 3
-b = 15
-data <- rbeta(10000, a + 1, b - a + 1)
-mean(data)
+**Answer:** We can check this by generating some random samples from a $Beta(4,13)$ distribution and calculating the mean of those samples.
 
+```{r Q2- 2c}
+a = 3; b = 15
+
+beta.data <- rbeta(
+  10000,
+  a + 1,
+  b - a + 1
+  )
+
+mean(beta.data)
 ```
+Which is $\approx 23.5\%$. Therefore, we can justifiably use $Beta(4,13)$ as a prior distribution.
 
 (d) Assume the answer in (c) is yes and derive the corresponding posterior.	[2 marks]
 
 ```{r Q2- 2d}
-x <- seq(0,1,by = 0.01)
-a1 <- 15
-b1 <- 40
-a2 <-  3
-b2 <-  15
-dist <- dbeta(x, (a1 + a2) + 1, (b1 + b2) - (a1 + a2) + 1)
-plot(x,dist,type='l')
-data <- rbeta(10000, (a1 + a2) + 1, (b1 + b2) - (a1 + a2) + 1)
-mean(data>0.5)
-mean(data)
+x <- seq(0,1,by = 0.01); a1 <- 15; b1 <- 40; a2 <-  3; b2 <-  15
+
+dens <- dbeta(
+  x,
+  (a1 + a2) + 1,
+  (b1 + b2) - (a1 + a2) + 1
+  )
+
+posterior.dens.beta <- as.data.frame(cbind(x, dens))
+
+ggplot(
+  data = posterior.dens.beta,
+  aes(x,dens)
+  ) + 
+  geom_line()
+
+beta.data <- rbeta(
+  10000,
+  (a1 + a2) + 1,
+  (b1 + b2) - (a1 + a2) + 1
+  )
+
+mean(beta.data>0.5)
+mean(beta.data)
 
 
 ```
 
 (e) How did this prior information affect the likelihood of at least 50% of ABC’s population of customers buying the new book?	[2 marks]
+
+```{r Q2e}
+
+ggplot() + 
+  geom_line(
+    data = posterior.dens.unif,
+    aes(x,dens),
+    color = "blue"
+    ) + 
+  geom_line(
+    data = posterior.dens.beta,
+    aes(x,dens),
+    color = "red"
+    )
+
+mean(beta.data>0.5)
+mean(beta.data)
+```
 
 ***
  
@@ -187,10 +240,10 @@ theta.coin <- seq(0,1,0.01)
 posterior.density  <- theta.coin^5*(1-theta.coin)^10 + theta.coin^10*(1-theta.coin)^5
 coin.data <- as.data.frame(cbind(theta.coin, posterior.density))
 
-ggplot(
-  coin.data,
-  aes(theta.coin, posterior.density)) + 
-  geom_line()
+ggplot() + 
+  geom_line(
+    data = coin.data,
+    aes(theta.coin, posterior.density))
 ```
 
 ***
