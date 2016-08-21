@@ -44,26 +44,43 @@ Joseph Jameison was charged with multiple rapes in 1987 in Allegheny County in t
 
 (a) Discuss how you might choose a prior probability that Jameison is guilty. Explain and defend your choice (do not set a specific number yet). [2 marks]
 
+**Answer:** From the description of the case we should highlight two important pieces of information. Firstly, the percentage of the population that carry the genetic marker displayed by the attacker is *very* small - $0.32\%$. Next, we should note what is omitted from the description of the genetic marker evidence: no values for the sensitivity or specificity of the test that determined the presence of the marker are stated. Therefore - at least in the toy context of this problem - we will assume that those values are both $100\%$. Obviously in reality this is impossible and we would have to take into account the accuarcy of the method/test used.
+
+So, in summary, we are told that:
+
+  + The marker is *definitely* present.
+  + The attacker displayed the marker.
+  + Joseph Jameison is a suspect. 
+
+We are not given any reason's for why he is a suspect, so the only way we can decide on his guilt is by determining whether or not he displays the same genetic marker. This is an either/or question so it makes sense - without more evidence - to assign a $50/50$ probabily of guilt.
+
 (b) Update your prior with the observed information. Display the full formula for Bayes’ rule in terms of the as yet unknown prior Pr(guilty). [3 marks]
 
-```{r Q1b}
-pr.guilty <- seq(0,0.99,by=0.0001)
-pr.marker <- 0.0032
-pr.notguilty <- 1-pr.guilty
-pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
-prob.dens <- as.data.frame(rbind(cbind(pr.guilty, pr.post),c(1,1)))
 
-ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
-  geom_line(data=prob.dens) +
-  geom_hline(yintercept=0.975)
-
-mpr.guilt <- which(pr.post > 0.975)
-pr.guilty[mpr.guilt[1]]
-```
 
 (c) Display the posterior probability of guilt using a range of suitable values for the prior Pr(guilty). [3 marks]
 
+```{r Q1b}
+pr.guilty <- seq(0,1,by=0.00001)
+pr.marker <- 0.0032
+pr.notguilty <- 1-pr.guilty
+pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
+prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
+
+ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
+  geom_line(data=prob.dens) +
+  geom_hline(yintercept=0.975, linetype = 2, color = "red")
+```
+
 (d) Say that a jury wants to be at least 97.5% sure of guilt before returning a guilty verdict. What is the smallest prior probability of guilt that could be chosen to ensure this level of probability. [2 marks]
+
+First, we need to find the index of the first of the probabilities we calculated for the posterior density that is greater than $0.975$. Then we find the corresponding value for the probabilty of guilt that generated that value at that index.
+
+```{r Q1d}
+mpr.guilt <- which(pr.post > 0.975)
+pr.guilty[mpr.guilt[1]]
+```
+Therefore, the minimum probability of guilt that the can be chosen is $\approx 11.1\%$.
 
 (e)	Suppose there are 4,622 males living in Allegheny County. Given that we have found 1 male with PGM2+1- in his DNA, what is the probability that other males in the county also display this marker?	[3 marks]
 
