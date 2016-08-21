@@ -305,6 +305,8 @@ Consider the Uniform(0, $\theta$) distribution, i.e. $$p(x | \theta) = 1/\theta,
 
 (a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) ∝ 1/ \theta.$ Be careful to use the correct likelihood and range!	[3 marks]
 
+**Answer:** Firstly, we have that that the density of 
+
 (b) Plot this posterior for $y_n = 5$ and $n = 20$.	[2 marks]
 
 (c) For the data at (b), derive 95% credible intervals, both central and HPD. Which would you prefer and why? [3 marks]
