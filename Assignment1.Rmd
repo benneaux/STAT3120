@@ -4,8 +4,6 @@ author: "Benjamin G. Moran; <right> c3076448@uon.edu.au </right>"
 date: "22nd August 2016"
 output:
   html_document:
-    fig_height: 3
-    fig_width: 4
     includes:
       before_body: eqnnumber.js
     mathjax: default
@@ -16,16 +14,12 @@ subtitle: <center> Semester 2, 2016 </center>
 
 ```{r setup, include=FALSE}
 require(knitr)
-knitr::opts_chunk$set(fig.height = 4, fig.width = 4, fig.pos = "centre", dev = "pdf")
+knitr::opts_chunk$set(fig.height = 4, fig.width = 4)
 knitr::opts_chunk$set(echo = TRUE)
-
-
 require(ggplot2)
 require(broom)
 require(magrittr)
 require(dplyr)
-
-
 ```
 
 Due Monday 22 August 2016 (on-campus by 3pm, distance by 5pm)
@@ -101,7 +95,7 @@ prob.dens <- as.data.frame(cbind(pr.guilty, pr.post)) %>%
 kable(prob.dens, "markdown")
 ```
 
-Which doesn't shed much light on how the probability changes, other than telling us that it is above $90\%$ for most values we can assign to $Pr(Guilt)$. Instead, lets simulate some more and plot the results.
+Which doesn't shed much light on how the probability changes, other than telling us that it is above $90\%$ for most values we can assign to $Pr(Guilt)$. Instead, lets simulate some more and plot the results. Note that the red line represents $97.5\%$ certainty, which i'll refer to in part (d).
 
 ```{r Q1b2}
 pr.guilty <- seq(0,1,by=0.0001)
@@ -109,7 +103,6 @@ pr.marker <- 0.0032
 pr.notguilty <- 1-pr.guilty
 pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
 prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
-
 ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
   geom_line(data=prob.dens) +
   geom_hline(yintercept=0.975, linetype = 2, color = "red")
@@ -117,31 +110,55 @@ ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
 
 (d) Say that a jury wants to be at least 97.5% sure of guilt before returning a guilty verdict. What is the smallest prior probability of guilt that could be chosen to ensure this level of probability. 2 marks
 
-First, we need to find the index of the first of the probabilities we calculated for the posterior density that is greater than $0.975$. Then we find the corresponding value for the probabilty of guilt that generated that value at that index.
+We have shown above that the majority of prior probabilities we could assign would satisfy this criteria. In order to find a minimum value however, we'll need to sample from the distribution. First, we need to find the index of the first of the probabilities we calculated for the posterior density that is greater than $0.975$. Then we find the corresponding value for the probabilty of guilt that generated the value at that index.
 
 ```{r Q1d}
 mpr.guilt <- which(pr.post > 0.975)
 pr.guilty[mpr.guilt[1]]
 ```
+
 Therefore, the minimum probability of guilt that the can be chosen is $\approx 11.1\%$.
 
 (e)	Suppose there are 4,622 males living in Allegheny County. Given that we have found 1 male with PGM2+1- in his DNA, what is the probability that other males in the county also display this marker?	3 marks
 
 **Answer:** We are not told that the distribution of the genetic marker amongst a population varies by sex. Therefore, we should assume that the $0.32\%$ prevalence stated in the question is suitable to use here. In a population of $4,622$ we would expect to see:
+
 ```{r Q1e}
 n <- 4622; prev <- 0.0032;
 pr.another <- ((n-1)*prev)/(n*prev)
 pr.another
 ```
+
 So there is approximately a $99.98\%$ chance that, given there is one male with the marker, there will be at least one more.
 
 (f) Should Jameison be found guilty on the DNA evidence alone? Discuss.	2 marks
+
+**Answer:** If we generate data for $Pr(Guilt)$ values between $0$ and $1\%$ we can see that they span a large range of values.
+```{r Q1f, echo = FALSE}
+pr.guilty <- seq(0,.01,by=0.001)
+pr.notguilty <- 1-pr.guilty
+pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
+prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
+prob.dens
+```
+
+When a prior probability this small is selected, we should be wary. Returning to part (e), if we were to take our prior as $1-Pr(>1 \mid 1) = 1 - 0.9997836 = 0.0002164$, the posterior probability would be:
+```{r q1f2, echo = FALSE}
+pr.guilty <- 0.0002164
+pr.notguilty <- 1-pr.guilty
+pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
+prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
+prob.dens
+```
+or $\approx 6\%$, which is hardly enough evidence to be confident that JJ is guilty. This makes sense as a prior, given that the only piece of evidence that we can test to determine guilt is the presence of the genetic marker. They key piece of information we need to determine is how many people could have committed the crime *other* that JJ - assuming a presumption of innocence. The probability we need is the likelihood that *at least one* other male in the pool of possible suspects - i.e. males in Allegheny County - carries the gene, which we calculated above. The prior probability of JJ being guilty should be set as the complement of this probability - i.e. $0.0002164$. Given the posterior probability returned by this prior, we should conclude that there is **not** enough evidence to convict him on the basis of genetic marker expression alone.
+
 
 **Question 2	Total : 10 marks**
 
 *Part 1:* ABC book distributors have a new book that they hope will be popular with their customers. To obtain an idea of how popular it will be they choose a random sample of 40 customers, ring them, give them a brief description and ask whether they would like to buy the book. 15 of the sample decided to buy the book. What inference can we make about the true proportion of the population of customers that will buy the new book based on this sample?
 
 (a) Under a uniform prior, derive the posterior distribution for the unknown true proportion. 2 marks
+
 **Answer:** First of all, what is described corresponds to a Binomial distribution.
 
 $$\begin{aligned} p(\theta | y = 15) &\propto Pr(y = 15 | \theta)p(\theta) \\
@@ -154,19 +171,9 @@ So the posterior works out to be
 
 ```{r Q2 - 1a}
 x <- seq(0,1,by = 0.01); a = 15; b = 40
-
-dens <- dbeta(
-  x,
-  a + 1,
-  b - a + 1
-  )
-
+dens <- dbeta(x,a + 1,b - a + 1)
 posterior.dens.unif <- as.data.frame(cbind(x,dens))
-
-ggplot(
-  data = posterior.dens.unif,
-  aes(x,dens)
-  ) +
+ggplot(data = posterior.dens.unif, aes(x,dens)) +
   geom_line()
 ```
 
@@ -182,11 +189,7 @@ implying that it is not very likely that ABC will achieve their target. We can c
 
 ```{r 2}
 x <- seq(0,1,by = 0.01)
-unif.data <- rbeta(
-  10000,
-  a + 1,
-  b - a + 1
-  )
+unif.data <- rbeta(10000,a + 1,b - a + 1)
 mean(unif.data)
 ```
 
@@ -206,54 +209,30 @@ which backs up the result above.
 
 (c) Can we use this as a prior density? Discuss.	2 marks
 
-**Answer:** We can check this by generating some random samples from a $Beta(4,13)$ distribution and calculating the mean of those samples.
+**Answer:** We can check this by generating some random samples from a $Beta(4,13)$ distribution and calculating the mean of those samples. I'll also plot a histogram of the sample data with the mean superimposed as a red line.
 
 ```{r Q2 2c}
 a = 3; b = 15
-
-beta.data <- as.data.frame(
-  rbeta(
-    10000,
-    a + 1,
-    b - a + 1
-    )
-)
-
+beta.data <- as.data.frame(rbeta(10000,a + 1,b - a + 1))
 ggplot(beta.data, aes(beta.data, ..density..)) + 
   geom_histogram(bins = 20) + 
   scale_x_continuous() + 
   geom_vline(xintercept = mean(beta.data[,1]), color = "red")
-
 mean(beta.data[,1])
 ```
 
 Which is $\approx 23.5\%$. Therefore, we can justifiably use $Beta(4,13)$ as a prior distribution.
 
+d) Assume the answer in (c) is yes and derive the corresponding posterior. 2 Marks
+
+**Answer:** Assuming a $Beta(4,13)$ prior and a $Beta(13.26)$ Likelihood we are left with a $Beta(19,38)$ The following code will generate our posterior density and plot it.
+
 ```{r Q22d}
 x <- seq(0,1,by = 0.01); a1 <- 15; b1 <- 40; a2 <-  3; b2 <-  15
-
-dens <- dbeta(
-  x,
-  (a1 + a2) + 1,
-  (b1 + b2) - (a1 + a2) + 1
-  )
-
+dens <- dbeta(x,(a1 + a2) + 1,(b1 + b2) - (a1 + a2) + 1)
 posterior.dens.beta <- as.data.frame(cbind(x, dens))
-
-ggplot(
-  data = posterior.dens.beta,
-  aes(x,dens)
-  ) + 
+ggplot(data = posterior.dens.beta,aes(x,dens)) + 
   geom_line()
-
-beta.data <- rbeta(
-  10000,
-  (a1 + a2) + 1,
-  (b1 + b2) - (a1 + a2) + 1
-  )
-
-mean(beta.data>0.5)
-mean(beta.data)
 ```
 
 (e) How did this prior information affect the likelihood of at least $50\%$ of ABCs population of customers buying the new book?	2 marks
@@ -261,22 +240,32 @@ mean(beta.data)
 **Answer:** Let's plot both together, with the density derived from the Uniform prior in blue.
 
 ```{r Q2e}
-
 ggplot() + 
-  geom_line(
-    data = posterior.dens.unif,
-    aes(x,dens),
-    color = "blue"
-    ) + 
-  geom_line(
-    data = posterior.dens.beta,
-    aes(x,dens),
-    color = "red"
-    )
-
-mean(beta.data>0.5)
-mean(beta.data)
+  geom_line(data = posterior.dens.unif,aes(x,dens),color = "blue") + 
+  geom_line(data = posterior.dens.beta,aes(x,dens),color = "red")
 ```
+
+Now lets's look at some summary statistics and also the range in detail:
+
+```{r Q22e2, echo=FALSE}
+a1 <- 15; b1 <- 40; a2 <-  3; b2 <-  15
+beta.post <- rbeta(1000,(a1 + a2) + 1,(b1 + b2) - (a1 + a2) + 1)
+unif.post <- rbeta(1000,a1 + 1,b1 - a1  + 1)
+summary <- cbind(summary(unif.post),summary(beta.post))
+range <- cbind(range(summary(unif.post)),range(summary(beta.post)))
+
+range.diff <- c(range(summary(unif.post))[2]-range(summary(unif.post))[1],range(summary(beta.post))[2]-range(summary(beta.post))[1])
+range <- rbind(range,range.diff)
+colnames(summary) <- c("Unif","Beta")
+colnames(range) <- c("Unif","Beta")
+rownames(range) <- c("Lower","Upper","Diff")
+summary
+range
+```
+
+From the above we can see that the mean is slightly less in the Beta data compared to the Unif data. Also the range is smaller in the Beta data.
+
+We can conclude that the Beta prior provides a tighter estimate of the parameter of interest. It also shows that the parameter is most likely to be $< 50\%$, and we are now surer of this using the Beta prior than we were using the Unif prior. Using the Beta prior has shifted the mean lower so it has negatively affected the likelihood of $50\%$ of ABC's customer population buying the book.
 
 ***
  
@@ -291,10 +280,7 @@ $$f(\theta) \propto \theta^{5}(1-\theta)^5$$
 theta.prior <- seq(0,1,0.01)
 prior.density  <- theta.prior^5*(1-theta.prior)^5 
 prior.data <- as.data.frame(cbind(theta.prior, prior.density))
-
-ggplot(
-  prior.data,
-  aes(theta.prior, prior.density)) + 
+ggplot(prior.data,aes(theta.prior, prior.density)) + 
   geom_line()
 ```
 
@@ -309,10 +295,7 @@ $$
 theta.like <- seq(0,1,0.01)
 like.density  <- (1-theta.like)^5  + theta.like^5
 like.data <- as.data.frame(cbind(theta.like, like.density))
-
-ggplot(
-  like.data,
-  aes(theta.like, like.density)) + 
+ggplot(like.data,aes(theta.like, like.density)) + 
   geom_line()
 ```
 
@@ -328,11 +311,8 @@ Now let's sketch the distribution
 theta.coin <- seq(0,1,0.01)
 posterior.density  <- theta.coin^5*(1-theta.coin)^10 + theta.coin^10*(1-theta.coin)^5
 coin.data <- as.data.frame(cbind(theta.coin, posterior.density))
-
 ggplot() + 
-  geom_line(
-    data = coin.data,
-    aes(theta.coin, posterior.density))
+  geom_line(data = coin.data,aes(theta.coin, posterior.density))
 ```
 
 ***
@@ -344,8 +324,9 @@ A treatment vs control group example discussed at various times in the literatur
 (a) Find a classical solution to the question of whether the treatment is successful. Bare output from a statistical package is acceptable, but without understanding the
 procedure, it may be difficult to obtain full marks at (c).	3 marks
 
-```{r Q4 classical, echo = FALSE}
+**Answer:** After putting the values given in the question into 2x2 contingency table, we can use the **chisq.test** function in **R** to run some classical analysis.
 
+```{r Q4 classical, echo = FALSE}
 group <- c("Treatment","Treatment","Control","Control")
 outcome <- c("Success","Failure","Success","Failure")
 n <- c(11,0,0,1)
@@ -355,7 +336,10 @@ tab
 Xsq <- broom::glance(chisq.test(tab, correct = FALSE))
 Xsq
 ```
-Utilising a classical solution, we find that the p-value returned by the $\chi^2$ test is $\approx$ $`r as.numeric(Xsq$p.value)`$ $< \alpha = 0.05$, which implies that we should reject $H_{0}$: that the treatment result is significant.
+
+Here we find that the p-value returned by the $\chi^2$ test is $\approx$ $`r as.numeric(Xsq$p.value)`$ $< \alpha = 0.05$, which implies that we should reject $H_{0}$: that the treatment result is not significant. However, we should note the warning that is also returned along with the result: these tests are succeptible to error when extreme data - i.e. 1 or 0 successes/failures - is used.
+
+Note also that if we were to try and compute summary statistics using Classical methods, all of the key measures - Upper, Lower, Mean, Median, Mode - would $=1$ and the standard deviation $=0$, which is clearly unsatisfactory. Classical methods break down when the probabilities involved are either equal to $1$ or $0$, as is the case  in this example.
 
 (b) Apply a Bayesian approach to this question, trying both the Bayes-Laplace and Jeffreys priors.	4 marks
 
@@ -386,15 +370,7 @@ Pr(\theta_{C}|X_{C}) &\sim Beta(\alpha = 0 + 1,\beta = 1 + 1) &\implies Beta(1,2
 
 ```{r Q4 BL, echo = FALSE}
 a = 11; b = 0
-
-post.treat.bl <- as.data.frame(
-  rbeta(
-    1000,
-    a + 1,
-    b + 1
-    )
-)
-
+post.treat.bl <- as.data.frame(rbeta(1000,a + 1,b + 1))
 ggplot(post.treat.bl, aes(post.treat.bl)) + 
   geom_histogram(binwidth = 0.1) +
   scale_x_continuous() +
@@ -404,15 +380,7 @@ ggplot(post.treat.bl, aes(post.treat.bl)) +
 
 ```{r Q$ BL 2, echo= FALSE}
 a = 0; b = 1
-
-post.control.bl <- as.data.frame(
-  rbeta(
-    1000,
-    a + 1,
-    b + 1
-    )
-)
-
+post.control.bl <- as.data.frame(rbeta(1000,a + 1,b + 1))
 ggplot(post.control.bl, aes(post.control.bl)) + 
   geom_histogram(binwidth = 0.1) +
   scale_x_continuous() +
@@ -430,14 +398,7 @@ Pr(\theta_{C}|X_{C}) &\sim Beta(\alpha = 0 + 0.5,\beta = 1 + 0.5) &\implies Beta
 
 ```{r Q4 J, echo = FALSE}
 a = 11; b = 0
-
-post.treat.j <-as.data.frame(rbeta(
-    1000,
-    a + 0.5,
-    b + 0.5
-    )
-)
-
+post.treat.j <-as.data.frame(rbeta(1000,a + 0.5,b + 0.5))
 ggplot(post.treat.j, aes(post.treat.j)) + 
   geom_histogram(binwidth = 0.1) +
   scale_x_continuous() +
@@ -447,16 +408,7 @@ ggplot(post.treat.j, aes(post.treat.j)) +
 
 ```{r Q42, echo = FALSE}
 a = 0; b = 1
-
-post.control.j <- as.data.frame(
-  rbeta(
-    1000,
-    a + 0.5,
-    b + 0.5
-    )
-)
-
-
+post.control.j <- as.data.frame(rbeta(1000,a + 0.5,b + 0.5))
 ggplot(post.control.j, aes(post.control.j)) + 
   geom_histogram(binwidth = 0.1) + 
   scale_x_continuous() +
@@ -464,7 +416,45 @@ ggplot(post.control.j, aes(post.control.j)) +
   xlab("Control")
 ```
 
+So, we are left with posterior distributions for both priors.
+
+```{r Q43, echo = FALSE}
+post.bl <- post.control.bl*post.treat.bl
+ggplot(post.bl, aes(post.bl)) + 
+  geom_histogram(binwidth = 0.1) + 
+  scale_x_continuous() +
+  ggtitle("Posterior Bayes-Laplace") + 
+  xlab("Posterior")
+```
+
+```{r Q44, echo = FALSE}
+post.j <- post.control.j*post.treat.j
+ggplot(post.j, aes(post.j)) + 
+  geom_histogram(binwidth = 0.1) + 
+  scale_x_continuous() +
+  ggtitle("Posterior Jeffrey's") + 
+  xlab("Posterior")
+```
+
 (c) Briefly explain possible reasons behind the various differences.	2 marks
+
+**Answer** First, let's compile some summary statistics for the posterior densities.
+
+```{r Q4c, echo= FALSE}
+
+sum.j <- broom::tidy(post.j)
+
+sum.bl <- broom::tidy(post.bl)
+summ <- rbind(sum.bl[,5:length(sum.bl)-3], sum.j[,5:length(sum.j)-3])
+summ <- subset(as.data.frame(summ), select = c(-trimmed,-mad, -n))
+
+rownames(summ) <- c("BL", "Jeffrey's")
+summ
+```
+
+As mentioned in part (a) the corresponding values using classical methods would be non-sensical in these extreme cases (i.e. all statistics equal to 1). So here we have clear evidence for why we should prefer Bayesian methods in these instances: they provide us with usable statistics to work with.
+
+There are some differences in the shape of the two posterior Bayes-derived distributions, which I believe is down to the fact that the BL prior is effectively flat, whilst the Jeffery's prior is u-shaped. The result of this is that BL prior is dominated more by the data in the control group and thus changes the shape of the posterior very little. The Jeffrey's prior on the other hand puts a greater emphasis
 
 ***
 
@@ -507,12 +497,12 @@ from which a random sample $\{x_1,...,x_n\}$ is obtained. Note that $y_n = \text
 
 (a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) \propto 1/ \theta$. Be careful to use the correct likelihood and range!	3 marks
 
-**Answer:** We know that the Joint Density of $\theta_{i} \sim \mathcal{U}[0,\theta], 1 \leq i \leq n$, so we can write our Likelihood as:
+**Answer:** We know the Joint Density of $\theta_{i} \sim \mathcal{U}[0,\theta], 1 \leq i \leq n$ is what we need for our likelihood, so we can write our Likelihood as:
 
 $$L(\theta \mid x) = \begin{cases}\prod\limits_{i=1}^{n} \frac{1}{\theta^{i}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
 
-We also know that *posterior $\sim$ prior * likelihood*, which implies that our posterior is given by:
+We also know that *posterior* $\sim \> prior \> *\> likelihood$, which implies that our posterior is given by:
 
 $$Pr(\theta \mid x) = \begin{cases}\frac{1}{\theta^{n+1}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
@@ -526,38 +516,37 @@ Let's plot it with a red line representing $y_{n} = 5$.
 
 ```{r Q6b}
 y <- 5; n <- 20; a <- 5
-
 theta <- seq(y,10, by = 0.001)
 post.dens <- 1/(theta^(n+1))
 dens <- as.data.frame(cbind(theta,post.dens))
-
 theta.0 <- as.data.frame(seq(0,10, by = 0.001))
-
   ggplot2::ggplot() + 
-    geom_line(
-      data = dens,
-      aes(theta,post.dens)
-      ) + 
-    geom_vline(
-      xintercept=y,
-      color= "red",
-      linetype = 2
-      ) +
-    geom_segment(
-      data = theta.0,
-      x=0,
-      xend=y,
-      y=0,
-      yend=0
-      ) + 
+    geom_line(data = dens,aes(theta,post.dens)) + 
+    geom_vline(xintercept=y,color= "red",linetype = 2) +
+    geom_segment(data = theta.0,x=0,xend=y,y=0,yend=0) + 
     xlim(0,10)
-
 ```
 
 From this it should be obvious that the MLE of $\theta$ is achieved whene $\theta = y_n$.
 
 (c) For the data at (b), derive 95% credible intervals, both central and HPD. Which would you prefer and why? 3 marks
 
+**Answer:** We calculate the upper bound - only the upper bound - of the HPD by $\forall \alpha \in [0,1]: HPD(\theta \mid y_{n}) = (y_{n}, \alpha^{-(n-1)} \, y_{n})$, which for $\alpha = 0.05$ equals:
+
+```{r Q6c}
+y.n <- 5; alph <- 0.05; n <- 20
+HPD.l <- y.n; HPD.u <- ((alph)^(-1/(n-1)))*y.n; HPD <- c(HPD.l, HPD.u)
+HPD
+```
+If we assume that we want a Central Interval corresponding to $[0.025, 0.975]$ then it will not include the MLE, which by default makes us favour the HPD. If we take the interval $[0,0.95]$ then it will include the MLE and be narrower - in this instance - than the HPD.
+
+```{r Q6last}
+ind <- c(quantile(post.dens, c(0.95))[[1]])
+ind2 <- c(which(post.dens < ind)[[1]])
+u.int <- theta[ind2]
+CL <- c(y.n,u.int)
+```
+However, given that this is not proper, I would prefer the HPD for the reason stated above.
 ***
 
 ####End of Assignment 1
