@@ -3,11 +3,11 @@ title: "<center> STAT3120 Applied Bayesian Methods </center>"
 author: "Benjamin G. Moran; <right> c3076448@uon.edu.au </right>"
 date: "22nd August 2016"
 output:
+  pdf_document: default
   html_document:
     includes:
       before_body: eqnnumber.js
     mathjax: default
-  pdf_document: default
   word_document: default
 subtitle: <center> Semester 2, 2016 </center>
 ---
