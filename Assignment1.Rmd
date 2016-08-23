@@ -3,16 +3,14 @@ title: "<center> STAT3120 Applied Bayesian Methods </center>"
 author: "Benjamin G. Moran; <right> c3076448@uon.edu.au </right>"
 date: "22nd August 2016"
 output:
-  tufte::tufte_html:
-    highlight: pygments
-    smart: TRUE
+  pdf_document:
+  html_document:
     graphics: yes
-    citation_package: natbib
-    latex_engine: xelatex
+    highlight: pygments
     includes:
       before_body: eqnnumber.js
     mathjax: default
-  pdf_document: default
+    smart: yes
   word_document: default
 subtitle: <center> Semester 2, 2016 </center>
 ---
@@ -21,8 +19,8 @@ subtitle: <center> Semester 2, 2016 </center>
 require(tufte)
 require(knitr)
 require(reshape2)
-opts_chunk$set(cache =TRUE)
-opts_chunk$set(collapse = TRUE, highlight = TRUE)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
 require(ggplot2)
 require(broom)
 require(magrittr)
@@ -91,35 +89,30 @@ Pr(G \mid M) &= \frac{Pr(G)}{Pr(G) + (0.0032) \,*\, Pr(G^{c})}
 ###(c) Display the posterior probability of guilt using a range of suitable values for the prior Pr(guilty). 3 marks
 
 ```{r Q1ba}
-pr.guilty <- seq(0.1,1,by=0.1)
-pr.marker <- 0.0032
-pr.notguilty <- 1-pr.guilty
+pr.guilty <- seq(0.1,1,by=0.1); pr.marker <- 0.0032; pr.notguilty <- 1-pr.guilty
 pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
 prob.dens <- as.data.frame(cbind(pr.guilty, pr.post)) %>%
   transmute("Pr(Guilt)" =  pr.guilty, Posterior = signif(pr.post, digits = 5))
-
-prob.dens
+kable(prob.dens)
 ```
 
 Which doesn't shed much light on how the probability changes, other than telling us that it is above $90\%$ for most values we can assign to $Pr(Guilt)$. Instead, lets simulate some more and plot the results. Note that the red line represents $97.5\%$ certainty, which i'll refer to in part (d).
 
 ```{r Q1b2}
-pr.guilty <- seq(0,1,by=0.0001)
-pr.marker <- 0.0032
-pr.notguilty <- 1-pr.guilty
+pr.guilty <- seq(0,1,by=0.0001); pr.marker <- 0.0032; pr.notguilty <- 1-pr.guilty
 pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
-prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
+prob.dens <- data.frame(pr.guilty, pr.post)
 ```
 
-```{r Q1b plot, fig.margin = FALSE, fig.fullwidth = TRUE, fig.align='center'}
-ggplot2::ggplot(prob.dens, 
-                aes(x=pr.guilty,y=pr.post)
-                ) +
+```{r Q1bplot, fig.width=7}
+ggplot2::ggplot(prob.dens, aes(x=pr.guilty,y=pr.post)) +
   geom_line(data=prob.dens) +
-  geom_hline(yintercept=0.975, 
-             linetype = 2, 
-             color = "red"
-             )
+  geom_hline(yintercept=0.975, linetype = 2, color = "red") +
+  labs(list(
+    x = "Pr(G)",
+    y = "Pr(G|M)",
+    title = "Posterior Probability of Guilt")) + 
+  theme_light()
 ```
 
 ***
@@ -139,7 +132,12 @@ Therefore, the minimum probability of guilt that the can be chosen is $\approx 1
 
 **Answer:** We are not told that the distribution of the genetic marker amongst a population varies by sex. Therefore, we should assume that the $0.32\%$ prevalence stated in the question is suitable to use here. In a population of $4,622$ we would expect to see:
 
-```{r Q1e}
+$$\begin{aligned} Pr(>1\mid 1) &= \frac{(n-1)*prevalence}{n*prevalence} \\
+&= \frac{4621*0.0032}{4622*0.0032} \\
+&\approx 0.111
+\end{aligned}$$
+
+```{r Q1e, echo = FALSE}
 n <- 4622; prev <- 0.0032;
 pr.another <- ((n-1)*prev)/(n*prev)
 pr.another
@@ -151,20 +149,18 @@ So there is approximately a $99.98\%$ chance that, given there is one male with 
 
 **Answer:** If we generate data for $Pr(Guilt)$ values between $0$ and $1\%$ we can see that they span a large range of values.
 ```{r Q1f, echo = FALSE}
-pr.guilty <- seq(0,.01,by=0.001)
-pr.notguilty <- 1-pr.guilty
+pr.guilty <- seq(0,.01,by=0.001); pr.notguilty <- 1-pr.guilty
 pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
 prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
-prob.dens
+kable(prob.dens)
 ```
 
 When a prior probability this small is selected, we should be wary. Returning to part (e), if we were to take our prior as $1-Pr(>1 \mid 1) = 1 - 0.9997836 = 0.0002164$, the posterior probability would be:
 ```{r q1f2, echo = FALSE}
-pr.guilty <- 0.0002164
-pr.notguilty <- 1-pr.guilty
+pr.guilty <- c(0.0002164); pr.notguilty <- 1-pr.guilty
 pr.post <- (1*pr.guilty)/(1*(pr.guilty) + pr.marker*(pr.notguilty))
-prob.dens <- as.data.frame(cbind(pr.guilty, pr.post))
-prob.dens
+prob.dens.2 <- as.data.frame(cbind(pr.guilty, pr.post))
+prob.dens.2
 ```
 or $\approx 6\%$, which is hardly enough evidence to be confident that JJ is guilty. This makes sense as a prior, given that the only piece of evidence that we can test to determine guilt is the presence of the genetic marker. They key piece of information we need to determine is how many people could have committed the crime *other* that JJ - assuming a presumption of innocence. The probability we need is the likelihood that *at least one* other male in the pool of possible suspects - i.e. males in Allegheny County - carries the gene, which we calculated above. The prior probability of JJ being guilty should be set as the complement of this probability - i.e. $0.0002164$. Given the posterior probability returned by this prior, we should conclude that there is **not** enough evidence to convict him on the basis of genetic marker expression alone.
 
@@ -185,14 +181,16 @@ $$\begin{aligned} p(\theta | y = 15) &\propto Pr(y = 15 | \theta)p(\theta) \\
 
 We know that the Bayes-Laplace ($Beta(1,1)$) prior approximates a Uniform, flat prior over the interval $(0,1)$. We also know that that the $Beta(\alpha, \beta)$ is a good substitute for the Binomial and will give us a $Beta$ posterior.
 
-So the posterior works out to be
+So the posterior works out to be:
 
-```{r Q2 - 1a}
+$$\begin{aligned} p(\theta | y = 16) &\propto Pr(y = 16 | \theta)p(\theta) \\
+&\propto \theta^{16}(1-\theta)^{26}
+\end{aligned}$$
+
+```{r Q21a, echo=FALSE}
 x <- seq(0,1,by = 0.01); a = 15; b = 40
-dens <- dbeta(x,a + 1,b - a + 1)
-posterior.dens.unif <- as.data.frame(cbind(x,dens))
-ggplot(data = posterior.dens.unif, aes(x,dens)) +
-  geom_line()
+dens.unif <- dbeta(x,a + 1,b - a + 1)
+posterior.dens.unif <- as.data.frame(cbind(x,dens.unif))
 ```
 
 ###(b) Is ABC likely to achieve 50% of their population of customers buying the new book? 2 marks
@@ -208,7 +206,8 @@ implying that it is not very likely that ABC will achieve their target. We can c
 ```{r 2}
 x <- seq(0,1,by = 0.01)
 unif.data <- rbeta(10000,a + 1,b - a + 1)
-mean(unif.data)
+mu.unif <- mean(unif.data)
+mu.unif
 ```
 
 which implies that the most likely outcome for ABC - using the given prior and likelihood - is that $\approx 38\%$ of their customers will purchase the book.
@@ -228,46 +227,47 @@ In past ABC new book promotions they have found that on average $23.5\%$ of thei
 
 ###(c) Can we use this as a prior density? Discuss.	2 marks
 
-**Answer:** We can check this by generating some random samples from a $Beta(4,13)$ distribution and calculating the mean of those samples. I'll also plot a histogram of the sample data with the mean superimposed as a red line.
+**Answer:** We can check this by generating some random samples from a $Beta(4,13)$ distribution and calculating the mean of those samples.
 
-```{r Q2 2c}
+```{r Q22c}
 a = 3; b = 15
-beta.data <- as.data.frame(rbeta(10000,a + 1,b - a + 1))
-ggplot(beta.data, aes(beta.data, ..density..)) + 
-  geom_histogram(bins = 20) + 
-  scale_x_continuous() + 
-  geom_vline(xintercept = mean(beta.data[,1]), color = "red")
-mean(beta.data[,1])
+beta.prior <- as.data.frame(rbeta(10000,a + 1,b - a + 1))
+mean(beta.prior[,1])
 ```
 
 Which is $\approx 23.5\%$. Therefore, we can justifiably use $Beta(4,13)$ as a prior distribution.
 
 ###d) Assume the answer in (c) is yes and derive the corresponding posterior. 2 Marks
 
-**Answer:** Assuming a $Beta(4,13)$ prior and a $Beta(13.26)$ Likelihood we are left with a $Beta(19,38)$ The following code will generate our posterior density and plot it.
+**Answer:** Assuming a $Beta(4,13)$ prior and a $Beta(16,26)$ Likelihood we are left with a $Beta(19,38)$ posterior, which we derive like this:
 
-```{r Q22d}
+$$\begin{aligned} 
+Pr(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
+&\propto Beta(16,26) \,Beta(4,13) \\
+&\propto Beta(\alpha = (15 + 3) + 1, \beta = (25 + 12) - (15 + 3) + 1) \\
+&\propto Beta(19,38)
+\end{aligned}$$
+
+
+```{r Q22data, echo = FALSE}
 x <- seq(0,1,by = 0.01); a1 <- 15; b1 <- 40; a2 <-  3; b2 <-  15
-dens <- dbeta(x,(a1 + a2) + 1,(b1 + b2) - (a1 + a2) + 1)
-posterior.dens.beta <- as.data.frame(cbind(x, dens))
-ggplot(data = posterior.dens.beta,
-       aes(x,dens)
-       ) + 
-  geom_line()
+dens.beta <- dbeta(x,(a1 + a2) + 1,(b1 + b2) - (a1 + a2) + 1)
+posterior.dens.beta <- as.data.frame(cbind(x, dens.beta))
+mu.beta <- mean(rbeta(10000,(a1 + a2) + 1,(b1 + b2) - (a1 + a2) + 1))
 ```
 
 ###(e) How did this prior information affect the likelihood of at least $50\%$ of ABCs population of customers buying the new book?	2 marks
 
-**Answer:** Let's plot both together, with the density derived from the Uniform prior in blue.
+**Answer:** Let's plot both together, with the density derived from the Uniform prior in blue, the Beta prior in red, and the mean of both marked with dashed lines.
 
-```{r Q2e}
+```{r Q2e, fig.width = 7.5}
 ggplot() + 
-  geom_line(data = posterior.dens.unif,
-            aes(x,dens),color = "blue"
-            ) + 
-  geom_line(data = posterior.dens.beta,
-            aes(x,dens),color = "red"
-            )
+  geom_line(data = posterior.dens.unif, aes(x,dens.unif),color = "blue") + 
+  geom_line(data = posterior.dens.beta, aes(x,dens.beta),color = "red") +
+  geom_vline(xintercept = mean(mu.unif), color = "blue", linetype = 2) +
+  geom_vline(xintercept = mean(mu.beta), color = "red", linetype = 2) +
+  labs(list(title= "ABC Book Sales - Conversion %", x = "Proportion(%)", y = "Density")) +
+  theme_light()
 ```
 
 Now lets's look at some summary statistics and also the range in detail:
@@ -281,11 +281,10 @@ range <- cbind(range(summary(unif.post)),range(summary(beta.post)))
 
 range.diff <- c(range(summary(unif.post))[2]-range(summary(unif.post))[1],range(summary(beta.post))[2]-range(summary(beta.post))[1])
 range <- rbind(range,range.diff)
-colnames(summary) <- c("Unif","Beta")
-colnames(range) <- c("Unif","Beta")
 rownames(range) <- c("Lower","Upper","Diff")
-summary
-range
+summary2 <- rbind(summary,range)
+colnames(summary2) <- c("Unif","Beta")
+kable(summary2)
 ```
 
 From the above we can see that the mean is slightly less in the Beta data compared to the Unif data. Also the range is smaller in the Beta data.
@@ -293,17 +292,14 @@ From the above we can see that the mean is slightly less in the Beta data compar
 We can conclude that the Beta prior provides a tighter estimate of the parameter of interest. It also shows that the parameter is most likely to be $< 50\%$, and we are now surer of this using the Beta prior than we were using the Unif prior. Using the Beta prior has shifted the mean lower so it has negatively affected the likelihood of $50\%$ of ABC's customer population buying the book.
 
 ***
- 
+\pagebreak 
+
 #Question 3	Total: 4 marks
 
 Suppose you have a Beta(6,6) prior on the probability $\theta$ that a coin will yield a head when spun in a specified manner. The coin is independently spun 5 times. All you are told is that all 5 results were the same, i.e. either 5 heads or 5 tails. Derive your posterior density (up to a proportionality constant) for $\theta$ and sketch it.
 
 **Answer:** We are given that the prior probability of $\theta$ is proportional to a $Beta(6,6)$ distribution:
 $$f(\theta) \propto \theta^{5}(1-\theta)^5$$
-
-```{r Q3a}
-
-```
 
 We are also given that the data could represent only two possible outcomes - either all heads or all tails. Therefore, the likelihood of the data is equal to:
 
@@ -312,35 +308,39 @@ $$\begin{aligned} Pr(x \mid \theta) &= \binom{5}{0}(1-\theta)^5 + \binom{5}{5}\t
 \end{aligned}
 $$
 
-```{r Q3b}
-
-```
-
 So, we can derive the posterior by multiplying the prior by the likelihood:
 $$\begin{aligned} 
-f(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
+Pr(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
 &\propto \theta^5(1-\theta)^5*\left((1-\theta)^5 + \theta^5\right) \\
 &\propto \theta^5(1-\theta)^{10} + \theta^{10}(1-\theta)^5
 \end{aligned}$$
 Now let's sketch the distribution
 
-```{r Q3 Data, echo = FALSE}
-#24024
+```{r Q3 Data}
 theta <- seq(0,1,0.01)
-prior <- data.frame(Dist = "Prior", Theta = theta, Dens = theta^5*(1-theta)^5)
-like  <- data.frame(Dist = "Likelihood", Theta = theta, Dens = (1-theta)^5 + theta^5)
-posterior <- data.frame(Dist = "Posterior", Theta = theta, Dens = theta^5*(1-theta)^10 + theta^10*(1-theta)^5)
+prior <- data.frame(Dist = "Prior", 
+                    Theta = theta, 
+                    Density = theta^5*(1-theta)^5)
+like  <- data.frame(Dist = "Likelihood", 
+                    Theta = theta, 
+                    Density = (1-theta)^5 + theta^5)
+posterior <- data.frame(Dist = "Posterior", 
+                        Theta = theta, 
+                        Density = theta^5*(1-theta)^10 + theta^10*(1-theta)^5)
 coin.data <- as.data.frame(rbind(prior,like, posterior))
 
 ```
 
-```{r Q3 plots, fig.margin = FALSE, fig.fullwidth = TRUE}
-p <- ggplot(coin.data, aes(x=Theta, y=Dens)) +
-  geom_line()
-p + facet_grid(Dist ~ ., scales = "free_y")
+```{r Q3plots, fig.margin = FALSE, fig.height=6, fig.width=6}
+ggplot(coin.data, aes(x=Theta, y=Density, col = Dist)) +
+  geom_line() + 
+  facet_grid(Dist ~ ., scales = "free_y") + 
+  ggtitle("Coin Flip Prior/Like/Post") +
+  theme_light()
 ```
 
 ***
+\newpage
 
 #Question 4	Total: 9 marks
 
@@ -391,23 +391,23 @@ $$\begin{aligned} Pr(\theta_{T}|X_{T}) &\sim Beta(\alpha = 11 + 1,\beta = 0 + 1)
 Pr(\theta_{C}|X_{C}) &\sim Beta(\alpha = 0 + 1,\beta = 1 + 1) &\implies Beta(1,2)
 \end{aligned}$$
 
-**Bayes-Laplace Priors**
 
 ```{r Q4 BL Data, echo = FALSE}
 a = 11; b = 0; 
-post.treat.bl <- data.frame(Dist = "Treat", Dens = rbeta(1000,a + 1,b + 1))
+post.treat.bl <- data.frame(Dist = "Treatment Posterior", Dens = rbeta(1000,a + 1,b + 1))
 a = 0; b = 1
-post.control.bl <- data.frame(Dist = "Control", Dens = rbeta(1000,a + 1,b + 1))
-post.comb <- post.control.bl$Dens*post.treat.bl$Dens
-post.bl <- data.frame(Dist = "Posterior", Dens = post.comb)
+post.control.bl <- data.frame(Dist = "Control Posterior", Dens = rbeta(1000,a + 1,b + 1))
+post.comb.bl <- post.control.bl$Dens*post.treat.bl$Dens
+post.bl <- data.frame(Dist = "Combined Posterior", Dens = post.comb.bl)
 bl.density <- rbind(post.treat.bl,post.control.bl, post.bl)
 ```
 
-```{r Q4 BL Plots, echo= FALSE, fig.margin = FALSE, fig.fullwidth = TRUE}
-ggplot(bl.density, aes(Dens)) + 
+```{r Q4BLPlots, echo= FALSE, fig.width=8}
+ggplot(bl.density, aes(Dens, col = Dist)) + 
   geom_histogram(binwidth = 0.05) +
   scale_x_continuous() +
   facet_grid(. ~Dist) + 
+  ggtitle("Bayes-Laplace Priors") +
   theme_light()
 ```
 
@@ -417,25 +417,25 @@ $$\begin{aligned} Pr(\theta_{T}|X_{T}) &\sim Beta(\alpha = 11 + 0.5,\beta = 0 + 
 Pr(\theta_{C}|X_{C}) &\sim Beta(\alpha = 0 + 0.5,\beta = 1 + 0.5) &\implies Beta(0.5,1.5)
 \end{aligned}$$
 
-**Jeffrey's Priors**
+
 
 ```{r Q4 J Data, echo = FALSE}
 a = 11; b = 0
-post.treat.j <-data.frame(Dist = "Treatment", Dens = rbeta(1000,a + 0.5,b + 0.5))
+post.treat.j <-data.frame(Dist = "Treatment Posterior", Dens = rbeta(1000,a + 0.5,b + 0.5))
 a = 0; b = 1
-post.control.j <- data.frame(Dist = "Control", Dens = rbeta(1000,a + 0.5,b + 0.5))
-post.comb <- post.treat.j$Dens*post.control.j$Dens
-post.j <- data.frame(Dist = "Posterior", Dens = post.comb)
+post.control.j <- data.frame(Dist = "Control Posterior", Dens = rbeta(1000,a + 0.5,b + 0.5))
+post.comb.j <- post.treat.j$Dens*post.control.j$Dens
+post.j <- data.frame(Dist = "Combined Posterior", Dens = post.comb.j)
 j.density <- rbind(post.treat.j,post.control.j, post.j)
 ```
 
-```{r Q4 J Plots, echo = FALSE, fig.margin = FALSE, fig.fullwidth = TRUE}
-ggplot(j.density, aes(Dens)) + 
+```{r Q4JPlots, echo = FALSE, fig.width = 8}
+ggplot(j.density, aes(Dens, col = Dist)) + 
   geom_histogram(binwidth = 0.05) +
   scale_x_continuous() +
   facet_grid(. ~Dist) +
+  ggtitle("Jeffrey's Priors") +
   theme_light()
-
 ```
 
 
@@ -444,22 +444,20 @@ ggplot(j.density, aes(Dens)) +
 **Answer** First, let's compile some summary statistics for the posterior densities.
 
 ```{r Q4c, echo= FALSE}
-
-sum.j <- broom::tidy(post.j)
-
-sum.bl <- broom::tidy(post.bl)
-summ <- rbind(sum.bl[,5:length(sum.bl)-3], sum.j[,5:length(sum.j)-3])
-summ <- subset(as.data.frame(summ), select = c(-trimmed,-mad, -n))
-
-rownames(summ) <- c("BL", "Jeffrey's")
-summ
+sum.j <- broom::tidy(post.comb.j)
+sum.bl <- broom::tidy(post.comb.bl)
+#summ <- rbind(sum.bl[,5:length(sum.bl)-3], sum.j[,5:length(sum.j)-3])
+#summ <- subset(as.data.frame(summ), select = c(-trimmed,-mad, -n))
+#rownames(summ) <- c("BL", "Jeffreys")
+#summ
 ```
 
 As mentioned in part (a) the corresponding values using classical methods would be non-sensical in these extreme cases (i.e. all statistics equal to 1). So here we have clear evidence for why we should prefer Bayesian methods in these instances: they provide us with usable statistics to work with.
 
-There are some differences in the shape of the two posterior Bayes-derived distributions, which I believe is down to the fact that the BL prior is effectively flat, whilst the Jeffery's prior is u-shaped. The result of this is that BL prior is dominated more by the data in the control group and thus changes the shape of the posterior very little. The Jeffrey's prior on the other hand puts a greater emphasis
+If we compare the posteriors for each group, we can see that the Jeffrey's prior 
 
 ***
+\newpage 
 
 #Question 5	Total: 4 marks
 
@@ -488,8 +486,8 @@ $$\begin{aligned}Pr(\theta \mid \bar{y}) &= N\left(\theta \mid \frac{\frac{\mu_{
 Pr(\theta \mid \bar{y}) &= N\left(\theta \mid \frac{\frac{180}{40^{2}} + \frac{150n}{20^{2}}}{\frac{1}{40^{2}} + \frac{n}{20^{2}}},\frac{1}{\frac{1}{40^{2}} + \frac{n}{20^{2}}}\right) 
 \end{aligned}$$
 
-
 ***
+\newpage
  
 #Question 6	Total: 8 marks
 
@@ -498,7 +496,7 @@ $$p(x \mid \theta) = \frac{1}{\theta},	0 < x < \theta$$
 
 from which a random sample $\{x_1,...,x_n\}$ is obtained. Note that $y_n = \text{max}\{x_1,...,x_n\}$ is a sufficient statistic.
 
-###(a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) \propto 1/ \theta$.
+####(a) Derive the posterior distribution $p(\theta | x_1,...,x_n) = p(\theta | y_n)$, based on the noninformative prior $p(\theta) \propto 1/ \theta$.
 Be careful to use the correct likelihood and range!	3 marks
 
 **Answer:** We know the Joint Density of $\theta_{i} \sim \mathcal{U}[0,\theta], 1 \leq i \leq n$ is what we need for our likelihood, so we can write our Likelihood as:
@@ -506,7 +504,7 @@ Be careful to use the correct likelihood and range!	3 marks
 $$L(\theta \mid x) \propto \begin{cases}\prod\limits_{i=1}^{n} \frac{1}{\theta^{i}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
 
-with a constant of integration equal to:
+with a proportionality constant equal to:
 $$\begin{aligned} \int\limits_{y_{n}}^{\infty}Pr(y_n \mid \theta) \, Pr(\theta) d\theta &=
 \int\limits_{y_{n}}^{\infty} \frac{1}{\theta^n} \, \frac{1}{\theta} d\theta \\
 &= \int\limits_{y_{n}}^{\infty} \frac{1}{\theta^{n+1}} d\theta \\
@@ -517,34 +515,35 @@ $$\begin{aligned} \int\limits_{y_{n}}^{\infty}Pr(y_n \mid \theta) \, Pr(\theta) 
 
 We also know that $Pr(\theta \mid y_{n}) = \> \frac{Pr(y_{n} \mid \theta) \, Pr(\theta)}{1/ny_{n}^{n}}$, which implies that our posterior is given by:
 
-$$Pr(\theta \mid x) = \begin{cases}\frac{ny_{n}^{n}}{\theta^{n+1}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
+$$Pr(\theta \mid x) \propto \begin{cases}\frac{1}{\theta^{n+1}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
 
 
 ###(b) Plot this posterior for $y_n = 5$ and $n = 20$.	2 marks
 
 **Answer:** With $y_n = \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} = 5$ and $n = 20$ we have a posterior distribution of 
-$$Pr(\theta \mid x) = \begin{cases} \frac{20*5^{20}}{\theta^{21}} & \text{max}\>\left\{x_1, x_2, \cdots, x_{20}\right\} \leq \theta \\ 0 & otherwise \end{cases}$$
-Let's plot it with a red line representing $y_{n} = 5$.
+$$Pr(\theta \mid x) \propto \begin{cases} \frac{1}{\theta^{21}} & \text{max}\>\left\{x_1, x_2, \cdots, x_{20}\right\} \leq \theta \\ 0 & otherwise \end{cases}$$
+Let's plot it.
 
 ```{r Q6b Data}
-y.n <- 32.2; n <- 20;
-theta <- seq(y.n,50, by = 0.001)
-post.dens <- (19*((y.n)^{19}))/(theta^(n))
-dens <- as.data.frame(cbind(theta,post.dens))
+y.n <- 5; n <- 20;
+theta <- seq(y.n,10, by = 0.001)
+post.dist <- (1)/(theta^(n+1))
+post.dens <- as.data.frame(cbind(theta,post.dist))
 theta.0 <- as.data.frame(seq(0,10, by = 0.001))
 ```
 
-```{r Q6b Plot, echo = FALSE, fig.margin = FALSE}
+```{r Q6bPlot, fig.width=7}
 ggplot2::ggplot() + 
-    geom_line(data = dens,aes(theta,post.dens)) + 
-    geom_vline(xintercept=y.n,color= "red",linetype = 2) +
+    geom_line(data = post.dens,aes(theta,post.dist)) + 
     geom_segment(data = theta.0,x=0,xend=y.n,y=0,yend=0) +
-    geom_hline(yintercept = 0.05) +
-    xlim(0,50)
+    xlim(0,10) +
+    labs(list(title = "Posterior - y.n = 5, n =20", x = "Theta", y = "Density")) +
+    theme_light() +
+    theme(axis.ticks = element_blank(), axis.text.y = element_blank())
 ```
 
-From this it should be obvious that the MLE of $\theta$ is achieved whene $\theta = y_n$.
+From this it should be obvious that the MLE of $\theta$ - $\theta = y_n$ - is not achieved because of the restriction $0<x<\theta$. 
 
 ###(c) For the data at (b), derive 95% credible intervals, both central and HPD. Which would you prefer and why? 3 marks
 
@@ -555,15 +554,8 @@ y.n <- 5; alph <- 0.05; n <- 20
 HPD.l <- y.n; HPD.u <- ((alph)^(-1/(n-1)))*y.n; HPD <- c(HPD.l, HPD.u)
 HPD
 ```
-If we assume that we want a Central Interval corresponding to $[0.025, 0.975]$ then it will not include the MLE, which by default makes us favour the HPD. If we take the interval $[0,0.95]$ then it will include the MLE and be narrower - in this instance - than the HPD.
+**Note:** I can't get the CI to come out right, so I've left it out.
 
-```{r Q6last}
-ind <- c(quantile(post.dens, c(0.95))[[1]])
-ind2 <- c(which(post.dens < ind)[[1]])
-u.int <- theta[ind2]
-CL <- c(y.n,u.int)
-```
-However, given that this is not proper, I would prefer the HPD for the reason stated above.
 ***
 
 ####End of Assignment 1

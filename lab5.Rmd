@@ -1,0 +1,209 @@
+---
+title: "Lab5"
+author: "Benjamin Moran"
+date: "22 August 2016"
+output: html_document
+---
+
+**Q1** Suppose that we have a sample of size n, independently generated from a N(µ,σ2) distribution. Summarise the posterior distribution for the parameter(s) in the following cases using Lecture Notes Week 4 and 5:
+(a)	The variance $\sigma^{2}$ is known: (i) conjugate prior; (ii) noninformative prior
+
+**Answer:** (i) From the notes
+
+$$\begin{aligned} p(\mu) &\propto (\sigma_{0}^{2})^{-\frac{1}{2}} \, exp[-\frac{1}{2\sigma_{0}^{2}} \, (\mu - \mu_{0})^2] \\
+p(y \mid \mu, \sigma^{2}) &\propto (\sigma^{2})^{-\frac{1}{2}} \, exp[-\frac{1}{2\sigma^{2}} \, (\mu - y)^2]
+\end{aligned}
+$$
+
+So their product is 
+
+$$\begin{aligned} p(\mu \mid y, \sigma^{2}) &\propto p(y \mid \mu, \sigma^{2}) \, p(\mu) \\
+p(\mu \mid y, \sigma^{2}) &\propto exp\left[-\frac{a}{2} \, \left(\mu - \frac{b}{a}\right)^2\right]
+\end{aligned}
+$$
+where
+
+$$\begin{aligned} a &= \frac{1}{\sigma^{2}} +  \frac{1}{\sigma_{0}^{2}} \\
+b &= \frac{y}{\sigma^{2}} +  \frac{\mu_{0}}{\sigma_{0}^{2}}
+\end{aligned}
+$$
+
+So the posterior distribution of the mean $\mu$ is 
+$$\mu \mid y \sim N \left(\frac{b}{a},\frac{1}{a}\right)$$
+
+See lecture 4 notes 
+
+(ii) In the non-informative case we let $\sigma_{0}^{2} \rightarrow \infty$ and get
+
+$$\begin{aligned} \frac{a}{b} &\rightarrow \frac{y/\sigma^{2}}{1/\sigma^{2}} &=y \\
+\frac{1}{a} &\rightarrow \sigma^{2}
+\end{aligned}
+$$
+which impliest that 
+$$\mu \mid y \sim N\left(y, \sigma^{2}\right)$$.
+
+
+
+(b)	The mean µ is known: (i) conjugate prior; (ii) noninformative prior
+(c)	Both are unknown: (i) noninformative prior; (ii) conjugate prior - BDA
+
+
+
+
+**Q2** Simulate from the Monte Carlo scheme
+
+1.	p(µ|y)
+
+2.	p(σ2| y,µ)
+for the treatment sample in the chicken calcium flow example (in the file stat3120data.xls or chicken.txt). Save the results for use in Q3.
+(a)	Obtain both the histogram estimate and the mixture estimate of $\mu_{t}$ .
+
+**Answer**
+
+```{r Q2 Chicken data }
+chicken <- read.delim("chicken.txt")
+saveRDS(chicken, "chicken.rds")
+chicken.data <- readRDS("chicken.rds")
+
+yt <- na.omit(chicken.data$treatment)
+yc <- na.omit(chicken.data$control)
+
+nt <- length(yt)
+nc <- length(yc)
+mut <- mean(yt) + sd(yt) * rt(1000,nt-1)/sqrt(nt)
+muc <- mean(yc) + sd(yc) * rt(1000,nc-1)/sqrt(nc)
+hist(mut)
+mean(mut)
+```
+Note: the marginal distribution of $\mu_{t}$ is a t distribution s.t. $\frac{\mu_{t} - \bar{y}}{s/\sqrt{n}} \sim t_{n-1}$. We then simply solve for $\mu_{t}$. The histogram above are sample estimates of $\mu_{t}$.
+
+(Remember: histogram estimates are based on the MC iterates for parameters from their (conditional) posterior. Mixture estimates are based on the MC iterates of the expected value of the conditional posterior distribution the parameter iterates are sampled from; they don't always change over the iterates!)
+(b)	Obtain both the histogram estimate and the mixture estimate of σ T2 .
+
+```{r Q2b}
+sigt <- 0
+nt <- length(yt)
+
+for (k in 1:1000){
+  b <- sum((yt - mut[k])^2) / 2
+  sigt[k] <- 1/(rgamma(1, nt/2 , b))
+}
+hist(sigt)
+mean(sigt)
+```
+
+```{r Q2bc}
+sigc <- 0
+nc <- length(yc)
+
+for (k in 1:1000){
+  b <- sum((yc - muc[k])^2) / 2
+  sigc[k] <- 1/(rgamma(1, nc/2 , b))
+}
+hist(sigc)
+mean(sigc)
+```
+
+Mixture estimates: here we are trying to find 
+
+$$E(\mu_{t} \mid y) = E[E(\mu_{t} \mid \sigma_{t}^{2}, y_{t})] = \bar{y}$$ because we know $\sigma_{t}^{2}$ is known, the posterior for $\mu_{t}$ becomes a normal distribution. So the posterior mean = the sample mean.
+
+We also want:
+
+$$E(\sigma_{t}^{2} \mid y_{t}) = E[E(\sigma_{t}^{2} \mid \mu_{t}, y_{t})] = \frac{1}{n} \sum_{j=1}^{n} \frac{\sum_{i=1}^{n} (y_{t} - \mu_{t}^{[k]})^{2}}{n-2}$$
+
+(c)	Obtain 95% intervals around both the histogram and mixture estimates for σ T2 . Compare the intervals produced for the histogram and mixture estimates.
+
+Simulation gets us:
+
+```{r Q2c}
+msigt <- 0
+for(k in 1:1000){
+  msigt[k] <- sum((yt-mut[k])^2)/(nt-2)
+}
+mean(msigt)
+quantile(sigt, c(0.025,0.975))
+quantile(msigt, c(0.025,0.975))
+```
+
+
+(d)	To think about: why are the intervals so different?
+
+**Q3** Simulate from the Monte Carlo scheme
+
+1.	p(µ|y)
+
+2.	p(σ2| y,µ)
+
+for both the control and treatment sample in the chicken calcium flow data.
+
+(a)	Obtain a classical 95% confidence interval for the difference in means µT  − µc
+
+```{r Q3a}
+ttestdata <- broom::tidy(t.test(yt,yc))
+ttestdata <- dplyr::mutate(ttestdata, df = parameter)
+ttestdata
+nc <- length(yc)
+```
+
+(b)	Plot the histogram of the MC sample of mean differences, using the sample obtained in Q2.
+```{r Q3b}
+mut <- mean(yt) + sd(yt) * rt(1000,nt-1)/sqrt(nt)
+muc <- mean(yc)+ + sd(yc) * rt(1000,nc-1)/sqrt(nc)
+
+hist(mut-muc,25)
+```
+
+(c)	Use the simulated samples to obtain a Bayesian 95% posterior confidence interval for the difference in means.
+
+```{r Q3c}
+quantile(mut-muc,c(0.025,0.975))
+```
+
+(d)	Estimate Pr(µT > µc | yT , yc ) using a classical method. (What is meant here, is its equivalent, i.e. a one-sided P-value.)
+
+```{r Q3d}
+pv2 <- ttestdata$p.value/2
+1-pv2
+```
+
+(e)	Estimate Pr(µT > µc | yT , yc ) using the simulated means. Does your answer agree with that in (d)? Should it?
+
+```{r Q3e}
+mean(mut>muc)
+```
+
+(f)	Do a classical F-test to judge whether the treatment and control variances are significantly different.
+
+```{r q3f}
+var.yt <- var(yt)
+var.yc <- var(yc)
+f.tc <- var.yt/var.yc
+f.tc
+```
+
+(g)	Discussion: can a classical confidence interval for σ T2 /σ c2  be produced?
+
+```{r Q3g}
+sig.ci <- f.tc*qf(c(0.025,0.975),nc-1,nt-1)
+sig.ci
+```
+
+(h)	Plot the histogram of the sample of variance ratios. How likely is it that σ T2 > σ c2 based on the sample data? Is the conclusion the same as in (f)?
+
+```{r Q3h}
+hist(sigt/sigc)
+mean(sigt > sigc)
+```
+
+(i)	Use the simulated variances to obtain a 95% interval for the ratio σ T2 /σ c2 . Is the CrI the same as in (g)?
+
+```{r Q3i}
+ci.comp <- rbind(quantile(sigt/sigc, c(0.025,0.975)),sig.ci)
+rownames(ci.comp) <- c("Bayes","Classical")
+ci.comp
+```
+
+
+**End of Lab 5.**
+
