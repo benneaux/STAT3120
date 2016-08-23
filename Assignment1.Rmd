@@ -325,6 +325,7 @@ f(\theta|x) &\propto Pr(x|\theta)f(\theta) \\
 Now let's sketch the distribution
 
 ```{r Q3 Data, echo = FALSE}
+#24024
 theta <- seq(0,1,0.01)
 prior <- data.frame(Dist = "Prior", Theta = theta, Dens = theta^5*(1-theta)^5)
 like  <- data.frame(Dist = "Likelihood", Theta = theta, Dens = (1-theta)^5 + theta^5)
@@ -502,25 +503,34 @@ Be careful to use the correct likelihood and range!	3 marks
 
 **Answer:** We know the Joint Density of $\theta_{i} \sim \mathcal{U}[0,\theta], 1 \leq i \leq n$ is what we need for our likelihood, so we can write our Likelihood as:
 
-$$L(\theta \mid x) = \begin{cases}\prod\limits_{i=1}^{n} \frac{1}{\theta^{i}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
+$$L(\theta \mid x) \propto \begin{cases}\prod\limits_{i=1}^{n} \frac{1}{\theta^{i}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
 
-We also know that *posterior* $\sim \> prior \> *\> likelihood$, which implies that our posterior is given by:
+with a constant of integration equal to:
+$$\begin{aligned} \int\limits_{y_{n}}^{\infty}Pr(y_n \mid \theta) \, Pr(\theta) d\theta &=
+\int\limits_{y_{n}}^{\infty} \frac{1}{\theta^n} \, \frac{1}{\theta} d\theta \\
+&= \int\limits_{y_{n}}^{\infty} \frac{1}{\theta^{n+1}} d\theta \\
+&= \left[-\frac{1}{n\theta^{n}}\right]_{y_{n}}^{\infty} \\
+&= \left[0 -\left(-\frac{1}{ny_{n}^{n}}\right)\right] \\
+&= \frac{1}{ny_{n}^{n}}
+\end{aligned}$$
 
-$$Pr(\theta \mid x) = \begin{cases}\frac{1}{\theta^{n+1}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
+We also know that $Pr(\theta \mid y_{n}) = \> \frac{Pr(y_{n} \mid \theta) \, Pr(\theta)}{1/ny_{n}^{n}}$, which implies that our posterior is given by:
+
+$$Pr(\theta \mid x) = \begin{cases}\frac{ny_{n}^{n}}{\theta^{n+1}} & \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} \leq \theta \\ 0 & otherwise 
 \end{cases}$$
 
 
 ###(b) Plot this posterior for $y_n = 5$ and $n = 20$.	2 marks
 
 **Answer:** With $y_n = \text{max}\>\left\{x_1, x_2, \cdots, x_n\right\} = 5$ and $n = 20$ we have a posterior distribution of 
-$$Pr(\theta \mid x) = \begin{cases} \frac{1}{\theta^{21}} & \text{max}\>\left\{x_1, x_2, \cdots, x_{20}\right\} \leq \theta \\ 0 & otherwise \end{cases}$$
+$$Pr(\theta \mid x) = \begin{cases} \frac{20*5^{20}}{\theta^{21}} & \text{max}\>\left\{x_1, x_2, \cdots, x_{20}\right\} \leq \theta \\ 0 & otherwise \end{cases}$$
 Let's plot it with a red line representing $y_{n} = 5$.
 
 ```{r Q6b Data}
-y <- 5; n <- 20; a <- 5
-theta <- seq(y,10, by = 0.001)
-post.dens <- (y*(y^n))/(theta^(n+1))
+y.n <- 32.2; n <- 20;
+theta <- seq(y.n,50, by = 0.001)
+post.dens <- (19*((y.n)^{19}))/(theta^(n))
 dens <- as.data.frame(cbind(theta,post.dens))
 theta.0 <- as.data.frame(seq(0,10, by = 0.001))
 ```
@@ -528,9 +538,10 @@ theta.0 <- as.data.frame(seq(0,10, by = 0.001))
 ```{r Q6b Plot, echo = FALSE, fig.margin = FALSE}
 ggplot2::ggplot() + 
     geom_line(data = dens,aes(theta,post.dens)) + 
-    geom_vline(xintercept=y,color= "red",linetype = 2) +
-    geom_segment(data = theta.0,x=0,xend=y,y=0,yend=0) + 
-    xlim(0,10)
+    geom_vline(xintercept=y.n,color= "red",linetype = 2) +
+    geom_segment(data = theta.0,x=0,xend=y.n,y=0,yend=0) +
+    geom_hline(yintercept = 0.05) +
+    xlim(0,50)
 ```
 
 From this it should be obvious that the MLE of $\theta$ is achieved whene $\theta = y_n$.
