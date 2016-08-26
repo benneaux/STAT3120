@@ -1,0 +1,101 @@
+---
+title: "Lab 6"
+author: "B. Moran"
+date: "26 August 2016"
+output: 
+  html_document:
+    includes:
+      theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(knitr)
+require(dplyr)
+```
+
+##STAT 3120 APPLIED BAYESIAN METHODS
+
+##Question 1 
+*The table below is taken from BDA, chapter 3, exercise 6. It contains results of a survey on bicycle traffic around Berkeley, CA in 1993. From the table in BDA we consider only the first four rows of data for residential streets. This consists of bicycle counts on a particular day on different streets around Berkeley. Also recorded is whether the street has a certified bicycle lane or not.*
+
+```{r Q1data, echo = FALSE}
+bike.count <- c(16,9,10,13,19,20,18,17,35,55,12,1,2,4,9,7,9,8)
+bike.route <- c(rep("Yes",10), rep("No",8))
+bike.data <- data.frame(bike.route, bike.count)
+kable(bike.data, align = "c", col.names = c("Bike Route?","Bike Count"))
+
+```
+
+*We wish to compare the amount of bicycle traffic on the sections of road that are designated bike routes, with that for roads without bike routes.*
+
+**(a)	Consider the group bike route =’Yes’ (Y) first. What distribution are the bicycle counts most likely to follow?**
+
+**(b)	Assume that the bicycle counts on bike routes are independent and identically distributed for different streets. What is the conditional likelihood formula for the counts y?**
+
+**(c)	What prior information do we have? Construct a prior distribution for θY, the parameter of interest, for the counts y.**
+
+**(d)	Update the prior with the observed counts to find the posterior distribution for $\theta_{Y} \mid y$. Generate an estimate and $95\%$ interval for $\theta_{Y} \mid y$.**
+ 
+**(e)	Let $Z$ = bicycle counts on non-bike routes. How can we compare $Y$ and $Z$?**
+
+**(f)	Estimate a $95\%$ credible interval on the difference $\theta_{Y} – \theta_{Z}$.What conclusions can you draw based on this interval?**
+
+**(g)	Estimate the probability that $\theta_{Y} – \theta_{Z}$ is greater than $10$ given the data.**
+
+**(h)	Perform the equivalent t-test. Discuss why the conclusion appears different from (g).**
+
+***
+
+##Question 2 
+
+*Three diffuse priors were used in lecture today for the Poisson parameter, Gamma(0,0), Gamma(0.5,0) and Gamma(1,0).*
+
+```{r Q2setup, echo = FALSE}
+
+gamma.0 <- function(n, x) {
+  dgamma(n*x, n)
+  }
+
+gamma.05 <- function(n,x){
+  dgamma(n*x + 0.5, n)
+}
+
+gamma.1 <- function(n,x) {
+  dgamma(n*x + 1, n)
+}
+
+gamma.202 <- function(n,x) {
+  dgamma(n*x + 20, n + 2)
+}
+
+gamma.203 <- function(n,x) {
+  dgamma(n*x + 20, n + 3)
+}
+
+
+```
+
+**a)	Repeat Q1 parts (d), (f) and (g) above for these three priors (or the two that you didn’t use). Are the results sensitive to these prior choices?**
+
+```{r Q2a}
+n <- 20; x <- sum(bike.data[1:12,2])/12
+n;x
+gamma.0(n,x)
+gamma.05(n,x)
+gamma.1(n,x)
+```
+
+**b)	The local head of ‘Bicycling USA’ suggests some information to you about cyclists in the area. Using this you construct a Gamma(20,2) prior for θY and a Gamma(20,3) prior for $\theta_{X}$.**
+
+Repeat Q1 parts (d), (f) and (g) above for this new prior. How have results changed from Q1 and Q2(a)?
+
+***
+
+##Question 3 - (STAT6xxx/postgraduates only)
+
+**a)	Consider the Poisson distribution with rate parameter $\theta$. Show that Jeffreys’ prior is $p(\theta) \sim \theta^{-0.5}$ and that this corresponds to a Gamma(0.5,0) distribution.**
+
+**b)	Consider the binomial distribution. Show that the large sample classical sampling variance of the mle estimate of $p$ is $\sqrt{p*(1-p)/n}$. Find the Jeffreys prior for the parameter $p$ (most of the work is already done).**
+
+**c)	Consider the Normal distribution with unknown µ and σ2. Show that the joint Jeffreys prior is $p(\mu, \sigma^{2}) \sim (\sigma^{2})^{-3/2}$ and that this corresponds to an Inverse Gamma(0.5, 0) density. Is this a proper density? Is it an appropriate choice of prior density?**
