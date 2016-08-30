@@ -14,7 +14,7 @@ require(dplyr)
 require(ggplot2)
 require(xtable)
 opts_chunk$set(echo = TRUE)
-opts_chunk$set(cache=TRUE)
+opts_chunk$set(cache=FALSE)
 ```
 
 ##STAT 3120 APPLIED BAYESIAN METHODS
@@ -130,17 +130,23 @@ gives a p-value of $0.1645$. *It doesn't for me?* This would need to be compared
 
 95% intervals for these are (using $m=10,000,000$ – even then not always enough for 2 dps!)
 
-```{r Q2a, results='markup'}
-options(xtable.comment = FALSE)
+```{r Q2a}
 prior <- c("0.0", "0.5,0", "1,0")
 posterior <- c("212,10", "212.5,10", "213,10")
 y.int <- c("18.44, 24.15", "18.49, 24.20", "18.54, 24.25")
 yz.int <- c("11.38, 18.09", "11.36, 18.09", "11.33, 18.08")
 pr.yz10 <- c(rep("0.997",3))
-headings <- c("Posterior", "Prior", "$\\theta_{Y}$" ,"95% interval θ_Y - θ_Z | y,z", "Pr(θ_Y - θ_Z > 10)")
+heading <- c("Prior", "Posterior", "95% interval $\\theta_{Y}$ $\\mid$ y" ,"95% interval $\\theta_{Y}$ - $\\theta_{Z}$ $\\mid$ y,z", expression("alpha^beta"))
 data <- cbind(prior, posterior, y.int, yz.int, pr.yz10)
-colnames(data) <- headings
-DT::datatable(xtable(data))
+colnames(data) <- heading
+```
+
+```{r Q2a table, results= 'asis'}
+print(xtable(data, align = rep("c", dim(data)[2] + 1)), type = "html")
+```
+
+```{r Q2a table2, results= 'asis'}
+DT::datatable(data, colnames = c(\theta, 'Are', 'Some', 'New', 'Names'), escape = FALSE)
 ```
 
 ```{r Q2a code, echo = FALSE}

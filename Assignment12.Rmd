@@ -7,24 +7,16 @@ output:
     graphics: yes
     highlight: pygments
     includes:
-      before_body: eqnnumber.js
-    mathjax: default
     smart: yes
-  pdf_document: null
-  word_document: default
 subtitle: <center> Semester 2, 2016 </center>
 ---
 
 ```{r setup, include=FALSE}
 require(tufte)
 require(knitr)
-require(reshape2)
 opts_chunk$set(cache = TRUE)
 opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
-require(ggplot2)
-require(broom)
-require(magrittr)
-require(dplyr)
+
 ```
 
 Due Friday $16^{th}$ September 2016 (on-campus by 3pm, distance by 5pm)
@@ -44,36 +36,67 @@ Marking Criteria:
 
 ***
  
-#Question 1 Total: 12 marks
+##Question 1 Total: 12 marks
 
-(a)	Consider a sample of $n=15$ data points, $y$, from the Normal distribution with unknown mean $\mu$ and variance \sigma^{2} . For this sample we wish to allow the 14th and 15th data points, $(y_{14}, y_{15})$, to have an inflated variance, namely 10\sigma^{2} .
+(a)	Consider a sample of $n=15$ data points, $y$, from the Normal distribution with unknown mean $\mu$ and variance \sigma^{2} . For this sample we wish to allow the 14th and 15th data points, $(y_{14}, y_{15})$, to have an inflated variance, namely $10\sigma^{2}$ .
 
     (i) Write down the likelihood $p( y \mid \mu,\sigma^{2})$ , including all constants. [2 marks]
-    To perform inference on $p(\mu,\sigma^{2} \mid y)$ we partition using $p(\mu \mid y)$ and $p(\sigma^{2} \mid y, \mu)$.
+  To perform inference on $p(\mu,\sigma^{2} \mid y)$ we partition using $p(\mu \mid y)$ and $p(\sigma^{2} \mid y, \mu)$.
     (ii) Mathematically derive the density  $p(\sigma^{2} \mid y, \mu)$ assuming the non-informative prior $p(\sigma^{2} ) \propto 1/\sigma^{2}$ . Derive $E(\sigma^{2} \mid y, \mu)$ and $V(\sigma^{2} \mid y, \mu)$. [4 marks]
 
 ***
     
-(b) A biologist believes that lifetimes in days of fruitflies follow an exponential distribution. The density for a single observation y drawn from an exponential distribution is
-$$p(y; \lambda) = \lambda e -\lambda y,	y > 0.$$
+(b) A biologist believes that lifetimes in days of fruitflies follow an exponential distribution. The density for a single observation y drawn from an exponential distribution is $$p(y; \lambda) = \lambda e -\lambda y,	y > 0.$$ For data, the biologist observes $100$ randomly selected fruitflies and records how many days they live.
 
-For data, the biologist observes $100$ randomly selected fruitflies and records how many days they live. 
-
-  (i)	Write the likelihood of \lambda if there are 100 data values, represented symbolically as y1,...,y100. What parametric family is the conjugate prior for the exponential likelihood? (Just name the family.)	[2 marks]
-  (ii)	The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks] 
-  (iii)	Based on the likelihood and the prior that you have specified, find the posterior density p(\lambda | y1,...,y100). Name it and give the numeric values of the parameters. [2 marks]
+    (i)	Write the likelihood of \lambda if there are 100 data values, represented symbolically as $y_{1},\cdots,y_{100}$. What parametric family is the conjugate prior for the exponential likelihood? (Just name the family.)	[2 marks]
+    
+      **Answer:**
   
+    (ii) The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks] 
+  
+    (iii) Based on the likelihood and the prior that you have specified, find the posterior density $p(\lambda \mid y_{1},\cdots,y_{100})$. Name it and give the numeric values of the parameters. [2 marks]
+  
+***
 
+##Question 2 Total: 13 marks
 The table below is adapted from the text BDA. It consists of the numbers of fatal accidents and approximate numbers of passenger miles (in 100 millions) flown each year from 1976 to 1985.
 
-#Question 2 Total: 13 marks
+```{r Q2 table, echo=FALSE}
+q2table <- readRDS(file="Assignment2Files/Q2Table.rds")
+kable(q2table, format="markdown", align = rep("c", dim(q2table)[2] + 1), col.names = c("Year", "Fatal Accidents", "Passenger Miles"))
+```
 
 (a) Assume the numbers of fatal accidents are independently and identically distributed. Suggest an appropriate distribution to model the number of fatal accidents. [2 marks]
 
 (b) Set a suitable prior distribution for the mean parameter in (a) and determine its posterior distribution based on the data in the table above. Plot this posterior density. [3 marks] 
-
 (c)Find a point estimate and 95% interval for the average yearly number of fatal accidents. [2 marks]
 
 (d)	Part (a) has ignored the information about passenger miles. Perhaps a better model here would take account that each fatal accident count is proportional to the number of miles flown. Set up a model of accident counts that accounts for the number of miles flown.	[2 marks]
 
 (e) Using this new model, set a prior distribution for the mean parameter and determine its posterior distribution. Plot this density and compare it with that in (b). [4 marks]
+
+***
+
+##Question 3	[Total: 20 marks]
+
+Consider the example on corn yields but with an extended data set, with sample sizes, sample means and sample variances as given below. We have five different corn growers giving individual yields for a particular new type of genetically engineered corn that has three seasons per year. The corn is distributed by a research station to the growers.
+
+```{r Q3 table, echo=FALSE}
+q3table <- readRDS(file="Assignment2Files/Q3Table.rds")
+kable(q3table, align = rep(c("c","c"), dim(q3table)[2] + 1))
+```
+
+Growers give yields for the most recent seasons in tons/hectare. Summary statistics for the data are given below.
+
+(a)	By adapting code from the week 7 lecture, fit a hierarchical Normal model to this data, using the Empirical Bayes approach. Provide estimates and inference for each unknown true grower mean yield, including a plot showing all estimated posterior densities, one for each unknown mean.	[7 marks]
+
+(b) Plot the estimated parent density for the five grower means. At what percentile of this distribution does of each grower’s estimated posterior mean yield lie? Do they all fit in with the prior distribution? [2 marks]
+
+(c) What is the posterior probability that each of the five growers has the largest mean yield? What is your conclusion in this case? [2 marks]
+
+(d) What is the posterior probability that, for each pair of growers (grower i and i+k), the mean yield for grower(i) exceeds the mean yield for grower (i+k)? [2 marks]
+(e) What is the most likely ordering for the 5 mean grower yields in your MC sample? What are the 2nd, 3rd and 4th most likely orderings? [4 marks]
+
+(f)	Based on (a)-(d), and any other evidence you can provide, where do you believe significant differences exist among the 5 grower means (if any)? [3 marks]
+
+###End of Assignment 2
