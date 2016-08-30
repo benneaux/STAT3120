@@ -9,9 +9,12 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 require(knitr)
 require(dplyr)
+require(ggplot2)
+require(xtable)
+opts_chunk$set(echo = TRUE)
+opts_chunk$set(cache=TRUE)
 ```
 
 ##STAT 3120 APPLIED BAYESIAN METHODS
@@ -31,19 +34,89 @@ kable(bike.data, align = "c", col.names = c("Bike Route?","Bike Count"))
 
 **(a)	Consider the group bike route =’Yes’ (Y) first. What distribution are the bicycle counts most likely to follow?**
 
+**Answer:** Assuming the counts are independent and identically distributed, we would use a Poisson distribution here. So, $Y \sim Poisson(\theta_{Y})$
+
+
 **(b)	Assume that the bicycle counts on bike routes are independent and identically distributed for different streets. What is the conditional likelihood formula for the counts y?**
+
+**Answer:** $$\begin{aligned} p(y \mid \theta_{Y}) &= \prod \frac{\theta_{Y}^{y_{i}}exp(-\theta_{Y})}{y_{i}!} \\
+&=\frac{\theta_{Y}^{n\bar{y}}exp(-n\theta_{Y})}{\prod y_{i}!} \\
+&\propto \theta_{Y}^{212}exp(-10\theta_{Y})
+\end{aligned}$$
+This is in the form of a $Gamma(213,10)$ density in $\theta_{Y}$.
 
 **(c)	What prior information do we have? Construct a prior distribution for θY, the parameter of interest, for the counts y.**
 
+**Answer:** In this case we seem to have no prior information about $\theta_{Y}$. Our preferred noninformative prior is $Gamma(1,0)$.
+
 **(d)	Update the prior with the observed counts to find the posterior distribution for $\theta_{Y} \mid y$. Generate an estimate and $95\%$ interval for $\theta_{Y} \mid y$.**
- 
+
+**Answer:** The posterior for  $\theta_{Y} \mid y$ is $Gamma(213, 10)$. $E(\theta_{Y} \mid y) = \frac{213}{10} = 21.3$
+
+```{r Q1d}
+qgamma(0.025,213,10)
+qgamma(0.975,213,10) 
+```
+A $95\%$ interval is $(18.54, 24.25)$.
+
 **(e)	Let $Z$ = bicycle counts on non-bike routes. How can we compare $Y$ and $Z$?**
+
+**Answer:** Naturally, we compare $\theta_{Y}$ and $\theta_{Z}$ , the rates of bicycle usage for bike routes and non-bike routes.
 
 **(f)	Estimate a $95\%$ credible interval on the difference $\theta_{Y} – \theta_{Z}$.What conclusions can you draw based on this interval?**
 
+
+```{r Q1f setup, results = 'hide'}
+ty <- rgamma(10000,213,10)
+tz <- rgamma(10000,53,8)
+tymz <- ty-tz
+```
+
+The quantile function is then used as follows 
+
+```{r Q1f quantile}
+quantile(tymz, 0.025)
+quantile(tymz, 0.975)
+```
+
+A point estimate is
+
+
+```{r Q1f mean}
+mean(tymz)
+```
+
+A histogram follows
+
+```{r Q1f histo}
+tymz.df <- data.frame(tymz)
+ggplot(tymz.df, aes(tymz)) + 
+  geom_histogram()
+  
+```
+
+Clearly bike routes are used significantly more than non-bike routes.
+
 **(g)	Estimate the probability that $\theta_{Y} – \theta_{Z}$ is greater than $10$ given the data.**
 
+**Answer:** Use the sample in (f) (two alternative methods given):
+
+```{r Q1 g}
+length(tymz[tymz>10])/length(tymz)
+mean(tymz>10)
+```
+
+We are very confident that bike usage is at least 10 per day per street more on bike routes than non-bike routes.
+
 **(h)	Perform the equivalent t-test. Discuss why the conclusion appears different from (g).**
+
+**Answer:** The t.test
+
+```{r Q1h}
+t.test(ty,tz,"greater", 10) 
+```
+
+gives a p-value of $0.1645$. *It doesn't for me?* This would need to be compared with $0.003$ based on (g)! In hindsight, there is a problem with the Poisson assumption (rather than the t-test, in our opinion, as it’s very robust). E.g. mean(y) = 21.2 and var(y) = 192.8: there seems to be overdispersion.
 
 ***
 
@@ -51,42 +124,66 @@ kable(bike.data, align = "c", col.names = c("Bike Route?","Bike Count"))
 
 *Three diffuse priors were used in lecture today for the Poisson parameter, Gamma(0,0), Gamma(0.5,0) and Gamma(1,0).*
 
-```{r Q2setup, echo = FALSE}
-
-gamma.0 <- function(n, x) {
-  dgamma(n*x, n)
-  }
-
-gamma.05 <- function(n,x){
-  dgamma(n*x + 0.5, n)
-}
-
-gamma.1 <- function(n,x) {
-  dgamma(n*x + 1, n)
-}
-
-gamma.202 <- function(n,x) {
-  dgamma(n*x + 20, n + 2)
-}
-
-gamma.203 <- function(n,x) {
-  dgamma(n*x + 20, n + 3)
-}
-
-
-```
-
 **a)	Repeat Q1 parts (d), (f) and (g) above for these three priors (or the two that you didn’t use). Are the results sensitive to these prior choices?**
 
-```{r Q2a}
-n <- 20; x <- sum(bike.data[1:12,2])/12
-n;x
-gamma.0(n,x)
-gamma.05(n,x)
-gamma.1(n,x)
+**Answer:** The likelihood contributes a $Gamma(213,10)$ to the posterior. A $Gamma(a,b)$ prior means the posterior is $\theta_{Y} \mid y \sim Gamma(212 + a,10 + b)$. So we have $Gamma(0,0)$ prior $\rightarrow \theta_{Y} \mid y \sim Gamma(212,10)$ and $Gamma(0.5,0)$ prior $\rightarrow \theta_{Y} \mid y \sim Gamma(212.5,10)$ 
+
+95% intervals for these are (using $m=10,000,000$ – even then not always enough for 2 dps!)
+
+```{r Q2a, results='markup'}
+options(xtable.comment = FALSE)
+prior <- c("0.0", "0.5,0", "1,0")
+posterior <- c("212,10", "212.5,10", "213,10")
+y.int <- c("18.44, 24.15", "18.49, 24.20", "18.54, 24.25")
+yz.int <- c("11.38, 18.09", "11.36, 18.09", "11.33, 18.08")
+pr.yz10 <- c(rep("0.997",3))
+headings <- c("Posterior", "Prior", "$\\theta_{Y}$" ,"95% interval θ_Y - θ_Z | y,z", "Pr(θ_Y - θ_Z > 10)")
+data <- cbind(prior, posterior, y.int, yz.int, pr.yz10)
+colnames(data) <- headings
+DT::datatable(xtable(data))
 ```
 
+```{r Q2a code, echo = FALSE}
+ty1=rgamma(10000,212,10)
+tz1=rgamma(10000,52,8)
+tymz1=ty1-tz1
+## The quantile function is then used as follows
+quantile(tymz1,c(0.025,0.975)) ##
+length(tymz1[tymz1>10])/length(tymz1) ###
+## For Gamma(0.5,0)
+qgamma(c(0.025,0.975),212.5,10) ##
+ty2=rgamma(10000,212.5,10)
+tz2=rgamma(10000,52.5,8)
+tymz2=ty2-tz2
+## The quantile function is then used as follows
+quantile(tymz2, c(0.025,0.975)) ##
+length(tymz2[tymz2>10])/length(tymz2) ###
+```
+
+Results seem quite insensitive to these prior choices.
+
 **b)	The local head of ‘Bicycling USA’ suggests some information to you about cyclists in the area. Using this you construct a Gamma(20,2) prior for θY and a Gamma(20,3) prior for $\theta_{X}$.**
+
+```{r Q2b code}
+## For informative priors Gamma(20,2) for Y and Gamma(20,3) for Z
+## For Y
+qgamma(c(0.025,0.975),232,12) ##
+ty3=rgamma(10000,232,12)
+tz3=rgamma(10000,72,11)
+tymz3=ty3-tz3
+## The quantile function is then used as follows
+quantile(tymz3, c(0.025,0.975)) ##
+length(tymz3[tymz3>10])/length(tymz3) ###
+```
+
+```{r Q2b plot}
+x=seq(15,35,0.01)
+plot(x, dgamma(x,213,10),type="l",ylim=c(0,0.35))
+curve(dgamma(x,212,10),col="red", add=TRUE)
+curve(dgamma(x,212.5,10),col="green", add=TRUE)
+curve(dgamma(x,232,12),col="blue", add=TRUE)
+
+```
 
 Repeat Q1 parts (d), (f) and (g) above for this new prior. How have results changed from Q1 and Q2(a)?
 
