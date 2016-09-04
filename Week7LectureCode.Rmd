@@ -1,0 +1,25 @@
+---
+title: "Week 7 Lecture Code"
+author: "Benjamin Moran"
+date: "4 September 2016"
+output: html_document
+---
+
+## Example – Inference for a group of Normal means
+We consider an example on corn yields. We have 5 different corn growers giving individual yields for a particular new type of corn, distributed by a research station to the growers. Growers give yields for 3 years in tons/hectare. The data is below
+
+
+```{r Q1}
+x2=seq(5,25,by=0.001)
+mu=16.11
+
+tau=1.82
+px2=-(x2-mu)^2/(2*tau^2)-3/2*log(1+3*(x2-mean(y2))^2/(2*var(y2))) 
+plot(x2,exp(px2),type = 'l')
+
+x4=seq(5,25,by=0.001) 
+px4=-(x4-mu)^2/(2*tau^2)-3/2*log(1+3*(x4-mean(y4))^2/(2*var(y4))) 
+lines(x4,exp(px4),col=2)
+
+```
+
