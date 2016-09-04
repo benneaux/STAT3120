@@ -9,7 +9,7 @@ output: html_document
 We consider an example on corn yields. We have 5 different corn growers giving individual yields for a particular new type of corn, distributed by a research station to the growers. Growers give yields for 3 years in tons/hectare. The data is below
 
 
-```{r Q1}
+```{r Q1, eval = FALSE}
 x2=seq(5,25,by=0.001)
 mu=16.11
 
