@@ -16,7 +16,7 @@ subtitle: <center> Semester 2, 2016 </center>
 ```{r setup, include=FALSE}
 require(tufte)
 require(knitr)
-opts_chunk$set(cache = TRUE)
+opts_chunk$set(cache = FALSE)
 opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
 ```
 
@@ -61,80 +61,151 @@ $$
         **Answer:** For the likelihood function of an eyponential distribution is:
 $$
   \begin{aligned}
-    L(\lambda; y_{n}) &= \prod\limits_{i=1}^{n} \lambda \, e^{-\lambda\,y_{i}} \\
-    &=\lambda^{n} \, e^{-\lambda \sum\limits_{i=1}^{n}y_{i}}
+    L(\lambda; y_{n}) 
+      &= \prod
+            \limits_{i=1}^{n} 
+          \lambda \, 
+          e^{-\lambda\,y_{i}} \\
+      &= \lambda^{n} \, 
+         e^{-\lambda \sum\limits_{i=1}^{n}y_{i}}
   \end{aligned}
 $$
 with $n=100$ we get:
 $$
   \begin{aligned}
-    L(\lambda; y_{100}) &= \lambda^{100} \, e^{-\lambda \sum\limits_{i=1}^{100}y_{i}} \\
-    &= \lambda^{100} \, e^{-100\lambda\bar{y}}
+    L(\lambda; y_{100}) 
+      &= \lambda^{100} \,
+         e^{-\lambda \sum\limits_{i=1}^{100}y_{i}} \\
+      &= \lambda^{100} \, 
+         e^{-100\lambda\bar{y}}
   \end{aligned}
 $$
-        
-        The cojugate prior for the exponential likelihood is Gamma distribution. Suppose that we have data $X_{i} \sim Exp(\lambda)$, and that the prior distribution for $\lambda$ is $Gamma(\alpha, \beta)$. Then the posterior distribution of \pi is given as
+The cojugate prior for the exponential likelihood is Gamma distribution. Suppose that we have data $X_{i} \sim Exp(\lambda)$, and that the prior distribution for $\lambda$ is $Gamma(\alpha, \beta)$. Then the posterior distribution of \pi is given as
 $$
   \begin{aligned}
-    p(\lambda \mid \vec{x}, \alpha, \beta) &\propto \lambda^{n}exp\left(-\lambda\sum\limits_{i=1}^{n}x_{i}\right)\, \lambda^{\alpha-1}exp \left(-\beta\lambda\right) \\
-    &\propto \lambda^{n +\alpha-1}exp\left(-\lambda\left(\beta + \sum\limits_{i=1}^{n}x_{i} \right)\right)
+    p(\lambda \mid \vec{x}, \alpha, \beta) 
+      &\propto \lambda^{n}
+        exp
+          \left(
+            -\lambda\sum\limits_{i=1}^{n}x_{i}
+          \right) \, 
+          \lambda^{\alpha-1} 
+          exp
+            \left(
+              -\beta\lambda
+            \right) \\
+      &\propto \lambda^{n +\alpha-1}
+        exp
+          \left(
+            -\lambda
+              \left(
+                \beta + \sum\limits_{i=1}^{n}x_{i}
+              \right)
+          \right)
   \end{aligned}
 $$
 which is equivalent to a $Gamma(\alpha + n,\beta + \sum\nolimits_{i=1}^{n}x_{i})$
     (ii) The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks]
     
         **Answer:** We know that the mean and variance of $Gamma(a,b)$ are given by 
-$$mean = \frac{a}{b}; \quad Variance = \frac{a}{b^{2}}$$ So we simply need to solve the simultaneous equations 
 $$
-  \begin{align*}
-    \intertext{Sub}
+  Mean = 
+    \frac
+      {a}{b}
+    ; \quad
+  Variance = 
+    \frac
+      {a}{b^{2}}
+$$ 
+So we simply need to solve the simultaneous equations 
+$$
+  \begin{aligned}
     \frac{a}{b} &= 3 \implies a = 3b \\
     \frac{a}{b^{2}} &=2 \\
     \frac{3b}{b^{2}} &= 2  \implies b= \frac{3}{2} \\
     \implies a &= \frac{9}{2}
-  \end{align*}
+  \end{aligned}
 $$
-$$\begin{minipage}{3in}
-\begin{align*}
-\intertext{If}
-   A &= \sigma_1+\sigma_2\\
-   B &= \rho_1+\rho_2\\
-\intertext{then}
-C(x) &= e^{Ax^2+\pi}+B
-\end{align*} 
-\end{minipage}$$
+$$
+  \begin{aligned}
+    A &= \sigma_1+\sigma_2\\
+    B &= \rho_1+\rho_2\\
+    C(x) &= e^{Ax^2+\pi}+B
+  \end{aligned} 
+$$
 which leaves us with a prior of $Gamma(\frac{9}{2},\frac{3}{2})$.
   
     (iii) Based on the likelihood and the prior that you have specified, find the posterior density $p(\lambda \mid y_{1},\cdots,y_{100})$. Name it and give the numeric values of the parameters. [2 marks]
   
 ***
-
+```{r clearQ1, echo=FALSE}
+rm(list=ls())
+```
 ##Question 2 Total: 13 marks
 The table below is adapted from the text BDA. It consists of the numbers of fatal accidents and approximate numbers of passenger miles (in 100 millions) flown each year from 1976 to 1985.
 
 ```{r Q2 table, echo=FALSE}
-q2table <- readRDS(file="Assignment2Files/Q2Table.rds")
-kable(q2table, format="markdown", align = rep("c", dim(q2table)[2] + 1), col.names = c("Year", "Fatal Accidents", "Passenger Miles"))
+q2.table <- matrix(
+  c(24,25,31,31,22,21,26,20,16,22,3863,4300,5027,5481,5814,6033,5877,6223,7433,7107),
+    ncol = 2,
+    nrow = 10
+  )
+rownames(q2.table) <- c("1976","1977","1978","1979","1980","1981","1982","1983","1984","1985")
+colnames(q2.table) <- c("Fatal Accidents", "Passenger Miles")
+sum.accidents <- sum(q2.table[,1])
+kable(q2.table, format="markdown", align = rep("c", dim(q2.table)[2] + 1), col.names = c("Fatal Accidents", "Passenger Miles"))
 ```
 
 (a) Assume the numbers of fatal accidents are independently and identically distributed. Suggest an appropriate distribution to model the number of fatal accidents. [2 marks]
 
-(b) Set a suitable prior distribution for the mean parameter in (a) and determine its posterior distribution based on the data in the table above. Plot this posterior density. [3 marks] 
-(c)Find a point estimate and 95% interval for the average yearly number of fatal accidents. [2 marks]
+**Answer:** An appropriate model to use would be a Poisson model. We would have a parameter $\theta$ representing the *expected* number of accidents occuring in a year and data $y_{i}$ representing the *actual* number of accidents each year. An appropriate conjugate prior distribution that we can use to model this would be a Gamma distribution.
+
+(b) Set a suitable prior distribution for the mean parameter in (a) and determine its posterior distribution based on the data in the table above. Plot this posterior density. [3 marks]
+
+**Answer:** From the data we can see that there have been `r sum.accidents` fatal accidents in $n = 10$ years. If we assume a non-informative $Gamma(1,0)$ prior, then the posterior distribution for the mean parameter is
+  $$Gamma_{post}(\alpha, \beta) = Gamma(1 + n\bar{y_{i}}, \beta + n) = Gamma(239, 10)$$
+
+```{r Q2b data}
+# theta <- rgamma(1000,238)/10
+# y1986 <- rpois(1000,theta)
+# print (sort(y1986)[c(25,976)])
+
+a0 <- 1; b0 <- 0; mu.y <- 23.8; n <- 10
+
+post.data <- rgamma(1000,a0 + n*mu.y, b0 + n)
+```
+
+```{r Q2b plot}
+hist(post.data)
+```
+
+(c) Find a point estimate and 95% interval for the average yearly number of fatal accidents. [2 marks]
+
+```{r Q2c 95% CI}
+mu.y
+qgamma(0.025,a0 + n*mu.y, b0 + n)
+qgamma(0.975,a0 + n*mu.y, b0 + n)
+```
 
 (d)	Part (a) has ignored the information about passenger miles. Perhaps a better model here would take account that each fatal accident count is proportional to the number of miles flown. Set up a model of accident counts that accounts for the number of miles flown.	[2 marks]
 
 (e) Using this new model, set a prior distribution for the mean parameter and determine its posterior distribution. Plot this density and compare it with that in (b). [4 marks]
 
 ***
-
+```{r clearQ2, echo=FALSE}
+rm(list=ls())
+```
 ##Question 3	[Total: 20 marks]
 
 Consider the example on corn yields but with an extended data set, with sample sizes, sample means and sample variances as given below. We have five different corn growers giving individual yields for a particular new type of genetically engineered corn that has three seasons per year. The corn is distributed by a research station to the growers.
 
 ```{r Q3 table, echo=FALSE}
-q3table <- readRDS(file="Assignment2Files/Q3Table.rds")
-kable(q3table, align = rep(c("c","c"), dim(q3table)[2] + 1))
+row.symbols = c(ni='n\U1D62', ybar='y\u0305\U1D62', sigmaSq="s\U00B2\U1D62")
+q3.table = matrix(c(16,19,14,12,8,15.3,16.2,16.4,13.2,13.5,8.2,12.3,7.9,5.2,6.2), 3, 5)
+colnames(q3.table) = c("1", "2", "3","4", "5")
+row.labels = c(row.symbols['ni'], row.symbols['ybar'], row.symbols['sigmaSq'])
+rownames(q3.table) = row.labels
+kable(q3.table, align = rep(c("c","c"), dim(q3.table)[2] + 1), caption = "Corn Yield Data by Grower", escape = TRUE)
 ```
 
 Growers give yields for the most recent seasons in tons/hectare. Summary statistics for the data are given below.
