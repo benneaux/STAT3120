@@ -146,7 +146,7 @@ print(xtable(data, align = rep("c", dim(data)[2] + 1)), type = "html")
 ```
 
 ```{r Q2a table2, results= 'asis'}
-DT::datatable(data, colnames = c(\theta, 'Are', 'Some', 'New', 'Names'), escape = FALSE)
+DT::datatable(data, colnames = c("theta", 'Are', 'Some', 'New', 'Names'), escape = FALSE)
 ```
 
 ```{r Q2a code, echo = FALSE}

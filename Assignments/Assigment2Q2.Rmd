@@ -1,0 +1,86 @@
+---
+title: "Assignment2Q2"
+author: "Benjamin Moran"
+date: "18 September 2016"
+output: html_document
+---
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+```
+##Question 2 Total: 13 marks
+The table below is adapted from the text BDA. It consists of the numbers of fatal accidents and approximate numbers of passenger miles (in 100 millions) flown each year from 1976 to 1985.
+
+```{r Q2 table, echo=FALSE}
+q2.table <- matrix(
+  c(24,25,31,31,22,21,26,20,16,22,3863,4300,5027,5481,5814,6033,5877,6223,7433,7107),
+    ncol = 2,
+    nrow = 10
+  )
+rownames(q2.table) <- c("1976","1977","1978","1979","1980","1981","1982","1983","1984","1985")
+colnames(q2.table) <- c("Fatal Accidents", "Passenger Miles")
+sum.accidents <- sum(q2.table[,1])
+kable(q2.table, format="markdown", align = rep("c", dim(q2.table)[2] + 1), col.names = c("Fatal Accidents", "Passenger Miles"))
+```
+
+(a) Assume the numbers of fatal accidents are independently and identically distributed. Suggest an appropriate distribution to model the number of fatal accidents. [2 marks]
+
+**Answer:** An appropriate model to use would be a Poisson model. We would have a parameter $\theta$ representing the *expected* number of accidents occuring in a year and data $y_{i}$ representing the *actual* number of accidents each year. An appropriate conjugate prior distribution that we can use to model this would be a Gamma distribution.
+
+(b) Set a suitable prior distribution for the mean parameter in (a) and determine its posterior distribution based on the data in the table above. Plot this posterior density. [3 marks]
+
+**Answer:** From the data we can see that there have been `r sum.accidents` fatal accidents in $n = 10$ years. If we assume a non-informative $Gamma(1,0)$ prior, then the posterior distribution for the mean parameter is
+  $$Gamma_{post}(\alpha, \beta) = Gamma(1 + n\bar{y_{i}}, \beta + n) = Gamma(239, 10)$$
+
+```{r Q2b data}
+
+fatal.accidents <- c(24,25,31,31,22,21,26,20,16,22)
+miles.flown <- c(3863,4300,5027,5481,5814,6033,5877,6223,7433,7107)
+mu.y <- mean(fatal.accidents)
+
+a0 <- 1; b0 <- 0; n <- 10
+
+post.data <- rgamma(1000,a0 + n*mu.y, b0 + n)
+```
+
+```{r Q2b plot}
+hist(post.data,50)
+```
+
+(c) Find a point estimate and 95% interval for the average yearly number of fatal accidents. [2 marks]
+
+```{r Q2c 95% CI}
+mu.y
+qgamma(0.025,a0 + n*mu.y, b0 + n)
+qgamma(0.975,a0 + n*mu.y, b0 + n)
+```
+
+(d)	Part (a) has ignored the information about passenger miles. Perhaps a better model here would take account that each fatal accident count is proportional to the number of miles flown. Set up a model of accident counts that accounts for the number of miles flown.	[2 marks]
+
+```{r Q2d accidents/mile}
+
+accident.rate <- fatal.accidents/miles.flown
+accident.rate
+
+mu.ar <- mean(accident.rate)
+mu.ar
+
+mu.y2 <- mean(mu.ar*miles.flown)
+
+a0 <- 1; b0 <- 0; n <- 10
+
+post.data <- rgamma(1000,a0 + n*mu.y2, b0 + n)
+hist(post.data,50)
+qgamma(0.025,a0 + n*mu.y2, b0 + n)
+qgamma(0.975,a0 + n*mu.y2, b0 + n)
+
+```
+
+(e) Using this new model, set a prior distribution for the mean parameter and determine its posterior distribution. Plot this density and compare it with that in (b). [4 marks]
+
+***
+```{r clearQ2, echo=FALSE}
+rm(list=ls())
+```

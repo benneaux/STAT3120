@@ -79,7 +79,7 @@ Marking Criteria:
                 \sum\limits_{i=14}^{15}
                   (y_{i}-\mu)^{2}
               \right\} \\
-          &= 20*(2\pi)^{-\frac{13}{2}}(\sigma^{2})^{-\frac{15}{2}}
+          &= 20^{-1}(2)^{-\frac{13}{2}}(\pi\sigma^{2})^{-\frac{15}{2}}
              exp
               \left\{
                 -\frac
@@ -144,7 +144,42 @@ $$
                 \right)
 $$
 
-We know that the mean of an Inverse Gamma is given by $\frac{\beta}{\alpha -1}$ and the variance by $\frac{\beta^{2}}{(\alpha - 1)^{2}(\alpha - 2)}$.
+We know that the mean of an Inverse Gamma is given by $\frac{\beta}{\alpha -1}$ and the variance by $\frac{\beta^{2}}{(\alpha - 1)^{2}(\alpha - 2)}$. Therefore
+
+$$
+  \begin{aligned}
+    E(\sigma^{2} \mid y, \mu) 
+      &= \frac
+          {\frac
+            {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+              + \sum\limits_{i=14}^{15}
+              (y_{i}-\mu)^{2}}
+            {20}}
+          {\frac
+            {15}{2} - 1
+          } \\
+     &=\frac
+         {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+           + \sum\limits_{i=14}^{15}
+           (y_{i}-\mu)^{2}}
+       {130} \\
+    V(\sigma^{2} \mid y, \mu) 
+      &= \frac
+        {\left(\frac
+          {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}}
+          {20}\right)^{2}}
+        {\left(\frac{15}{2} - 1\right)^{2}
+          \left(\frac{15}{2} - 2\right)} \\
+      &= \frac
+        {3200\left(
+          10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}\right)}
+        {1859}
+  \end{aligned}
+$$
 
 ***
     
@@ -156,7 +191,7 @@ $$
 
     (i)	Write the likelihood of \lambda if there are 100 data values, represented symbolically as $y_{1},\cdots,y_{100}$. What parametric family is the conjugate prior for the exponential likelihood? (Just name the family.)	[2 marks]
     
-        **Answer:** For the likelihood function of an eyponential distribution is:
+        **Answer:** For the likelihood function of an exponential distribution is:
 $$
   \begin{aligned}
     L(\lambda; y_{n}) 
@@ -178,31 +213,7 @@ $$
          e^{-100\lambda\bar{y}}
   \end{aligned}
 $$
-The cojugate prior for the exponential likelihood is Gamma distribution. Suppose that we have data $X_{i} \sim Exp(\lambda)$, and that the prior distribution for $\lambda$ is $Gamma(\alpha, \beta)$. Then the posterior distribution of \pi is given as
-$$
-  \begin{aligned}
-    p(\lambda \mid \vec{x}, \alpha, \beta) 
-      &\propto \lambda^{n}
-        exp
-          \left(
-            -\lambda\sum\limits_{i=1}^{n}x_{i}
-          \right) \, 
-          \lambda^{\alpha-1} 
-          exp
-            \left(
-              -\beta\lambda
-            \right) \\
-      &\propto \lambda^{n +\alpha-1}
-        exp
-          \left(
-            -\lambda
-              \left(
-                \beta + \sum\limits_{i=1}^{n}x_{i}
-              \right)
-          \right)
-  \end{aligned}
-$$
-which is equivalent to a $Gamma(\alpha + n,\beta + \sum\nolimits_{i=1}^{n}x_{i})$
+The cojugate prior for the exponential likelihood is Gamma distribution. 
     (ii) The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks]
     
         **Answer:** We know that the mean and variance of $Gamma(a,b)$ are given by 
@@ -219,18 +230,89 @@ So we simply need to solve the simultaneous equations
 $$
   \begin{aligned}
     \frac{a}{b} &= 3 \implies a = 3b \\
-    \frac{a}{b^{2}} &=2 \\
-    \frac{3b}{b^{2}} &= 2  \implies b= \frac{3}{2} \\
-    \implies a &= \frac{9}{2}
+    \frac{a}{b^{2}} &=2
   \end{aligned}
 $$
+If we sub the value for $a$ into the second equation, we get:
 $$
-  \begin{aligned}
-    A &= \sigma_1+\sigma_2\\
-    B &= \rho_1+\rho_2\\
-    C(x) &= e^{Ax^2+\pi}+B
-  \end{aligned} 
+  \frac
+    {3b}{b^{2}}
+    = 2
+  \implies 
+    b= \frac
+          {3}{2}
+  \implies 
+    a = \frac
+          {9}{2}
 $$
 which leaves us with a prior of $Gamma(\frac{9}{2},\frac{3}{2})$.
   
     (iii) Based on the likelihood and the prior that you have specified, find the posterior density $p(\lambda \mid y_{1},\cdots,y_{100})$. Name it and give the numeric values of the parameters. [2 marks]
+    
+    **Answer:** Suppose that we have data $X_{i} \sim Exp(\lambda)$, and that the prior distribution for $\lambda$ is $Gamma(\alpha, \beta)$. Then the posterior distribution of $\lambda$ is given as
+$$
+  \begin{aligned}
+    p(\lambda \mid \vec{x}, \alpha, \beta) 
+      &\propto \lambda^{n}
+        exp
+          \left(
+            -\lambda\sum\limits_{i=1}^{n}x_{i}
+          \right) \, 
+          \lambda^{\alpha-1} 
+          exp
+            \left(
+              -\beta\lambda
+            \right) \\
+      &= \lambda^{n +\alpha-1}
+        exp
+          \left(
+            -\lambda
+              \left(
+                \beta + \sum\limits_{i=1}^{n}x_{i}
+              \right)
+          \right) \\
+      &= \lambda^{n +\alpha-1}
+        exp
+          \left(
+            -\lambda
+              \left(
+                \beta + n\bar{x}
+              \right)
+          \right)      
+  \end{aligned}
+$$
+which is equivalent to a $Gamma(\alpha + n,\beta + n\bar{x})$. Subbing in the values we determined above gives us:
+
+$$
+  \begin{aligned}
+    p(\lambda \mid \vec{y}, 9/2, 3/2) 
+      &\propto \lambda^{100}
+        exp
+          \left(
+            -100\lambda\bar{y}
+          \right) \, 
+          \lambda^{7/2} 
+          exp
+            \left(
+              -3/2  \lambda
+            \right) \\
+      &= \lambda^{100 + 7/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right) \\
+      &= \lambda^{207/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right)      
+  \end{aligned}
+$$
+which is equivalent to $Gamma(207/2,3/2 + 100\bar{x})$.
+    

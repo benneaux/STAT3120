@@ -178,7 +178,7 @@ Semester 2, 2016
             \sum\limits_{i=14}^{15}
               (y_{i}-\mu)^{2}
           \right\} \\
-      &amp;= 20*(2\pi)^{-\frac{13}{2}}(\sigma^{2})^{-\frac{15}{2}}
+      &amp;= 20^{-1}(2)^{-\frac{13}{2}}(\pi\sigma^{2})^{-\frac{15}{2}}
          exp
           \left\{
             -\frac
@@ -239,7 +239,41 @@ Semester 2, 2016
                 {20}
                 \right)
 \]</span></p>
-<p>We know that the mean of an Inverse Gamma is given by <span class="math">\(\frac{\beta}{\alpha -1}\)</span> and the variance by <span class="math">\(\frac{\beta^{2}}{(\alpha - 1)^{2}(\alpha - 2)}\)</span>.</p>
+<p>We know that the mean of an Inverse Gamma is given by <span class="math">\(\frac{\beta}{\alpha -1}\)</span> and the variance by <span class="math">\(\frac{\beta^{2}}{(\alpha - 1)^{2}(\alpha - 2)}\)</span>. Therefore</p>
+<p><span class="math">\[
+  \begin{aligned}
+    E(\sigma^{2} \mid y, \mu) 
+      &amp;= \frac
+          {\frac
+            {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+              + \sum\limits_{i=14}^{15}
+              (y_{i}-\mu)^{2}}
+            {20}}
+          {\frac
+            {15}{2} - 1
+          } \\
+     &amp;=\frac
+         {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+           + \sum\limits_{i=14}^{15}
+           (y_{i}-\mu)^{2}}
+       {130} \\
+    V(\sigma^{2} \mid y, \mu) 
+      &amp;= \frac
+        {\left(\frac
+          {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}}
+          {20}\right)^{2}}
+        {\left(\frac{15}{2} - 1\right)^{2}
+          \left(\frac{15}{2} - 2\right)} \\
+      &amp;= \frac
+        {3200\left(
+          10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}\right)}
+        {1859}
+  \end{aligned}
+\]</span></p>
 <hr />
 <ol start="2" style="list-style-type: lower-alpha">
 <li><p>A biologist believes that lifetimes in days of fruitflies follow an exponential distribution. The density for a single observation y drawn from an exponential distribution is <span class="math">\[
@@ -247,7 +281,7 @@ Semester 2, 2016
 \]</span> For data, the biologist observes <span class="math">\(100\)</span> randomly selected fruitflies and records how many days they live.</p>
 <ol style="list-style-type: lower-roman">
 <li><p>Write the likelihood of if there are 100 data values, represented symbolically as <span class="math">\(y_{1},\cdots,y_{100}\)</span>. What parametric family is the conjugate prior for the exponential likelihood? (Just name the family.) [2 marks]</p>
-<strong>Answer:</strong> For the likelihood function of an eyponential distribution is: <span class="math">\[
+<strong>Answer:</strong> For the likelihood function of an exponential distribution is: <span class="math">\[
   \begin{aligned}
 L(\lambda; y_{n}) 
   &amp;= \prod
@@ -265,29 +299,7 @@ L(\lambda; y_{100})
   &amp;= \lambda^{100} \, 
  e^{-100\lambda\bar{y}}
   \end{aligned}
-\]</span> The cojugate prior for the exponential likelihood is Gamma distribution. Suppose that we have data <span class="math">\(X_{i} \sim Exp(\lambda)\)</span>, and that the prior distribution for <span class="math">\(\lambda\)</span> is <span class="math">\(Gamma(\alpha, \beta)\)</span>. Then the posterior distribution of is given as <span class="math">\[
-  \begin{aligned}
-p(\lambda \mid \vec{x}, \alpha, \beta) 
-  &amp;\propto \lambda^{n}
-exp
-  \left(
-    -\lambda\sum\limits_{i=1}^{n}x_{i}
-  \right) \, 
-  \lambda^{\alpha-1} 
-  exp
-    \left(
-      -\beta\lambda
-    \right) \\
-  &amp;\propto \lambda^{n +\alpha-1}
-exp
-  \left(
-    -\lambda
-      \left(
-        \beta + \sum\limits_{i=1}^{n}x_{i}
-      \right)
-  \right)
-  \end{aligned}
-\]</span> which is equivalent to a <span class="math">\(Gamma(\alpha + n,\beta + \sum\nolimits_{i=1}^{n}x_{i})\)</span></li>
+\]</span> The cojugate prior for the exponential likelihood is Gamma distribution.</li>
 <li><p>The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks]</p>
 <p><strong>Answer:</strong> We know that the mean and variance of <span class="math">\(Gamma(a,b)\)</span> are given by <span class="math">\[
   Mean = 
@@ -300,20 +312,84 @@ exp
 \]</span> So we simply need to solve the simultaneous equations <span class="math">\[
   \begin{aligned}
 \frac{a}{b} &amp;= 3 \implies a = 3b \\
-\frac{a}{b^{2}} &amp;=2 \\
-\frac{3b}{b^{2}} &amp;= 2  \implies b= \frac{3}{2} \\
-\implies a &amp;= \frac{9}{2}
+\frac{a}{b^{2}} &amp;=2
   \end{aligned}
-\]</span> <span class="math">\[
-  \begin{aligned}
-A &amp;= \sigma_1+\sigma_2\\
-B &amp;= \rho_1+\rho_2\\
-C(x) &amp;= e^{Ax^2+\pi}+B
-  \end{aligned} 
+\]</span> If we sub the value for <span class="math">\(a\)</span> into the second equation, we get: <span class="math">\[
+  \frac
+{3b}{b^{2}}
+= 2
+  \implies 
+b= \frac
+  {3}{2}
+  \implies 
+a = \frac
+  {9}{2}
 \]</span> which leaves us with a prior of <span class="math">\(Gamma(\frac{9}{2},\frac{3}{2})\)</span>.</p></li>
 <li><p>Based on the likelihood and the prior that you have specified, find the posterior density <span class="math">\(p(\lambda \mid y_{1},\cdots,y_{100})\)</span>. Name it and give the numeric values of the parameters. [2 marks]</p></li>
-</ol></li>
 </ol>
+<p><strong>Answer:</strong> Suppose that we have data <span class="math">\(X_{i} \sim Exp(\lambda)\)</span>, and that the prior distribution for <span class="math">\(\lambda\)</span> is <span class="math">\(Gamma(\alpha, \beta)\)</span>. Then the posterior distribution of <span class="math">\(\lambda\)</span> is given as <span class="math">\[
+  \begin{aligned}
+p(\lambda \mid \vec{x}, \alpha, \beta) 
+  &amp;\propto \lambda^{n}
+    exp
+      \left(
+        -\lambda\sum\limits_{i=1}^{n}x_{i}
+      \right) \, 
+      \lambda^{\alpha-1} 
+      exp
+        \left(
+          -\beta\lambda
+        \right) \\
+  &amp;= \lambda^{n +\alpha-1}
+    exp
+      \left(
+        -\lambda
+          \left(
+            \beta + \sum\limits_{i=1}^{n}x_{i}
+          \right)
+      \right) \\
+  &amp;= \lambda^{n +\alpha-1}
+    exp
+      \left(
+        -\lambda
+          \left(
+            \beta + n\bar{x}
+          \right)
+      \right)      
+  \end{aligned}
+\]</span> which is equivalent to a <span class="math">\(Gamma(\alpha + n,\beta + n\bar{x})\)</span>. Subbing in the values we determined above gives us:</p></li>
+</ol>
+<p><span class="math">\[
+  \begin{aligned}
+    p(\lambda \mid \vec{y}, 9/2, 3/2) 
+      &amp;\propto \lambda^{100}
+        exp
+          \left(
+            -100\lambda\bar{y}
+          \right) \, 
+          \lambda^{7/2} 
+          exp
+            \left(
+              -3/2  \lambda
+            \right) \\
+      &amp;= \lambda^{100 + 7/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right) \\
+      &amp;= \lambda^{207/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right)      
+  \end{aligned}
+\]</span> which is equivalent to <span class="math">\(Gamma(207/2,3/2 + 100\bar{x})\)</span>.</p>
 </div>
 
 
