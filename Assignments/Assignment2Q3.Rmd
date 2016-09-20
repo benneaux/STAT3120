@@ -223,8 +223,6 @@ abline(v=mean(mu4), lty=3, col = 4)
 lines(density(mu5),col=5)
 text(mean(mu5),0.05, "mu5", col = 5, adj = c(-0.1, -0.1))
 abline(v=mean(mu5), lty=3, col = 5)
-
-
 ```
 
 (b) Plot the estimated parent density for the five grower means. At what percentile of this distribution does of each grower’s estimated posterior mean yield lie? Do they all fit in with the prior distribution? [2 marks]
@@ -262,7 +260,6 @@ kable(parent.perc, col.names = c("Grower","1","2","3","4","5"))
 (c) What is the posterior probability that each of the five growers has the largest mean yield? What is your conclusion in this case? [2 marks]
 
 ```{r MCMC2, echo = FALSE}
-
 probs <- matrix(nrow = 5, ncol = 5)
 n <- 1000
 probs[1,1] <- length(mu1[mu1>mu1])/n # 0
@@ -312,8 +309,6 @@ length(mu5[mu5>mu1&mu5>mu2&mu5>mu3&mu5>mu4])/n
 ```
 
 This tells us that, using our estimates, Grower 3 has the largest mean yield with a probability of $\approx$ `r length(mu3[mu3>mu1&mu3>mu2&mu3>mu4&mu3>mu5])/n*100`%.
-
-
 
 (d) What is the posterior probability that, for each pair of growers (grower i and i+k), the mean yield for grower(i) exceeds the mean yield for grower (i+k)? [2 marks]
 

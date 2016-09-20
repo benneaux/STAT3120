@@ -49,6 +49,7 @@ Data <- cbind(Data, QI)
   Be <- rate +1
   Data <- cbind(rate,MLE,Be)
   CIU <- vector(mode = 'numeric', length = 8)
+
   CIL <- vector(mode = 'numeric', length = 8)
   for(k in 1:8){
     CIL[k] <- qgamma(0.025, rate[k] +1, 1)
