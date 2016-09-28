@@ -1,10 +1,10 @@
 ---
 output:
-  html_document:
-    toc: yes
   html_notebook:
     toc: yes
   title: "STAT3120 Applied Bayesian Methods"
+  html_document:
+    toc: yes
 ---
 
 
@@ -17,29 +17,28 @@ Andrew Johns has played 153 games for the Newcastle Knights NRL team; of those 1
 ### (a) 
 Estimate the following:
 
-####(i) 
-Pr(Johns plays)
+####(i) Pr(Johns plays)
 153/223 = `r 153/223`
-####(ii) 
-Pr(Knights win)
+
+####(ii) Pr(Knights win)
 135/223 = `r 135/223`
-####(iii)
-Pr(Johns plays AND Knights win)
+
+####(iii) Pr(Johns plays AND Knights win)
 Johns has played in 100 games where the Knights have won, so answer 100/223 = `r 100/223`
-####(iv)
-Pr(Johns played | Knights win)
+
+####(iv) Pr(Johns played | Knights win)
 We just read from the table that = 100/135 OR using definition
-Pr (Johns played | Knights win) = Pr (Johns played, Knights win)/ Pr (Knights win) =	(100/223)/(135/223) = 100/135 = 0.448/0.605 = ` r 0.448/0.605`
-####(v) 
-Pr(Knights win | Johns played)
-Pr (Knights win | Johns played) = 100/153 = ` r 100/153`
+Pr (Johns played | Knights win) = Pr (Johns played, Knights win)/ Pr (Knights win) =	(100/223)/(135/223) = 100/135 = 0.448/0.605 = `r 0.448/0.605`
+
+####(v) Pr(Knights win | Johns played)
+Pr (Knights win | Johns played) = 100/153 = `r 100/153`
 Or using definition = Pr (Johns played, Knights win)/ Pr (Johns played) = 100/223/(153/223)
-####(vi) 
-Pr(Knights win | Johns didn't play)
+
+####(vi) Pr(Knights win | Johns didn't play)
 Pr(Knights win | Johns didn't play) = 35/70 = 0.5 OR using definition
 =	Pr(Knights win, Johns didn't play)/Pr(Johns didn't play) = 35/223/(70/223) = 0.5
-####(vii)
-Pr(Johns played | Knights lose)	
+
+####(vii) Pr(Johns played | Knights lose)	
 Pr(Johns played | Knights lose) = Pr (Johns played, Knights lose)/ Pr (Knights lose)
 
 Firstly, Johns has played in 153-100=53 games the Knights have lost, so Pr (Johns played, Knights lose) = 53/223 = 0.238.
@@ -52,39 +51,24 @@ Knights win	100	35	135
 Knights lose	53	35	88		
 Sum		153	70	223		
 
-###(b)	
-Think about the following:
+###(b)	Think about the following:
 
-1)	Interpret the probabilities in (iii), (iv), (v), (vi) and (vii).
-2)	How could each be used in footy tipping or betting?
-3)	Do we need to know 223 (the total number of games) to calculate these?
+#### 1)	Interpret the probabilities in (iii), (iv), (v), (vi) and (vii).
+Firstly, of the 223 games the Knights have played, the events that Johns played and Knights won both occurred 44.8% = 100*(100/223) of the time. For games in which we know the Knights won, Johns played in about 74% of them; for games in which we know Johns played, the Knights won 65%; while if Johns didn't play the Knights won only 35% of these. Finally for games the Knights lost, Johns played in 60% of them.
 
-1)	Firstly, of the 223 games the Knights have played, the events that Johns played and Knights won both occurred 44.8% = 100*(100/223) of the time. For games in which we know the Knights won, Johns played in about 74% of them; for games in which we know Johns played, the Knights won 65%; while if Johns didn't play the Knights won only 35% of these. Finally for games the Knights lost, Johns played in 60% of them.
+####2)	How could each be used in footy tipping or betting?
+Only the 65% = Pr (Knights win | Johns played) and the 50% Knights win when Johns doesn't play should be used in betting. Betting is equivalent to forecasting. We can not know the result (Knights win or lose) before the game, we can however know that Johns is listed to play in an upcoming match. If that is the case, the Knights have won 65% of those matches, compared to only 60% overall and 50% wins when Johns did not play. We are more likely to bet on the Knights if Johns is playing.
 
-2)	Only the 65% = Pr (Knights win | Johns played) and the 50% Knights win when Johns doesn't play should be used in betting. Betting is equivalent to forecasting. We can not know the result (Knights win or lose) before the game, we can however know that Johns is listed to play in an upcoming match. If that is the case, the Knights have won 65% of those matches, compared to only 60% overall and 50% wins when Johns did not play. We are more likely to bet on the Knights if Johns is playing.
-
-3)	No: 223 cancels out in all calculations except in (iii).
+####3)	Do we need to know 223 (the total number of games) to calculate these?
+No: 223 cancels out in all calculations except in (iii).
  
 ## Q2 
 Consider the following example, adapted from Albert (1997) Bayesian computation using Minitab:
 
 A common blood test for AIDS has a false negative rate of 3% (i.e. if you have the disease, the test comes up negative 3% of the time) and a false positive rate of 2%. AIDS has an incidence 1 in 200 in Australia. You take a blood test and it comes up positive, what is the probability that you actually have AIDS? (The questions below will guide you through the answer.)
 
-### (a)
-Discussion: What are the relevant events A and B here? What prior information do we have? What is Pr(A)?
-
-### (b)
-Use Bayes' rule to update the prior probability, Pr(A).
-### (c)
-Prepare a table showing the prior, likelihood and posterior probabilities of each event.
-### (d)
-How strongly did the data affect the prior in this case?
-### (e)
-How high would Pr(A) have to be for you to be worried about a positive result?
-### (f)
-Suppose you have 3 separate positive blood test results. What is your updated probability of having the disease?
-
-(a)	Bayes' rule updates Pr(A) given the info in B to give Pr(A \mid B). The events are: 
+### (a) Discussion: What are the relevant events A and B here? What prior information do we have? What is Pr(A)?
+Bayes' rule updates Pr(A) given the info in B to give Pr(A \mid B). The events are: 
 
 A: you have AIDS.
 B: you return a positive blood test.
@@ -93,7 +77,7 @@ We know that $Pr(Bc \mid A) = 0.03$ (false negative) AND $Pr(B \mid Ac) = 0.02$ 
 
 Let's estimate	$Pr(A) = 1/200 =$ `r 1/200`
 
-(b) Use Baye's rule to update the prior probability, Pr(A).
+### (b) Use Bayes' rule to update the prior probability, Pr(A).
 
 $$
   \begin{aligned}
@@ -108,16 +92,15 @@ $$
           {1}
           {1 + \frac
                   {Pr(B \mid A) Pr(A^{c})Pr(A^{c})}
-                  {Pr(B\mid A) Pr( A)}
-          }
+                  {Pr(B\mid A) Pr( A)}}
   \end{aligned}
 $$
 
-Notice that the denominator term $Pr(B)$ is NOT needed (but can be deduced if necessary) in this calculation. $Pr(A \mid B) = \frac{1}{1 + \frac{0.02 × 0.995}{(1 - 0.03) × 0.005}}	= 0.196$			
+Notice that the denominator term $Pr(B)$ is NOT needed (but can be deduced if necessary) in this calculation. $Pr(A \mid B) = \frac{1}{1 + \frac{0.02 \times 0.995}{(1 - 0.03) \times 0.005}}	= 0.196$			
 
 Clearly you should NOT be too worried about a positive result, you still have an 80% chance it is a false positive.
- 
-(c) Prepare a table showing the prior, likelihood and posterior probabilities of each event.
+
+### (c) Prepare a table showing the prior, likelihood and posterior probabilities of each event.
 
 Model	Prior	Likelihood	Product	Posterior
 		of +ve test		
@@ -133,13 +116,11 @@ prod=prior*likelihood
 sum=sum(prod) 
 posterior=prod/sum
 ```
-###(d)
-How strongly did the data affect the prior in this case?
 
+### (d) How strongly did the data affect the prior in this case?
 The prior probability of having the disease was 0.005. The posterior is 0.196. This is an increase of .196/.005 = 39 times. One positive blood test increases your chances of having the disease by a factor of 39. However, it is still not a large number.
 
-###(e) 
-How high would Pr(A) have to be for you to be worried about a positive result?
+### (e) How high would Pr(A) have to be for you to be worried about a positive result?
 
 Let's examine three other priors.
 
@@ -203,9 +184,8 @@ posterior=prod/sum
 ```
 
 Once the incidence or prior probability of the disease gets above about 1 in 100, you start to get worried.
- 
-###(f)	
-Suppose you have 3 separate positive blood test results. What is your updated probability of having the disease?
+
+### (f) Suppose you have 3 separate positive blood test results. What is your updated probability of having the disease?
 
 Using the same table idea and assuming independence of tests (is that a valid assumption?),
 
@@ -301,7 +281,7 @@ When the contestant chooses a door, it is 1/3 likely to have the car behind it. 
 
 ###Empirical approach:
 
-Do the experiment about 10--20 times with 3 cups and a coin or ping-pong ball, or use the utility “Let's make a deal” (e.g. http://math.ucsd.edu/\simcrypto/Monty/monty.html).
+Do the experiment about 10--20 times with 3 cups and a coin or ping-pong ball, or use the utility 'Let's make a deal' (e.g. http://math.ucsd.edu/\simcrypto/Monty/monty.html).
 
 You will see you win twice as often if you switch cups.
 
@@ -326,15 +306,13 @@ vals <-c(8,2,4,3)
 #knitr::kable(vals, row.names = FALSE,col.names = c("Type 1","Type 2","Type 3","Type 4"))
 ```
 
-####(i)	
-What prior could we use for each hypothesis?
+####(i)	What prior could we use for each hypothesis?
 
 In this situation, rather than estimation and inference, the geneticist is more interested in which hypothesis is supported by the data.In this question we have two competing hypotheses, and some observed counts of data, y. 
 
 We do NOT know the prior probability of each hypothesis, we may assume Pr(A) = Pr(B) OR some other probabilities based on previous work, or consultation with genetic theory or geneticists. It is often safer to assume Pr(A) = Pr(B).
 
-####(ii)
-Which of the two hypotheses is more likely based on the data?
+####(ii) Which of the two hypotheses is more likely based on the data?
 
 In this situation, rather than estimation and inference, the geneticist is more interested in which hypothesis is supported by the data.In this question we have two competing hypotheses, and some observed counts of data, y. 
 
@@ -374,10 +352,9 @@ $$Pr(A \mid y) = 1/(1+1/1.83) = 0.647$$,
 and see that A is indeed the more likely hypothesis based on the data.
 
 ## Q2 
-Albert, Ch. 4, Exercise 4.4, no. 4. A woman tells you she can predict the sex of a baby by how high it ‘rides' in the mother's uterus. ‘High' means a boy and ‘low' means a girl. You suspect she is only guessing, but you are not completely sure;
+Albert, Ch. 4, Exercise 4.4, no. 4. A woman tells you she can predict the sex of a baby by how high it 'rides' in the mother's uterus. 'High' means a boy and 'low' means a girl. You suspect she is only guessing, but you are not completely sure;
 
-###(a)
-Place a prior distribution on the values of her success rate (p) in the table below that reflects this belief that she is probably just guessing.
+###(a) Place a prior distribution on the values of her success rate (p) in the table below that reflects this belief that she is probably just guessing.
 
 Success rate (p)	0	0.25	0.5	0.75	0.9	1
 Pr(p) (prior)	0	0.1	0.75	0.1	0.04	0.01
@@ -394,14 +371,18 @@ plot(p,prior,type='l')
 
 (if you cut and paste these lines and get an error, you might need to re-type the plot line, as Word uses its own quotation marks)
 
-###(b)	
-You conduct an experiment with 10 pregnant women, and the woman is correct 7 times out of 10 in predicting the sex of the unborn baby. Update your probabilities in the table.
+###(b)	You conduct an experiment with 10 pregnant women, and the woman is correct 7 times out of 10 in predicting the sex of the unborn baby. Update your probabilities in the table.
 
-Success rate (p)	0	0.25	0.5	0.75	0.9	1
-Pr(p) (prior)	0	0.1	0.75	0.1	0.04	0.01
-Likelihood	0	0.00309	0.117	0.25	0.0574	0
-Product	0	0.00031	0.0878	0.025	0.00230	0
-Posterior	0	0.00267	0.761	0.217	0.0199	0
+```{r, echo = FALSE}
+srate <- c(0,0.25,	0.5,	0.75,	0.9,	1)
+prior <- c(0,	0.1,0.75,	0.1,	0.04,	0.01)
+like <- c(0,	0.00309,	0.117,	0.25,	0.0574,	0)
+prod <- c(0,	0.00031,	0.0878,	0.025,	0.00230,	0)
+post <- c(0,	0.00267,	0.761,	0.217,0.0199,	0)
+data <- cbind(srate,prior,like,prod,post)
+names_data <- c("Success rate (p)","Pr(p) (prior)", "Likelihood","Product",	"Posterior")
+knitr::kable(data,row.names = FALSE, col.names = names_data)
+```
 
 The binomial model is assumed here, so
 
@@ -443,8 +424,7 @@ plot(p,posterior,type='l')
 
 (again, you might need to replace the quotation marks if cutting and pasting)
 
-###(c)	
-How likely is she to have some skill in gender prediction? How likely is she to be just guessing?
+###(c)	How likely is she to have some skill in gender prediction? How likely is she to be just guessing?
 
 We could interpret skill as p>0.5.
 
@@ -455,15 +435,17 @@ $$
 
 The posterior still favours that she is guessing.
 
-###(d) 
-Repeat (b) and (c) with a flat prior on p.
-
-Success rate (p)	0	0.25	0.5	0.75	0.9	1
-Pr(p) (prior)	0.167	0.167	0.167	0.167	0.167	0.167
-Likelihood	0	0.00309	0.117	0.25	0.0574	0
-Product	0	0.000515	0.0195	0.0417	0.00957	0
-Posterior	0	0.0072	0.274	0.585	0.134	0
-
+###(d) Repeat (b) and (c) with a flat prior on p.
+```{r}
+srate <- c(0,0.25,	0.5,	0.75,	0.9,	1)
+prior <- c(0.167,	0.167,0.167,	0.167,	0.167,	0.167)
+like <- c(0,	0.00309,	0.117,	0.25,	0.0574,	0)
+prod <- c(0,	0.000515,	0.0195,	0.0417,	0.00957,	0)
+post <- c(0,	0.0072,	0.274,	0.585,0.134,	0)
+data <- cbind(srate,prior,like,prod,post)
+names_data <- c("Success rate (p)","Pr(p) (prior)", "Likelihood","Product",	"Posterior")
+knitr::kable(data,row.names = FALSE, col.names = names_data)
+```
 $$
 Pr(skill \mid y=7) = Pr(p>0.5 \mid y = 7) = 0.719. \\
 
@@ -474,12 +456,11 @@ The posterior (likelihood) now favours that she has some skill. Think about how 
 
 ## Q3
 
-###(a)
-A basketball fan watches Michael Jordan and randomly chooses 100 of his free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
+###(a) A basketball fan watches Michael Jordan and randomly chooses 100 of his free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
 
-If we let YJ = number of successful free throws for Jordan then we can assume YJ \sim Bin(n =100, \theta_{J}) and \theta_{J} \sim Unif(0,1) = Beta(1,1)
+If we let Y_{j} = number of successful free throws for Jordan then we can assume Y_{j} \sim Bin(n =100, \theta_{J}) and \theta_{J} \sim Unif(0,1) = Beta(1,1)
 
-p(\theta_{J} \mid yJ ) \propto p( yJ \mid \theta J ) p(\theta J ) \propto \theta J89 (1' \theta J )11\theta J1'1 (1' \theta J )1'1 = \theta J90'1 (1' \theta J )12'1 So, \theta_{J} \mid yJ \sim Beta( 90, 12). We can plot this on a grid of points as follows in R:
+p(\theta_{J} \mid Y_{j} ) \propto p( Y_{j} \mid \theta_{J} ) p(\theta_{J} ) \propto \theta_{J}89 (1' \theta_{J} )11\theta_{J}1'1 (1' \theta_{J} )1'1 = \theta_{J}90'1 (1' \theta_{J} )12'1 So, \theta_{J} \mid Y_{j} \sim Beta( 90, 12). We can plot this on a grid of points as follows in R:
 
 ```{r}
 x <- (0:1000)/1000 # (easier: seq(0,1,.0001)) 
@@ -503,10 +484,9 @@ qbeta(0.975,90,12)
 
 to generate the 95% credible interval for the $Beta(90,12)$ distribution.
 
-###(b) 
-The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for their success proportion using a uniform prior and a 95% credible interval. Plot this density.
+###(b) The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for their success proportion using a uniform prior and a 95% credible interval. Plot this density.
 
-If we let YO = number of successful free throws for O'Neal then we can assume YO \sim Bin(n =100, \theta_{O}) and \theta_{O} \sim Unif(0,1) = Beta(1,1)
+If we let Y_{O} = number of successful free throws for O'Neal then we can assume Y_{O} \sim Bin(n =100, \theta_{O}) and \theta_{O} \sim Unif(0,1) = Beta(1,1)
 
 p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1' \theta_{O} )60 \theta_{O}1'1 (1 ' \theta_{O} )1'1 = \theta_{O}41'1 (1 ' \theta_{O} )61'1 So, \theta_{O} \mid yO \sim Beta( 41, 61). We can plot this on a grid of points as follows in R:
 
@@ -518,122 +498,89 @@ plot(x,px,type='l')
 title("O'Neal free throws, Beta(41,61)")
 ```
 
-O'Neal free throws, Beta(41,61)
 
-0 2 4 6 8 ptheta
+The density is peaked at $0.4$, with posterior mean $41/102 = 0.402$.
 
-0.0 0.2 0.4 0.6 0.8 1.0 theta
-
-The density is peaked at 0.4, with posterior mean 41/102 = 0.402.
-
-Use qbeta(0.025,41,61) = 0.309 and qbeta(0.975,41,61) = 0.498 in R to generate the 95% (central) credible interval for the Beta(41,61) distribution.
+Use $qbeta(0.025,41,61) =$ `r qbeta(0.025,41,61)` and $qbeta(0.975,41,61) =$ `r qbeta(0.975,41,61)` in R to generate the 95% (central) credible interval for the $Beta(41,61)$ distribution.
 
 
-###(c)
-Use what you know about these two players (if any_{t}hing) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a)-(b).
+###(c) Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a)-(b).
 
-Suppose you suspect that Jordan's percentage is somewhere between 0.75 and 0.95. Choose a prior mean of 0.85 with prior variance of 0.0025 = [(0.95-0.75)/4]^2
+Suppose you suspect that Jordan's percentage is somewhere between $0.75$ and $0.95$. Choose a prior mean of $0.85$ with prior variance of $0.0025 = [(0.95-0.75)/4]^2$
 
 This means that:
+$$
+	\frac{a}{a + b}	= 0.85;	\> \frac{ab}{(a + b)^{2}(a + b + 1)} = 0.0025 \\	
+b =	\frac{3a}{17}\implies a = 42.5,\>b = 7.5 \> (*)		
+$$
 
-	a		= 0.85;	ab		= 0.0025	
-	a + b		(a + b)2 (a	+ b + 1)		
-							
-b =	3a	→ a = 42.5,b = 7.5 (*)		
-		17					
+(For general purposes, it's probably easier to write $\mu$ and $\sigma^{2}$ as functions of a and b.) Now, $Y_{j} \sim Bin(n =100, \theta_{J})$ and $\theta_{J} \sim Beta(42.5, 7.5), p( \theta_{J} \mid Y_{j} ) \propto p(Y_{j} \mid \theta_{J})p(\theta_{J}) \propto \theta_{J}^{89}(1- \theta_{J})^{11}\theta_{J}^{41.5}(1- \theta_{J})^{6.5} = \theta_{J}^{130.5}(1- \theta_{J})^{17.5}$
 
-(For general purposes, it's probably easier to write \mu and \sigma2 as functions of a and b.) Now, YJ \sim Bin(n =100, \theta_{J}) and \theta_{J} \sim Beta(42.5, 7.5),
-
-p( \theta_{J} \mid yJ ) \propto p( yJ  \mid \theta J ) p(\theta J ) \propto \theta J89 (1' \theta J )11\theta J41.5 (1' \theta J )6.5 = \theta J130.5 (1' \theta J )17.5
-
-So, \theta_{J} \mid yJ \sim Beta( 131.5, 18.5). The prior, likelihood and posterior are plotted below. The model estimate is now 130.5/148 = 0.882; posterior mean is 131.5/150 = 0.877 and a 95% posterior CrI is qbeta(0.025,131.5,18.5) = 0.820 and
-
-qbeta(0.975,131.5,18.5) = 0.924.
+So, $\theta_{J} \mid Y_{j} \sim Beta( 131.5, 18.5)$. The prior, likelihood and posterior are plotted below. The model estimate is now $130.5/148 = 0.882$; posterior mean is $131.5/150 = 0.877$ and a 95% posterior CrI is $qbeta(0.025,131.5,18.5) =$ `r qbeta(0.025,131.5,18.5)` and $qbeta(0.975,131.5,18.5) = $ `r qbeta(0.975,131.5,18.5)`.
 
 (*) A more general method is based on recognising that
 
-\mu =	a		&\sigma^{2}	=	ab	implies \sigma^{2} =		\mu(1 ' \mu)	i.e.					
-	a + b			(a + b)2 (a + b + 1)		(a + b + 1)						
-																
-a + b =	\mu(1' \mu)			\mu(1' \mu)		(1'	\mu(1' \mu)		
-		\sigma	2		'1 and a = \mu(a + b) = \mu	\sigma	2		'1 ; b =		\mu)	\sigma	2	'1	
+$$mu =	\frac{a}{a+b},	\sigma^{2}	=	\frac{ab}{(a + b)^2 (a + b + 1)}	\implies \sigma^{2} =	\frac{\mu(1 - \mu)}{(a + b + 1)	}$$
+i.e.
+$$
 
+a + b =	\frac{\mu(1-\mu)}{\sigma^2}-1 \text{ and } a = \mu(a + b) = \mu\left[\frac{\mu(1- \mu)}{\sigma^2}-1\right]; \>	b =	(1-\mu)\left[\frac{\mu(1-\mu)}{\sigma^2}-1\right]
+$$
 
-	8	
-px	6	
-	4	
-	2	
-	0	
+```{r}
+par(mfrow=c(3,1))
+x<-(0:1000)/1000 
+px <- dbeta(x,42.5,7.5)
+pl<-dbeta(x,90,12) 
+pp <- dbeta(x,131.5, 18.5)
 
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x
-
-
-	12
-pxl	8
-	4
-	0
-
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x
-
-
-	15
-pxp	10
-	5
-	0
-
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x
-
+plot(x,px,type='l') 
+plot(x,pl,type='l') 
+plot(x,pp,type='l')
+```
 The posterior distribution is slightly narrower than that for the Uniform prior for Jordan's unknown free throw rate. The above analysis is an example of a specific prior only.
 
-Now suppose that you suspect that O'Neal's percentage is very close to 50% and certainly between 40 and 60%. We choose a prior mean of 0.5 with prior variance of 0.0025 = [(0.6-0.4)/4]^2
+Now suppose that you suspect that O'Neal's percentage is very close to 50% and certainly between $40$ and 60%. We choose a prior mean of 0.5 with prior variance of $0.0025 = [(0.6-0.4)/4]^2$
 
 This means that:
 
-	a	= 0.5;	ab		= 0.0025	
-	a + b		(a + b)2 (a + b	+ 1)		
-						
-b = a → a = 49.5,b = 49.5			
-Now, YO \sim Bin(n =100, \theta_{O})	and \theta_{O} \sim Beta(49.5, 49.5)	
+$$
+	\frac{a}{a + b}	= 0.5;	\> \frac{ab}{(a + b)^{2}(a + b + 1)} = 0.0025 \\	
+b =	a\implies a = 49.5,\>b = 49.5		
+$$		
+Now, $Y_{O} \sim Bin(n =100, \theta_{O})$	and $\theta_{O} \sim Beta(49.5, 49.5), p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1-\theta_{O} )^{60} \theta_{O}^{48.5} (1 - \theta_{O} )^{48.5} = \theta_{O}^{88.5} (1- \theta_{O} )^{108.5}$
 
-p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1' \theta_{O} )60 \theta_{O}48.5 (1' \theta_{O} )48.5 = \theta_{O}88.5 (1' \theta_{O} )108.5
+So, $\theta_{O} \mid yO  \sim Beta(89.5, 109.5)$. The prior, likelihood and posterior are plotted below.
 
-So, \theta_{O} \mid yO  \sim Beta(89.5, 109.5). The prior, likelihood and posterior are plotted below.
+The model estimate is now $88.5/197 = 0.449$; posterior mean is $89.5/199 = 0.450$ and a 95% posterior CrI is $qbeta(0.025,89.5,109.5) = $ `r qbeta(0.025,89.5,109.5)` & $qbeta(0.975, 89.5,109.5) = $ `r qbeta(0.975, 89.5,109.5)`.
 
-The model estimate is now 88.5/197 = 0.449; posterior mean is 89.5/199 = 0.450 and a 95% posterior CrI is qbeta(0.025,89.5,109.5) = 0.381 &
+```{r}
+par(mfrow=c(3,1))
+x<-(0:1000)/1000 
+px <- dbeta(x,49.5,49.5)
+pl<-dbeta(x,41,61) 
+pp <- dbeta(x,89.5, 109.5)
 
-qbeta(0.975, 89.5,109.5) = 0.519.
+plot(x,px,type='l') 
+plot(x,pl,type='l') 
+plot(x,pp,type='l')
+```
 
+###(d) What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
 
-###(d) 
-What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
+$$
+Pr(\theta_{J} >0.9\mid \theta_{J} \sim Beta(90,12)) = 1-pbeta(0.9,90,12) = 0.309 \\
+Pr(\theta_{J} >0.9\mid \theta_{J} \sim Beta(131.5,18.5)) = 1-pbeta(0.9,131.5,18.5) = 0.196
+$$
+We are not sure in either case; 0.9 seems close to the centre of the possible values for $\theta_{J}$.
 
-Pr(\theta_{J} >0.9\mid \theta_{J} \simBeta(90,12)) = 1-pbeta(0.9,90,12) = 0.309
+###(e) How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal?
 
-Pr(\theta_{J} >0.9\mid \theta_{J} \simBeta(131.5,18.5)) = 1-pbeta(0.9,131.5,18.5) = 0.196
-
-We are not sure in either case; 0.9 seems close to the centre of the possible values for \theta_{J}.
-
-###(e)
-How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal?
-
-We can compare the 2 posterior distributions. Assuming the uniform prior, $\theta_{J} \simBeta(90,12)$ and $\theta_{O} \sim Beta(41,61)$. We might wish to know $Pr(\theta_{J} > \theta_{O} \mid yJ, yO) = Pr(\theta_{J} - \theta_{O} > 0 \mid yJ, yO)$.
+We can compare the 2 posterior distributions. Assuming the uniform prior, $\theta_{J} \sim Beta(90,12)$ and $\theta_{O} \sim Beta(41,61)$. We might wish to know $Pr(\theta_{J} > \theta_{O} \mid Y_{j}, yO) = Pr(\theta_{J} - \theta_{O} > 0 \mid Y_{j}, yO)$.
 
 The classical approach here would look for the sampling distribution of the estimate of $\theta_{J} - \theta_{O}$, which is intractable without using Normal approximations. However as these samples are clearly independent we just compare the posterior distributions $\theta_{J} \sim Beta(90,12)$ and $\theta_{O} \sim Beta(41,61)$.
 
-
-0 2 4 6 8 10 12 pxj
-
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x
-
-Clearly $Pr(\theta_{J} > \theta_{O} \mid yJ, yO) \sim= 0$. (Formal analysis in next week's lab.) Jordan has a better free throw percentage than O'Neal, based on this data. The plot was created using the following R code
+Clearly $Pr(\theta_{J} > \theta_{O} \mid Y_{j}, yO) \sim= 0$. (Formal analysis in next week's lab.) Jordan has a better free throw percentage than O'Neal, based on this data. The plot was created using the following R code
 
 ```{r}
 x<-(0:1000)/1000 
@@ -650,41 +597,24 @@ Let  $Y \sim Binomial (n=10, \theta)$.
 ####(i)	
 Derive the prior predictive distribution p(y), under a Unif(0,1) prior on \theta, and plot it
  
-
-		1	1	
-Pr(Y = y) = p( y) = \int p( y,\theta )d\theta = \int p( y \mid \theta ) p(\theta	
-		0	0	
-10		Γ( y + 1)Γ(11 ' y) =	10! y!(10 ' y)!	
-=				
-		Γ(12)	y!(10 ' y)!11!	
-y				
-= 1/11;	y = 0,1,2,\cdots,10		
- 
-10	1
-)d\theta =	\int\theta y (1 ' \theta )10' y d\theta
-y  0
- 
+$$
+\begin{aligned}
+Pr(Y &= y) = p(y) = \int\limits_{0}^{1}p(y,\theta)d\theta = \int\limits_{0}^{1} p(y \mid \theta)p(\theta)d\theta = \binom{10}{y}\int\limits_{0}^{1}\theta^y(1-\theta)^{10-y}d\theta \\ 
+&= \binom{10}{y}\frac{\Gamma(y + 1)\Gamma(11-y)}{\Gamma(12)}=\frac{10!y!(10-y)!}{y!(10-y)!11!} \\ 
+&=	1/11; \qquad y = 0,1,2,\cdots,10
+\end{aligned}
+$$ 
 
 ####(ii)
 Derive the posterior predictive density $p(y*\mid y)$ and plot it.
-			1							1				
-Pr(Y2 = x \mid Y1 = y) = \int p(x,\theta \mid Y1 = y)d\theta = \int p(x \mid \theta ,Y1 = y) p(\theta \mid Y1 = y)d\theta	
-			0							0				
-			10		1	\theta x (1 ' \theta )10' x		Γ(12)		\theta y (1 ' \theta )10' y d\theta	
-			=								
-												
-				\int				Γ( y + 1)Γ(11 ' y)		
-10		x		0			x+ y			
-		Γ(12)				1			20' x' y				
-							\int\theta   (1 ' \theta )		d\theta			
-												
-=	x		Γ( y + 1)Γ(11	' y)						
-					0							
-10		Γ(12)				Γ(x + y + 1)Γ(21' x ' y)			
-												;	x, y = 0,1,2,\cdots,10	
-														
-=	x		Γ( y + 1)Γ(11	' y)			Γ(22)				
-											
+$$
+\begin{aligned}
+Pr(Y_2 &= x \mid Y_1 = y) = \int\limits_{0}^{1}p(x,\theta\mid Y_1 = y)p(\theta \mid Y_1 = y)d\theta \\
+&= \binom{10}{y}\int\limits_{0}^{1}\theta^x(1-\theta)^{10-x}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\theta^y(1-\theta)^{10-y}d\theta \\ 
+&= \binom{10}{y}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\int\limits_{0}^{1}\theta^{x+y}(1-\theta)^{20-x-y}d\theta \\ 
+&=\binom{10}{y}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\frac{\Gamma(x + y + 1)\Gamma(21-x-y)}{\Gamma(22)}; \qquad x,y = 0,1,2,\cdots,10
+\end{aligned}
+$$ 
 
 You can program this in R using a function named bb, thus:
 
@@ -699,13 +629,25 @@ bb=function(x,y) {
 
 We can draw the graph for each possible $y$. Here, distributions will be drawn for $y=0, 1, 2, 5, 8, 9, 10$.
 
+```{r}
+x <- seq(0,10,1)
+y <- c(0,1,2,5,8,9,10)
+par(mfrow=c(3,3))
+px <- vector(mode='numeric', length = 11)
+for(i in 1:length(y)){
+  for(k in 1:length(x)){
+    px[k] <- bb(x[k],y[i])
+  }
+    plot(x, px, type = 'l')
+}
+```
+
 # Lab Exercises 3 Solutions
 
 ## Q1
 We looked at this question last week. Use Monte Carlo simulation to get the same answers as last week to 2 decimal places.
 
-### (a) 
-A basketball fan watches Michael Jordan and of 100 randomly chosen free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
+### (a) A basketball fan watches Michael Jordan and of 100 randomly chosen free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
 
 Recall that the posterior is a $Beta(90,12)$ and the answer in R is
 
@@ -714,30 +656,25 @@ qbeta(0.025,90,12)
 qbeta(0.975,90,12)
 ```
 
-i.e. (0.813, 0.937)
-
-We need to simulate a Beta(90,12) here. The R command rbeta(k,a,b)
+We need to simulate a $Beta(90,12)$ here. The R command $rbeta(k,a,b)$
 Simulates a sample of size k from a Beta(a,b) density. Let's start with 100 MC sample
 
 ```{r}
-thetaj=rbeta(100,90,12)
-
+thetaj <- rbeta(100,90,12)
 quantile(thetaj,c(0.025,0.975))
 ```
 
 which returns (for example: remember, this is a random sample) $(0.819, 0.938)$, and so even 100 MC samples gives 1-2 decimal places of accuracy. Let's try 1000 samples:
 
 ```{r}
-thetaj=rbeta(1000,90,12)
-
+thetaj <- rbeta(1000,90,12)
 quantile(thetaj,c(0.025,0.975))
 ```
 
 which gives $(0.8200480, 0.9327415)$ again 1-2 decimal accuracy. Now 10000 samples
 
 ```{r}
-thetaj=rbeta(10000,90,12)
-
+thetaj <- rbeta(10000,90,12)
 quantile(thetaj,c(0.025,0.975))
 ```
 
@@ -759,59 +696,51 @@ The plot below shows a $beta(90,12)$ density overlaid onto the density estimate 
 
 ```{r}
 plot(density(thetaj),xlim=c(0.7,0.97))
-
-theta1=seq(0,1,.001)
-
+theta1 <- seq(0,1,.001)
 lines(theta1,dbeta(theta1,90,12),type='l',lty=2)
 ```
 
  
-###(b) 
-The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for his success proportion using a uniform prior and a 95% credible interval. Plot this density.
+###(b) The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for his success proportion using a uniform prior and a 95% credible interval. Plot this density.
 
-Recall that $\theta_{O} \mid yO \sim Beta( 41, 61)$ and a 95% CrI was $(0.309, 0.498)$. So,
+Recall that $\theta_{O} \mid y_{O} \sim Beta( 1, 61)$ and a 95% CrI was $(0.309, 0.498)$. So,
 
 ```{r}
-thetao=rbeta(100,41,61)
-
+thetao <- rbeta(100,41,61)
 quantile(thetao,c(0.025,0.975))
 ```
 
 gives $(0.3280602, 0.4925870)$ and we have 1-2 place accuracy.
 
 ```{r}
-thetao=rbeta(10000,41,61)
-
+thetao <- rbeta(10000,41,61)
 quantile(thetao,c(0.025,0.975))
 ```
 
 gives $(0.3088187, 0.4962563)$ and we have 2 decimal places of accuracy.
 
 ```{r}
-thetao=rbeta(100000,41,61)
-
+thetao <- rbeta(100000,41,61)
 quantile(thetao,c(0.025,0.975))
 ```
 
 gives $(0.3093610, 0.4979226)$ and 3 places of accuracy.
 
 
-###(c)	
-Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a) and (b).
+###(c)	Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a) and (b).
 
 We refer you to Lab 2 Solutions: Suppose you suspect that Jordan's percentage is somewhere between 0.75 and 0.95. Based on a prior mean of 0.85 and prior variance of $0.0025 = [(0.95-0.75)/4]^2$, we derived $a = 42.5 and b.= 7.5$.
 
-Now, $YJ \sim Bin(n =100, \theta_{J})$	and $\theta_{J} \sim Beta(42.5, 7.5)$, $p(\theta J  \mid yJ ) \propto p( yJ  \mid \theta J ) p(\theta J ) \propto \theta J89 (1' \theta J )11\theta J41.5 (1' \theta J )6.5 = \theta J130.5 (1' \theta J )17.5$
+Now, $Y_{j} \sim Bin(n =100, \theta_{J})$	and $\theta_{J} \sim Beta(42.5, 7.5)$, $p(\theta_{J}  \mid Y_{j} ) \propto p( Y_{j}  \mid \theta_{J} ) p(\theta_{J} ) \propto \theta_{J}89 (1' \theta_{J} )11\theta_{J}41.5 (1' \theta_{J} )6.5 = \theta_{J}130.5 (1' \theta_{J} )17.5$
 
-So, $\theta J  \mid yJ \sim Beta( 131.5, 18.5)$.
+So, $\theta_{J}  \mid Y_{j} \sim Beta( 131.5, 18.5)$.
 
 The mode estimate is now $130.5/148 = 0.882$; posterior mean is $131.5/150 = 0.877$ and a 95% posterior CrI is $qbeta(0.025,131.5,18.5) = 0.820$ and $qbeta(0.975,131.5,18.5) = 0.924$.
 
 Re-doing it with 10000 MC samples
 
 ```{r}
-thetaj=rbeta(10000,131.5,18.5)
-
+thetaj <- rbeta(10000,131.5,18.5)
 quantile(thetaj,c(0.025,0.975))
 ```
 
@@ -821,7 +750,7 @@ Now suppose that you suspect that O'Neal's percentage is very close to 50% and v
 
 This means that (from before):
 
-$$YO \sim Bin(n =100, \theta_{O})	and \theta_{O} \sim Beta(49.5, 49.5)$$
+$$Y_{O} \sim Bin(n =100, \theta_{O})	and \theta_{O} \sim Beta(49.5, 49.5)$$
 
 p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1' \theta_{O} )60 \theta_{O}48.5 (1' \theta_{O} )48.5 = \theta_{O}88.5 (1' \theta_{O} )108.5
 
@@ -832,15 +761,13 @@ The mode estimate is now 88.5/197 = 0.449; posterior mean is $89.5/199 = 0.450$ 
 Re-doing it with 10000 MC samples
 
 ```{r}
-thetao=rbeta(10000,89.5,109.5)
-
+thetao <- rbeta(10000,89.5,109.5)
 quantile(thetao,c(0.025,0.975))
 ```
 
 which gives $(0.3800281, 0.5193504)$
 
-###(d) 
-What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
+###(d) What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
 
 Instead of the Lab 2 Solutions, Question 3 (d), e.g. 
 
@@ -854,13 +781,11 @@ given our vector $\theta$ we can approximate this by
 sum(thetaj>0.9)/10000 # (or: mean(theta>0.9))
 ```
 
-###(e) 
-How many iterations did you need to get 2 decimal places of accuracy? What about 3 or more? How many places of accuracy do we need?
+###(e) How many iterations did you need to get 2 decimal places of accuracy? What about 3 or more? How many places of accuracy do we need?
 
 It took 100 iterations to get 1-2 places and up to 1000000 to get 3 places of accuracy. In this problem, 2 decimal places is clearly enough accuracy to make decisions about a proportion which is between 0 and 1.
 
-###(f) 
-How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal? Use MC simulation to answer.
+###(f) How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal? Use MC simulation to answer.
 
 We just need to estimate $Pr(\theta_{J} > \theta_{O})$ . In the samples of size 100000, all 100000 iterates had $\theta_{J} > \theta_{O}$, i.e.
 
@@ -870,15 +795,14 @@ length(thetaj[thetaj>thetao])	# (or: mean(thetaj>theta0))
 
 returned 100000, so our estimate is $Pr(\theta_{J} > \theta_{O}) \sim = 1$.
 
-###(g) 
-More interestingly, do this analysis for if O'Neal's performance had been 80 out of 100. Provide an appropriate graph.
+###(g) More interestingly, do this analysis for if O'Neal's performance had been 80 out of 100. Provide an appropriate graph.
 
 E.g.
 
 ```{r}
-thetaj=rbeta(1000000,90,12)
+thetaj <- rbeta(1000000,90,12)
 quantile(thetaj,c(0.025,0.975))
-thetao=rbeta(1000000,81,21)
+thetao <- rbeta(1000000,81,21)
 quantile(thetao,c(0.025,0.975))
 ```
 
@@ -888,7 +812,7 @@ I.e., substantial overlap (see graph too)
 mean(thetaj>thetao)
 ```
 
-I.e., we still have “statistical significance”!
+I.e., we still have 'statistical significance'!
 
 ```{r}
 theta <- seq(0,1,.001)
@@ -899,133 +823,94 @@ lines(theta,dbeta(theta,81,21),type='l')
 ## Q2 
 Consider again the placenta previa example, where y = no. of female births and $\theta	= Pr(female birth)$; we will take a sample of $n=1000$.
 
-###(a)	
-After consultation with a specialist in Placenta previa, you place a $Beta(100,100)$ prior on \theta. Show that this means that you (and the doctor) are more than 95% sure that $0.4 < \theta < 0.6$; but that you are undecided whether $\theta > 0.5$ OR $\theta < 0.5$.
+###(a)	After consultation with a specialist in Placenta previa, you place a $Beta(100,100)$ prior on \theta. Show that this means that you (and the doctor) are more than 95% sure that $0.4 < \theta < 0.6$; but that you are undecided whether $\theta > 0.5$ OR $\theta < 0.5$.
 
-If we have \theta \sim Beta(100,100) we can easily answer questions such as
-
-Pr(0.4 < \theta < 0.6) = pbeta(0.6,100,100) – pbeta(0.4,100,100) = 0.9956798 > 0.95
+If we have $\theta \sim Beta(100,100)$ we can easily answer questions such as $Pr(0.4 < \theta < 0.6) = pbeta(0.6,100,100) - pbeta(0.4,100,100) = 0.9956798 > 0.95$
 And
-
-Pr(\theta < 0.5) = pbeta(0.5,100,100) = 0.5
+$Pr(\theta < 0.5) = pbeta(0.5,100,100) = 0.5$
 thus verifying the two statements in the question. We could also do this via MC simulation:
 
 ```{r}
-theta=rbeta(10000,100,100) 
-length(theta[theta<0.5])/10000 #(or: mean…) 
+theta <- rbeta(10000,100,100) 
+length(theta[theta<0.5])/10000 #(or: mean...) 
 (length(theta[theta<0.6])-length(theta[theta<0.4]))/10000
 ```
 
-Which gives 0.5032 and 0.9949 which are correct to 2-3 decimal places.
+Which gives $0.5032$ and $0.9949$ which are correct to 2-3 decimal places.
 
-###(b) 
-Is this a reasonable prior distribution?
+###(b) Is this a reasonable prior distribution?
 
 Good question. It represents an expert's opinion and puts almost all probability between 0.4 and 0.6. It is pictured below
 
-
-
-
-
-100, 100)	10	
-	8	
-dbeta(x_{1},	6	
-	4	
-	2	
-	0	
-
-0.3	0.4	0.5	0.6	0.7
-
-x_{1}
+```{r}
+x1 <- seq(0.01,1,0.01)
+px <- dbeta(x1,100,100)
+plot(x1,px,type = 'l', xlim=c(0.3,0.7))
+```
 
 ###(c)	(Masters).
 What does this prior imply about the possible observations, y, before we observe any data? Does this seem reasonable?
 
 Recall the prior predictive density is a beta-binomial							
-$$p( y1 ) =	Γ(a + b)			Γ(n + 1)		Γ( y1 + a)Γ(n ' y1	+ b)	, y1	= 0,…, n	
-	Γ(a)Γ(b) Γ( y1	+ 1)Γ(n ' y1 + 1)		Γ(a	+ b + n)$$				
-											
+$$p(y_1) =	\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + a)\Gamma(n-y_1 + b)}{\Gamma(a+b+n)},\qquad y_1 = 0,\dots,
+n$$
 For a=b=100 we have
 
 $$
-p( y1 ) =	Γ(200)			Γ(n + 1)		Γ( y1	+ 100)Γ(n ' y1 + 100)	, y1	= 0,…, n	
-	Γ(100)Γ(100) Γ( y1 + 1)Γ(n ' y1	+ 1)		Γ(100 + 100 + n)			
+p(y_1) =	\frac{\Gamma(200)}{\Gamma(100)\Gamma(100)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + 100)\Gamma(n-y_1 + 100)}{\Gamma(100+100+n)},\qquad y_1 = 0,\dots,n
 $$
 
 Let's consider $n=10, 100, 1000, 10000$
  
+```{r}
+bb2 <- function(y,n,a,b) {
+  g1 <- lgamma(a+b)-(lgamma(a)+lgamma(b))
+  g2 <- lgamma(n+1)-(lgamma(y+1)+lgamma(n-y+1))
+  g3 <- (lgamma(y+a)+lgamma(n-y+b))-lgamma(a+b+n)
+  g <- g1+g2+g3
+  exp(g)
+}
+```
 
-100			n=10		
-exp(bb(y, 10, 100,					
-	0.10    0.20					
-	0.00					
-	2	4	6	8	10	
-			y			
-100, 1			n=1000	
-exp(bb(y, 1000,				
-	0.004   0.008					
-	0.000					
-	0	200	400	600	800	
-			y			
- 
+```{r}
 
+n <- c(10,100,1000,10000)
+a <- 100
+b <- 100
 
-100, 10				n=100			
-100,	0.06						
-exp(bb(y,	0.02  0.04						
-	0.00						
-	0	20	40	60	80	100	
-				y			
-100,				n=10000		
-exp(bb(y, 10000,						
-	6  e-04						
-	e+00						
-	0						
-	0	2000		6000		10000	
-				y			
- 
+par(mfrow=c(2,2))
+
+for(i in 1:length(n)){
+  y <- seq(0,n[i],1)
+  py <- vector(mode='numeric', length = n[i])
+  for(k in 1:length(y)){
+    py[k] <- bb2(y[k],n[i],a,b)
+  }
+    plot(y, py, type = 'l', main = paste("n = ",n[i]))
+}
+```
+
 
 The prior predictive puts most probability on y for y/n = 0.4 to 0.6 as would be expected from the Beta(100,100) prior which does the equivalent thing.
 
-###(d)	
-The sample of n=1000 is taken and 511 males are born. Update your opinion about whether \theta > 0.5 OR \theta < 0.5.
+###(d)	The sample of $n=1000$ is taken and 511 males are born. Update your opinion about whether $\theta > 0.5$ OR $\theta < 0.5$.
 
-\theta	\mid y=489, n=1000 \sim Beta(489+100, 511+100) = Beta(589, 611)
-
-Pr(\theta >0.5 \mid y=489, n=1000) = 1 – pbeta(0.5,589,611) = 0.263. The density is plotted below with prior on top and posterior on bottom.
-dbeta(x_{1}, 100, 100	8
-	4
-	0
-
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x_{1}
-
-dbeta(x_{1}, 589, 611	10  20
-	0
-
-0.0	0.2	0.4	0.6	0.8	1.0
-
-x_{1}
- 
-
-###(e)
-Repeat (d) under a (i) Beta(1,1) prior (ii)	Beta(a,b) prior where a and b are chosen so that the prior mean = 0.5 and prior standard deviation = 0.1
+$\theta	\mid y=489, n=1000 \sim Beta(489+100, 511+100) = Beta(589, 611), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,589,611) = 0.263$. The density is plotted below with prior on top and posterior on bottom.
+```{r}
+par(mfrow=c(2,1))
+x <- seq(0.001,1,0.001)
+plot(x,dbeta(x,100,100),type='l')
+plot(x,dbeta(x,589,611),type='l')
+```
+###(e) Repeat (d) under a (i) Beta(1,1) prior (ii)	Beta(a,b) prior where a and b are chosen so that the prior mean = 0.5 and prior standard deviation = 0.1
 
 ####(i)	
-Under a Beta(1,1) prior, \theta \mid y=489, n=1000 \sim Beta(489+1, 511+1) = Beta(490, 512)
+Under a $Beta(1,1)$ prior, $\theta \mid y=489, n=1000 \sim Beta(489+1, 511+1) = Beta(490, 512), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,490,512) = 0.243$
 
-$Pr(\theta >0.5 \mid y=489, n=1000) = 1 – pbeta(0.5,490,512) = 0.243$
-(ii)	a		= 0.5 ⇒ a = b	and				
-	a + b						
-											
-			ab			a2	1		2	
-		=		=		= 0.1	⇒ a = b = 12	
-	(a + b)2 (a + b + 1)		4a2 (2a + 1)		8a + 4			
-Under a Beta(12,12) prior prior, \theta \mid y=489, n=1000 \sim Beta(489+12, 511+12) = Beta(501, 523) Pr(\theta >0.5 \mid y=489, n=1000) = 1 – pbeta(0.5,501,523) = 0.246
+(ii)	$\frac{a}{a+b} = 0.5 \implies a = b$	and	$\frac{a + b}{(a + b)^2 (a + b + 1)}=\frac{a^2}{4a^2(2a+1)}=\frac{1}{8a+4}=0.1^2\implies a = b = 12$
+Under a $Beta(12,12)$ prior prior, $\theta \mid y=489, n=1000 \sim Beta(489+12, 511+12) = Beta(501, 523), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,501,523) = 0.246$
 
-###(f) 
-How sensitive are the results to choice of prior?
+###(f) How sensitive are the results to choice of prior?
 
 The results seem not sensitive to prior choice, especially for priors with mean close to 0.5.
 
@@ -1034,76 +919,59 @@ The results seem not sensitive to prior choice, especially for priors with mean 
 Let $y \sim N (\theta ,4)$ , so that $y$ is Normally distributed with unknown mean $\theta$ and known variance $4$. Let the prior distribution on the mean $\theta$ be
 
 $$
-\theta	1	2
-Pr(\theta )	0.5	0.5
+\theta \quad 1 \quad 2 \\
+Pr(\theta)\quad 0.5\quad 0.5
 $$
 
 Thus $\theta$ can only take the values $1$ or $2$, both with equal probability.
 
-###(a)
-A single sample of $y=1$ is observed. Update the discrete probability distribution for $\theta$ using Bayes' rule. i.e. find $p(\theta \mid y = 1)$.
-
-###(b)
-A single observation of $y=1.5$ is observed. Update the prior, ignoring the data point in part (a).
-
-###(c)
-Update the prior using Bayes' rule after observing both sample points in (a) and (b). That is we have a sample of size $2, y1 = 1; y2 = 1.5.$
-###(d)
-Use probability rules to find the marginal likelihood p(y), i.e. the likelihood unconditional on $\theta$. Plot this likelihood over a sensible grid of points.
-
-###(e)	
-What is the mean and variance of $p(y)$?
-###(f)
-Can you simulate from $p(y)$? If so, simulate a sample of size $10000$ and check the sample mean and variance are close to the theoretical values in (b). Estimate a 95% CrI for y based on the sample.
-
-Solution :
-
-###(a)
+###(a) A single sample of $y=1$ is observed. Update the discrete probability distribution for $\theta$ using Bayes' rule. i.e. find $p(\theta \mid y = 1)$.
 $$
-p(\theta \mid y = 1)	\propto p( y = 1\mid \theta ) p(\theta ) = (8\pi )	'0.5		'	1	( y ' \theta )	2		
-			exp		8			p(\theta )	
-dnorm(1,theta,sqrt(4))*0.5	
+p(\theta \mid y = 1)	\propto p( y = 1\mid \theta ) p(\theta ) = (8\pi )^{-0.5}exp\left(-\frac{1}{8}(y-\theta )^2\right)p(\theta )	\\
+=dnorm(1,\theta,\sqrt4)/2
 $$
 
 for	$\theta = 1$ and then $\theta = 2$
-							
-So the posterior is Pr ( \theta =1 \mid y=1) = 0.531									
-		Pr ( \theta =2 \mid y=1) = 0.469								
-###(b)
-1							
-p(\theta \mid y = 1.5) \propto p( y = 1.5 \mid \theta ) p(\theta ) = (8\pi )	'0.5			(1.5	' \theta )	2		p(\theta )	
-		exp '	8						
-													
-	\theta	Prior	Likelihood		Product	Posterior				
-	1	0.5	0.1933		0.09665	0.5						
-	2	0.5	0.1933		0.09665	0.5						
-			Sum		0.1933								
-=dnorm(1.5,\theta,sqrt(4))*0.5	for  \theta = 1 and then \theta = 2						
+So the posterior is $Pr ( \theta =1 \mid y=1) = 0.531, Pr (\theta =2 \mid y=1) = 0.469$.
 
-So the posterior is Pr ( \theta =1 \mid y=1.5) = 0.5
+###(b) A single observation of $y=1.5$ is observed. Update the prior, ignoring the data point in part (a).
+$p(\theta \mid y = 1.5) \propto p( y = 1.5 \mid \theta ) p(\theta ) = (8\pi )^{-0.5}exp\left(-\frac{1}{8}(1.5	- \theta)^2 p(\theta )$
+```{r}
+names <- c("theta",	"Prior", "Likelihood","Product","Posterior")				
+one <- c(1,	0.5,	0.1933,		0.09665	,0.5	)					
+two <- c(	2	,0.5,	0.1933,		0.09665,	0.5	)					
+sum <- c("","",	"Sum",	0.1933,"")
 
-Pr ( \theta =2 \mid y=1.5) = 0.5
+data <- rbind(one,two,sum)
+knitr::kable(data,row.names = FALSE,col.names = names)
+```
+
+$=dnorm(1.5,\theta,sqrt(4))*0.5	for  \theta = 1 and then \theta = 2$						
+So the posterior is $Pr (\theta =1 \mid y=1.5) = 0.5,Pr ( \theta =2 \mid y=1.5) = 0.5$.
 
 Clearly this point doesn't give us ANY ex_{t}ra info about \theta since it is exactly half way between 1 and 2!
 
-###(c)
-Update the prior using Bayes rule after observing both sample points in (a) and
-(b). That is we have a sample of size 2, y1 = 1; y2 = 1.5.
+###(c) Update the prior using Bayes' rule after observing both sample points in (a) and (b). That is we have a sample of size $2, y1 = 1; y2 = 1.5.$
 
-p(\theta \mid y = 1,1.5)	\propto p( y = (1,1.5) \mid \theta ) p(\theta ) = (8\pi )	'1		'	1	[(1	' \theta )	2	+ (1.5	' \theta )	2		
-			exp		8							] p(\theta )	
-													
+$$p(\theta \mid y = 1,1.5)	\propto p( y = (1,1.5) \mid \theta ) p(\theta ) = (8\pi)^{-1}exp\left(-\frac{1}{8}\left[(1	- \theta)^2 +(1.5	- \theta)^2\right]\right)p(\theta )	
+$$
 
 	\theta	Prior	Likelihood	Product	Posterior	
 	1	0.5	0.0386	0.0193	0.531	
 	2	0.5	0.0340	0.017	0.469	
 			Sum	0.0363		
-=dnorm(1,\theta,sqrt(4))* dnorm(1.5,\theta,sqrt(4))*0.5  for	\theta = 1 and then \theta = 2
+$=dnorm(1,\theta,sqrt(4))* dnorm(1.5,\theta,sqrt(4))*0.5$  for	$\theta = 1$ and then $\theta = 2$
 
-So the posterior is Pr ( \theta =1 \mid y=1) = 0.531
+So the posterior is $Pr ( \theta =1 \mid y=1) = 0.531,Pr ( \theta =2 \mid y=1) = 0.469$.
+This is the same as in (a). The point 1.5 is exactly between 1 and 2 and gives NO information either way about $\theta =1$ or $2$, as shown in (b).
 
-Pr ( \theta =2 \mid y=1) = 0.469
-This is the same as in (a). The point 1.5 is exactly between 1 and 2 and gives NO information either way about \theta =1 or 2, as shown in (b).
+###(d) Use probability rules to find the marginal likelihood p(y), i.e. the likelihood unconditional on $\theta$. Plot this likelihood over a sensible grid of points.
+
+###(e) What is the mean and variance of $p(y)$?
+
+###(f) Can you simulate from $p(y)$? If so, simulate a sample of size $10000$ and check the sample mean and variance are close to the theoretical values in (b). Estimate a 95% CrI for y based on the sample.
+
+Solution :
 
 ###(d)
 Use probability rules to find the marginal likelihood p(y), i.e. the likelihood unconditional on \theta. Plot this likelihood over a sensible grid of points.
@@ -1283,7 +1151,7 @@ plot(x,dnorm(x,mean(yc),sqrt(var(yc)/length(yc))),type='l')
 title('control')
 ```
 
-Point estimates for the unknown means are $\hat{\mu}_{T}  = y_{t}  = 1.173; \muˆC  = yC  = 1.013$.
+Point estimates for the unknown means are $\hat{\mu}_{T}  = y_{t}  = 1.173; \muC  = yC  = 1.013$.
 
 95% probability intervals are $\mu_{T}  \pm 1.96	\sigma^{2}		\sigma^{2}	
 	T ; \mu_{C} \pm 1.96	C	
