@@ -3,11 +3,17 @@ title: "R Notebook"
 output:
   html_document: default
   html_notebook: default
+  pdf_document: default
 ---
+
+```{r SETUP, include=FALSE}
+require(knitr)
+opts_chunk$set(cache=FALSE)
+```
 
 # Lab Exercises 3 Solutions
 
-## Q1
+## Question 1
 We looked at this question last week. Use Monte Carlo simulation to get the same answers as last week to 2 decimal places.
 
 #### (a) A basketball fan watches Michael Jordan and of 100 randomly chosen free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
@@ -89,12 +95,11 @@ quantile(thetao,c(0.025,0.975))
 
 gives $(0.3093610, 0.4979226)$ and 3 places of accuracy.
 
-
 #### (c)	Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a) and (b).
 
 We refer you to Lab 2 Solutions: Suppose you suspect that Jordan's percentage is somewhere between 0.75 and 0.95. Based on a prior mean of 0.85 and prior variance of $0.0025 = [(0.95-0.75)/4]^2$, we derived $a = 42.5 and b.= 7.5$.
 
-Now, $Y_{j} \sim Bin(n =100, \theta_{J})$	and $\theta_{J} \sim Beta(42.5, 7.5)$, $p(\theta_{J}  \mid Y_{j} ) \propto p( Y_{j}  \mid \theta_{J} ) p(\theta_{J} ) \propto \theta_{J}89 (1' \theta_{J} )11\theta_{J}41.5 (1' \theta_{J} )6.5 = \theta_{J}130.5 (1' \theta_{J} )17.5$
+Now, $Y_{J} \sim Bin(n =100, \theta_{J})$	and $\theta_{J} \sim Beta(42.5, 7.5)$, $p(\theta_{J} \mid Y_{J}) \propto p(Y_{J}  \mid \theta_{J}) p(\theta_{J}) \propto \theta_{J}^{89}(1-\theta_{J} )11\theta_{J}^{41.5} (1-\theta_{J})^{6.5}=\theta_{J}^{130.5}(1-\theta_{J} )^{17.5}$
 
 So, $\theta_{J}  \mid Y_{j} \sim Beta( 131.5, 18.5)$.
 
@@ -116,7 +121,7 @@ This means that (from before):
 $$\begin{aligned}
 Y_{O} &\sim Bin(n =100, \theta_{O})\\ 
 \theta_{O} &\sim Beta(49.5, 49.5) \\
-p(\theta_{O} \mid yO ) &\propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \\
+p(\theta_{O} \mid y_{O} ) &\propto p( y_{O} \mid \theta_{O} ) p(\theta_{O} ) \\
 &\propto \theta_{O}^{40} (1-\theta_{O})^{60} \theta_{O}^{48.5} (1-\theta_{O})^{48.5} \\
 &= \theta_{O}^{88.5} (1- \theta_{O} )^{108.5}
 \end{aligned}
@@ -131,8 +136,6 @@ Re-doing it with 10000 MC samples
 thetao <- rbeta(10000,89.5,109.5)
 quantile(thetao,c(0.025,0.975))
 ```
-
-which gives $(0.3800281, 0.5193504)$
 
 #### (d) What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
 
@@ -187,8 +190,8 @@ plot(theta,dbeta(theta,90,12),type='l')
 lines(theta,dbeta(theta,81,21),type='l')
 ```
 
-## Q2 
-Consider again the placenta previa example, where y = no. of female births and $\theta	= Pr(female birth)$; we will take a sample of $n=1000$.
+## Question 2 
+Consider again the placenta previa example, where y = no. of female births and $\theta	= Pr(\text{female birth})$; we will take a sample of $n=1000$.
 
 #### (a)	After consultation with a specialist in Placenta previa, you place a $Beta(100,100)$ prior on \theta. Show that this means that you (and the doctor) are more than 95% sure that $0.4 < \theta < 0.6$; but that you are undecided whether $\theta > 0.5$ OR $\theta < 0.5$.
 
@@ -219,9 +222,11 @@ plot(x1,px,type = 'l', xlim=c(0.3,0.7))
 What does this prior imply about the possible observations, y, before we observe any data? Does this seem reasonable?
 
 Recall the prior predictive density is a beta-binomial							
-$$p(y_1) =	\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + a)\Gamma(n-y_1 + b)}{\Gamma(a+b+n)},\qquad y_1 = 0,\dots,
-n$$
-For a=b=100 we have
+$$
+p(y_1) =	\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + a)\Gamma(n-y_1 + b)}{\Gamma(a+b+n)},\qquad y_1 = 0,\dots,
+n
+$$
+For $a=b=100$ we have
 
 $$
 p(y_1) =	\frac{\Gamma(200)}{\Gamma(100)\Gamma(100)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + 100)\Gamma(n-y_1 + 100)}{\Gamma(100+100+n)},\qquad y_1 = 0,\dots,n
@@ -257,7 +262,6 @@ for(i in 1:length(n)){
 }
 ```
 
-
 The prior predictive puts most probability on y for y/n = 0.4 to 0.6 as would be expected from the Beta(100,100) prior which does the equivalent thing.
 
 ##### (d)	The sample of $n=1000$ is taken and 511 males are born. Update your opinion about whether $\theta > 0.5$ OR $\theta < 0.5$.
@@ -272,8 +276,15 @@ plot(x,dbeta(x,589,611),type='l')
 
 ##### (e) Repeat (d) under a (i) Beta(1,1) prior (ii)	Beta(a,b) prior where a and b are chosen so that the prior mean = 0.5 and prior standard deviation = 0.1
 
-###### (i)	
-Under a $Beta(1,1)$ prior, $\theta \mid y=489, n=1000 \sim Beta(489+1, 511+1) = Beta(490, 512), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,490,512) = 0.243$
+###### (i)	Under a $Beta(1,1)$ prior,
+$$
+\begin{aligned}
+\theta \mid y=489, n=1000 &\sim Beta(489+1, 511+1) \\
+&= Beta(490, 512) \\
+Pr(\theta >0.5 \mid y=489, n=1000) &= 1 - pbeta(0.5,490,512) \\
+&= 0.243
+\end{aligned}
+$$
 
 ###### (ii)	
 $\frac{a}{a+b} = 0.5 \implies a = b$	and	$\frac{a + b}{(a + b)^2 (a + b + 1)}=\frac{a^2}{4a^2(2a+1)}=\frac{1}{8a+4}=0.1^2\implies a = b = 12$
@@ -283,13 +294,17 @@ Under a $Beta(12,12)$ prior prior, $\theta \mid y=489, n=1000 \sim Beta(489+12, 
 
 The results seem not sensitive to prior choice, especially for priors with mean close to 0.5.
 
-## Q3 Adapted from BDA, Section 1.12, question 1.
+## Question 3 
+Adapted from BDA, Section 1.12, question 1.
 Let $y \sim N (\theta ,4)$ , so that $y$ is Normally distributed with unknown mean $\theta$ and known variance $4$. Let the prior distribution on the mean $\theta$ be
+```{r}
+tbl = matrix(c(1,2,0.5,0.5), 2, 2)
+colnames(tbl) = c(1, 2)
+row.labels = c("\U03B8","Pr(\U03B8)")
+rownames(tbl) = row.labels
+kable(tbl,escape = FALSE)
+```
 
-$$
-\theta \quad 1 \quad 2 \\
-Pr(\theta)\quad 0.5\quad 0.5
-$$
 
 Thus $\theta$ can only take the values $1$ or $2$, both with equal probability.
 
@@ -390,8 +405,6 @@ for(k in 1:10000) {
 hist(y)
 ```
 
-The mean and variance of my sample is $1.51$ and $4.24$ respectively as expected. A 95% CrI for y is $quantile(y,c(0.025,0.975)) = $`r quantile(y,c(0.025,0.975))`.
+The mean and variance of my sample is $1.51$ and $4.24$ respectively as expected. A 95% CrI for y is $quantile(y,c(0.025,0.975))$ = (`r quantile(y,c(0.025,0.975))`).
 
 This is an example of a mixture of 2 Normal distributions.
-
-
