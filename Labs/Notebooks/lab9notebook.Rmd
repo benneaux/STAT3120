@@ -1,0 +1,94 @@
+---
+title: "Lab Exercises 9 Solutions"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+## Question 1
+
+###### If you want WinBUGS for your home PC
+
+WinBUGS was developed by David Spiegelhalter and colleagues at the Medical Research Council Biostatistics Unit in Cambridge, England. If you want WinBUGS for your own PC, you can download files from
+
+http://www.mrc-bsu.cam.ac.uk/software/bugs/
+
+##### Bringing up WinBUGS and Finding Documentation
+
+Select WinBUGS from the “All Programs” menu list.
+
+On-line documentation is available under the “Help” menu, and it can be printed. Be sure to take a look at the examples as well as the manual itself.
+
+For distance students, to get the Tutorial document, click Help/Users Manual/Tutorial.
+
+##### Seeds: Random effect logistic regression
+
+This example is taken from Table 3 of Crowder (1978), and concerns the proportion of seeds that germinated on each of 21 plates arranged according to a 2 by 2 factorial layout by seed and type of root extract. The data are shown below, where ri and ni are the number of germinated and the total number of seeds on the $i^{th}$ plate, $i =1,\dots,N$. These data are also analysed by, for example, Breslow: and Clayton (1993).
+ 
+ ![](c:/R/STAT3120/Labs/LabData/Lab9BUGSOutput1.png)
+ 
+ The model is essentially a random effects logistic, allowing for over-dispersion. If pi is the probability of germination on the i th plate, we assume
+$$
+r_i  \sim Binomial(p_i, n_i) \\
+logit(p_i) = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \alpha_{12}x_{1i}x_{2i} + b_i \\
+b_i	\sim Normal(0, \tau)
+$$
+
+where $x_{1i}$	, $x_{2i}$   are the seed type and root extract of the i th plate, and an interaction term $\alpha_{12}x_{1i}x_{2i}$	is included.  $\alpha_0,\alpha_1, \alpha_2, \alpha_{12}, \tau$ are given independent "noninformative" priors.
+
+##### Below is for steps (1)-(3) in Lab 9 Q1. 
+model {
+for (i in 1:N) {
+
+r[i] ~ dbin(p[i], n[i]) b[i] ~ dnorm(0, tau)
+
+logit(p[i]) <- alpha0 + alpha1 * x1[i] + alpha2 * x2[i] + alpha12 * x1[i] * x2[i] + b[i]
+
+}
+alpha0 ~ dnorm(0, 1.0E-6) alpha1 ~ dnorm(0, 1.0E-6) alpha2 ~ dnorm(0, 1.0E-6) alpha12 ~ dnorm(0, 1.0E-6) tau ~ dgamma(0.001, 0.001) sigma <- 1 / sqrt(tau)
+
+}
+
+#### Data 
+```{r q2data, include=FALSE}
+data <- list(r =  c(10, 23, 23, 26, 17, 5, 53, 55, 32, 46, 10,   8, 10,   8, 23, 0,  3, 22, 15, 32, 3), 
+n =  c(39, 62, 81, 51, 39, 6, 74, 72, 51, 79, 13, 16, 30, 28, 45, 4, 12, 41, 30, 51, 7),
+x1 =  c(0,   0,  0,   0,   0, 0,   0,   0,  0,   0,   0,  1,   1,   1,   1, 1,   1,  1,   1,   1, 1),
+x2 = c(0,   0,  0,   0,   0, 1,   1,   1,  1,   1,   1,  0,   0,
+   0,   0, 0,   1,  1,   1,   1, 1),
+N = 21)
+
+inits <-  list(alpha0 = 0, alpha1 = 0, alpha2 = 0, alpha12 = 0, tau = 1)
+```
+
+NOTE:  in  the  latest  version  of  WinBUGS,  when  taking  this  dataset  from  Examples  I,  a  flat prior on sigma is recommended over the above prior on tau (with adjusted Inits):
+
+> sigma \sim dunif(0,100)
+
+> tau<- 1/(sigma*sigma)
+
+**After doing step (4) in Lab 9 Q1, you will have similar to the following results** 
+
+#### Results
+
+A burn in of 1000 updates followed by a further 10000 updates gave the following parameter estimates
+```{r lab9table, includ=FALSE}
+
+cnames <- c("mean",	"sd",	"MC error", "2.5%",	"median",	"97.5%",	"start",	"sample")
+alpha0	<- c(-0.5546,	0.1941,	0.007696, -0.9353,  -0.5577,  -0.1597,  1001,	10000)
+alpha1 <- c(0.08497,	0.3127,	0.01283,	-0.5814,	0.09742,	0.6679,	1001,	10000)
+alpha12 <- c(-0.8229,	0.4321,	0.01785,	-1.697,	-0.8218,	0.01641,	1001,	10000)
+alpha2 <- c(1.356,	0.2743,	0.01236,	0.8257,	1.347,	1.909,	1001,	10000)
+sigma <- c(0.2731,	0.1437,	0.007956,	0.04133,	0.2654,	0.5862,	1001,	10000)
+data <- rbind(alpha0,alpha1,alpha12,alpha2,sigma)
+colnames(data) <- cnames
+kable(data, format="markdown", align = rep("c", dim(data)[2] + 1),rownames="nodes")
+```
+##### Hence the model is:
+$$
+r_i  \sim Binomial(p_i, n_i) \\
+logit(p_i) = −0.5546 + 0.08497 x_{1i} + 1.356 x_{2i} -0.8229 x_{1i}x_{2i} + b_i \\
+b_i	\sim Normal(0, \tau=1/(0.2731)^2)
+$$
+
+where $x_{1i}$	, $x_{2i}$   are the seed type and root extract of the $i^{th}$ plate, and an interaction term $\alpha_{12}x_{1i}x_{2i}$	is included. 

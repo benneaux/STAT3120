@@ -1,0 +1,31 @@
+---
+title: "Assignment 3 - Question 2"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+```
+```{r data, include=FALSE}
+data <- readRDS("C:/R/STAT3120/Assignments/Assignment3/Data/birthweight.rds")
+```
+
+##Question 2
+
+**Taken from Albert (2007). Normal linear regression.**
+
+Dobson (2001) describes a birthweight regression study. One is interested in predicting a baby’s birthweight (in grams) based on the gestational age (in weeks) and the gender of the baby. The data is presented in the file *birthweight.txt*. In the standard linear regression model, we assume that
+$$
+\text{Birthweight (i)} = \beta_{0} + \beta_{1}\,AGE\,(i) + \beta_{2}\,GENDER\,(i) + e(i)
+$$
+where the *e(i)’s* are independent and Normally distributed random variables with mean **0** and variance $\sigma^{2}$.
+
+#####(a) Use the R function lm to fit this model by Least-Squares. From the output, assess if the effects AGE and GENDER are significant, and if they are significant, describe the effects of each covariate on birthweight.
+
+#####(b)	Suppose a uniform prior is placed on the regression parameters $\beta$ = ($\beta_{0}$, $\beta_{1}$, $\beta_{2}$). Use the LearnBayes package in R (blinreg command) to simulate an MC sample of **5000** draws from the joint posterior distribution of ($\beta$, $\sigma^{2}$). From the simulated sample, compute posterior means and standard deviations of $\beta_{1}$ and $\beta_{2}$. Compare the results with the LS estimates obtained in **(a)**.
+
+#####(c) Repeat part **(b)** using WinBUGS. Compare the results with the LS estimates obtained in **(a)** and MC sampling in part **(b)**.
