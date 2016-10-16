@@ -1,0 +1,2520 @@
+---
+output:
+  html_notebook:
+    toc: yes
+  title: "STAT3120 Applied Bayesian Methods"
+  html_document:
+    toc: yes
+---
+
+
+#Lab Exercises 1 Solutions
+
+## Q1
+
+Andrew Johns has played 153 games for the Newcastle Knights NRL team; of those 100 games have been wins for the Knights. During that time, Newcastle have played 223 games in total, winning 135.
+
+### (a) 
+Estimate the following:
+
+####(i) Pr(Johns plays)
+153/223 = `r 153/223`
+
+####(ii) Pr(Knights win)
+135/223 = `r 135/223`
+
+####(iii) Pr(Johns plays AND Knights win)
+Johns has played in 100 games where the Knights have won, so answer 100/223 = `r 100/223`
+
+####(iv) Pr(Johns played | Knights win)
+We just read from the table that = 100/135 OR using definition
+Pr (Johns played | Knights win) = Pr (Johns played, Knights win)/ Pr (Knights win) =	(100/223)/(135/223) = 100/135 = 0.448/0.605 = `r 0.448/0.605`
+
+####(v) Pr(Knights win | Johns played)
+Pr (Knights win | Johns played) = 100/153 = `r 100/153`
+Or using definition = Pr (Johns played, Knights win)/ Pr (Johns played) = 100/223/(153/223)
+
+####(vi) Pr(Knights win | Johns didn't play)
+Pr(Knights win | Johns didn't play) = 35/70 = 0.5 OR using definition
+=	Pr(Knights win, Johns didn't play)/Pr(Johns didn't play) = 35/223/(70/223) = 0.5
+
+####(vii) Pr(Johns played | Knights lose)	
+Pr(Johns played | Knights lose) = Pr (Johns played, Knights lose)/ Pr (Knights lose)
+
+Firstly, Johns has played in 153-100=53 games the Knights have lost, so Pr (Johns played, Knights lose) = 53/223 = 0.238.
+Pr(Knights lose) = (223-135)/223 = 88/223 = 0.395
+
+So, Pr(Johns played | Knights lose) = 53/88 = 0.603 (this can be read simply from the table)
+						
+Johns played	Johns didn't play	Total		
+Knights win	100	35	135		
+Knights lose	53	35	88		
+Sum		153	70	223		
+
+###(b)	Think about the following:
+
+#### 1)	Interpret the probabilities in (iii), (iv), (v), (vi) and (vii).
+Firstly, of the 223 games the Knights have played, the events that Johns played and Knights won both occurred 44.8% = 100*(100/223) of the time. For games in which we know the Knights won, Johns played in about 74% of them; for games in which we know Johns played, the Knights won 65%; while if Johns didn't play the Knights won only 35% of these. Finally for games the Knights lost, Johns played in 60% of them.
+
+####2)	How could each be used in footy tipping or betting?
+Only the 65% = Pr (Knights win | Johns played) and the 50% Knights win when Johns doesn't play should be used in betting. Betting is equivalent to forecasting. We can not know the result (Knights win or lose) before the game, we can however know that Johns is listed to play in an upcoming match. If that is the case, the Knights have won 65% of those matches, compared to only 60% overall and 50% wins when Johns did not play. We are more likely to bet on the Knights if Johns is playing.
+
+####3)	Do we need to know 223 (the total number of games) to calculate these?
+No: 223 cancels out in all calculations except in (iii).
+ 
+## Q2 
+Consider the following example, adapted from Albert (1997) Bayesian computation using Minitab:
+
+A common blood test for AIDS has a false negative rate of 3% (i.e. if you have the disease, the test comes up negative 3% of the time) and a false positive rate of 2%. AIDS has an incidence 1 in 200 in Australia. You take a blood test and it comes up positive, what is the probability that you actually have AIDS? (The questions below will guide you through the answer.)
+
+### (a) Discussion: What are the relevant events A and B here? What prior information do we have? What is Pr(A)?
+Bayes' rule updates Pr(A) given the info in B to give Pr(A \mid B). The events are: 
+
+A: you have AIDS.
+B: you return a positive blood test.
+
+We know that $Pr(Bc \mid A) = 0.03$ (false negative) AND $Pr(B \mid Ac) = 0.02$ (false positive). We also need to know Pr(A). This is the prior probability that you have the disease, before the blood test. This could be taken as the population incidence of the disease OR some estimate based on your family history, risk factors etc.
+
+Let's estimate	$Pr(A) = 1/200 =$ `r 1/200`
+
+### (b) Use Bayes' rule to update the prior probability, Pr(A).
+
+$$
+  \begin{aligned}
+    Pr(A \mid B) 
+    &=	\frac
+          {Pr(B \mid A) Pr(A)}
+          {Pr(B)} \\ 
+    & =	\frac
+          {Pr(B \mid A) Pr(A)}
+          {Pr(B \mid A) Pr(A) + Pr(B \mid A^{c}) Pr(A^{c})} \\ 	
+    &=	\frac
+          {1}
+          {1 + \frac
+                  {Pr(B \mid A) Pr(A^{c})Pr(A^{c})}
+                  {Pr(B\mid A) Pr( A)}}
+  \end{aligned}
+$$
+
+Notice that the denominator term $Pr(B)$ is NOT needed (but can be deduced if necessary) in this calculation. $Pr(A \mid B) = \frac{1}{1 + \frac{0.02 \times 0.995}{(1 - 0.03) \times 0.005}}	= 0.196$			
+
+Clearly you should NOT be too worried about a positive result, you still have an 80% chance it is a false positive.
+
+### (c) Prepare a table showing the prior, likelihood and posterior probabilities of each event.
+
+Model	Prior	Likelihood	Product	Posterior
+		of +ve test		
+Have disease	0.005	0.97	0.00485	0.196
+Dont	0.995	0.02	0.0199	0.804
+SUM			0.02475	1
+
+In R: 
+```{r}
+prior=c(0.005,0.995) 
+likelihood=c(0.97,0.02) 
+prod=prior*likelihood 
+sum=sum(prod) 
+posterior=prod/sum
+```
+
+### (d) How strongly did the data affect the prior in this case?
+The prior probability of having the disease was 0.005. The posterior is 0.196. This is an increase of .196/.005 = 39 times. One positive blood test increases your chances of having the disease by a factor of 39. However, it is still not a large number.
+
+### (e) How high would Pr(A) have to be for you to be worried about a positive result?
+
+Let's examine three other priors.
+
+####(i)
+Say the incidence of AIDS was 1 in 100
+
+Model	Prior	Likelihood	Product	Posterior
+		of +ve test		
+Have disease	0.01	0.97	0.0097	0.329
+Don't	0.99	0.02	0.0198	0.671
+SUM			0.0295	1
+
+In R: 
+
+```{r}
+prior=c(0.01,0.99) 
+likelihood=c(0.97,0.02) 
+prod=prior*likelihood 
+sum=sum(prod) 
+posterior=prod/sum
+```
+
+####(ii)
+What about incidence 1 in 20?
+
+Model	Prior	Likelihood	Product	Posterior
+		of +ve test		
+Have disease	0.05	0.97	0.0485	0.719
+Don't	0.95	0.02	0.019	0.281
+SUM			0.0675	1
+
+
+In R: 
+
+```{r}
+prior=c(0.05,0.95) 
+likelihood=c(0.97,0.02) 
+prod=prior*likelihood 
+sum=sum(prod) 
+posterior=prod/sum
+```
+
+####(iii)	
+Your partner has this disease and a doctor estimates that Pr(A) = 0.2
+
+Model	Prior	Likelihood	Product	Posterior
+		of +ve test		
+Have disease	0.2	0.97	0.194	0.924
+Don't	0.8	0.02	0.016	0.076
+SUM			0.21	1
+
+
+In R: 
+
+```{r}
+prior=c(0.2,0.8)
+likelihood=c(0.97,0.02)
+prod=prior*likelihood
+sum=sum(prod)
+posterior=prod/sum
+```
+
+Once the incidence or prior probability of the disease gets above about 1 in 100, you start to get worried.
+
+### (f) Suppose you have 3 separate positive blood test results. What is your updated probability of having the disease?
+
+Using the same table idea and assuming independence of tests (is that a valid assumption?),
+
+```{r}
+names <- c("Model",	"Prior", "Likelihood of \n 3 +ve tests",	"Product",	"Posterior")
+have <- c(0.005,0.973,0.004563365,0.998)
+dont<- c(0.995,0.023,0.00000796,0.00174)
+sum <- c("","",0.004571325,1)
+data <- rbind(have,dont,sum)
+rnames <- c("Have Disease","Don't","Sum")
+data <- cbind(rnames,data)
+colnames(data) <- c(names)
+```
+
+Clearly, repeated positive tests add lots of evidence in favour of you having the disease.
+
+In R: 
+```{r}
+prior=c(0.005,0.995)
+likelihood=c((0.97)^3,(0.02)^3)
+prod=prior*likelihood
+sum=sum(prod)
+posterior=prod/sum
+```
+
+## Q3
+Three approaches: experts, empirical analysts and logicians.
+
+BDA, exercise 1.10, no.7. At the end of a game show called Let's make a deal, contestants are asked to choose 1 of 3 doors. Behind 1 door is a car, behind the other 2 doors are lesser prizes. After the contestant chooses a door, Monte Hall (the host) opens a door that he knows has a lesser prize behind it (NOT the door chosen by the contestant). Monte then offers the contestant to switch to the 3rd remaining door OR stick with the original choice of door. Should the contestant switch doors?
+
+###Expert (mathematical) approach:
+There are three variables here. Let C = the door number that the car is behind (1,2,3); Y = the door number that you choose; and let M = the door number that the compere decides to open. Without loss of generality assume that you choose door 1 first. What is $Pr(C=1\mid M=2, Y=1)$?
+
+There are three variables here. Let
+C = the door number that the car is behind (1,2,3);
+Y = the door number that you choose; and
+M = the door number that the compere decides to open.
+
+Without loss of generality assume that you choose door 1 first. Monte Hall can now choose either door 2 or 3, depending where the car is. Let's say he chooses door 2 (i.e. the car can only be behind door 1 or 3).
+$$
+  \begin{aligned}
+    Pr(C = 1\mid M = 2, Y = 1) 
+      &= \frac
+          {Pr(C = 1,M = 2, Y = 1)}
+          {Pr(M = 2, Y = 1)} \\
+      &= \frac
+            {Pr(M = 2\mid C = 1, Y = 1)Pr(C = 1\mid Y = 1)P(Y = 1)}
+            {Pr(M = 2\mid Y = 1)P(Y = 1)} \\
+      &=  \frac
+            {Pr(M = 2\mid C = 1, Y = 1)Pr(C = 1\mid Y = 1)}
+            {Pr(M = 2 \mid Y = 1)} \\
+      &=  \frac
+            {Pr(M = 2\mid C = 1, Y = 1)Pr(C = 1\mid Y = 1)}
+            {Pr(M = 2\mid C = 1, Y = 1)Pr(C = 1\mid Y = 1) + Pr(M = 2\mid C = 2, Y = 1)Pr(C = 2\mid Y = 1) + Pr(M = 2\mid C = 3, Y = 1)Pr(C = 3\mid Y = 1)} \\
+      &=  \frac
+            {1/2 \times 1/3}
+            {1/2 \times 1/3 + Pr(M = 2\mid C = 2, Y = 1)Pr(C = 2\mid Y = 1) + Pr(M = 2\mid C = 3, Y = 1)Pr(C = 3\mid Y = 1)} \\
+      &=	\frac
+            {1/6}
+            {1/6 + 0 \times 1/3 + 1 \times 1/3} \\
+      &= \frac
+            {1}
+            {3}	
+	\end{aligned}
+$$
+
+Note that $Pr(M = 2 \mid C = 3, Y = 1) = 1$ as Monte Hall must choose door 2 in this case.
+
+We know C can't equal 2 as the compere cannot choose the door the car is behind, i.e. $Pr(C = 2 \mid M = 2, Y = 1) = 0$.
+
+The other case is that C=3, with a similar way to the above such that,
+
+$$
+  \begin{aligned}
+    Pr(C = 3 \mid M	= 2, Y = 1)	
+      &= \frac
+            {Pr(M = 2\mid C = 3, Y = 1)Pr(C = 3\mid Y = 1)}	
+					  {Pr(M = 2\mid Y = 1)} \\
+			&=  \frac
+			      {1 \times 1/3}
+			      {1/6 + 1/3} \\
+			&=	2
+	\end{aligned}
+$$
+
+Clearly the contestant should always swap doors when given the chance.
+ 
+###Logical approach:
+
+What is the probability of the chosen door having the car behind it? What is the probability of the door that the compere opens having the car behind it? Does the probability for the chosen door change when the compere opens a door? Combine this information to decide if the contestant should change doors.
+
+When the contestant chooses a door, it is 1/3 likely to have the car behind it. This does NOT change when Monte Hall opens another door, since Monte knows where the car is and always chooses a door without the car (this door has probability 0 of having the car behind it). Thus the door not chosen by the contestant (OR Monte Hall) has probability 2/3 of containing the car. The contestant should always SWAP doors, giving twice the probability of winning the car.
+
+###Empirical approach:
+
+Do the experiment about 10--20 times with 3 cups and a coin or ping-pong ball, or use the utility 'Let's make a deal' (e.g. http://math.ucsd.edu/\simcrypto/Monty/monty.html).
+
+You will see you win twice as often if you switch cups.
+
+End of Lab 1
+
+#Lab Exercises 2 Solutions
+
+## Q1 
+Albert, 1997, Chapter 3.4, Exercise 5: A geneticist is investigating the link between two fruit-fly genes, and plans a test cross. He has only two hypotheses for genes of the fruit-fly offspring. Under hypothesis A and B, the proportions of offspring of each type are in the table below:
+```{r}
+
+c.names	<- c("Hypothesis","Type 1",	"Type 2",	"Type 3",	"Type 4")
+A <- c("A", 0.5625,	0.1875,	0.1875,	0.0625)
+B	<- c("B",0.25,	0.25,	0.25,	0.25)
+data <- rbind(A,B)
+colnames(data) <- c.names
+knitr::kable(data, row.names = FALSE)
+```
+The fruit flies were mated and the following numbers of offspring of each type were observed:
+```{r}
+vals <-c(8,2,4,3)
+#knitr::kable(vals, row.names = FALSE,col.names = c("Type 1","Type 2","Type 3","Type 4"))
+```
+
+####(i)	What prior could we use for each hypothesis?
+
+In this situation, rather than estimation and inference, the geneticist is more interested in which hypothesis is supported by the data.In this question we have two competing hypotheses, and some observed counts of data, y. 
+
+We do NOT know the prior probability of each hypothesis, we may assume Pr(A) = Pr(B) OR some other probabilities based on previous work, or consultation with genetic theory or geneticists. It is often safer to assume Pr(A) = Pr(B).
+
+####(ii) Which of the two hypotheses is more likely based on the data?
+
+In this situation, rather than estimation and inference, the geneticist is more interested in which hypothesis is supported by the data.In this question we have two competing hypotheses, and some observed counts of data, y. 
+
+A Bayesian will estimate Pr(A \mid y) and Pr(B \mid y) (as if they are the only two possible outcomes) and use these quantities to determine the most likely hypothesis.
+
+This leads to	
+$$Pr(A \mid y) = \frac{Pr(y \mid A)Pr(A)}{Pr(y \mid A)Pr(A) + Pr(y \mid B)Pr(B)} = \frac{1}{1 + \frac{Pr(y\mid B)Pr(B)}{Pr(y\mid A) Pr(A)}}$$
+
+The ratio of likelihoods in the denominator is called the Bayes factor (which has a different interpretation when hypotheses are composite). If the Bayes factor is greater than 1, and $Pr(A) = Pr(B)$, then hypothesis A is more likely than hypothesis B, while if it is less than 1 then hypothesis B is more likely.
+
+ 
+For the likelihoods, we use a multinomial model with 4 categories (a binomial has 2 possible categories each trial, a multinomial has more than 2). The likelihood for a multinomial with $y_1, y_2, y_3$ and $y_4$ counts in each category is
+
+$$
+Pr(y \mid \theta) = \frac{n!}{y_1!y_2!y_3!y_4!}\theta_1^{y_1}	\theta_2^{y_2} \theta_3^{y_3}(1- \theta_1- \theta_2- \theta_3 )^{y_{4}} \propto \theta_1^{y_1}	\theta_2^{y_2} \theta_3^{y_3}(1- \theta_1	- \theta_2 - \theta_3)^{y_4}
+$$
+
+ignoring the integration constant. Thus the likelihood under each hypothesis is:
+
+$$
+Pr(y \mid A) \propto 0.5625^8 0.1875^2 0.1875^4 0.0625^3 = 1.06 \times 10^{-10} \\
+Pr(y \mid B) \propto 0.25^8 0.25^2 0.25^4 0.25^3 = 5.82 \times 10^{-11}
+$$
+
+Note that we have ignored the combinatorial term in front of the likelihood as it is the same (i.e., constant) for each hypothesis (it depends on y only).
+
+By inspection of the data, hypothesis A appears more likely than B.
+
+As mentioned above, here the Bayes factor is just the ratio of likelihoods
+
+$$\frac{p(y \mid A)}{p(y \mid B)} = 1.06 \times 10^{-10} /(5.82 \times 10^{-11}) = 1.83$$
+
+In other words, based on the data, hypothesis A is 1.83 times as likely as hypothesis B. We find that
+
+$$Pr(A \mid y) = 1/(1+1/1.83) = 0.647$$,
+
+and see that A is indeed the more likely hypothesis based on the data.
+
+## Q2 
+Albert, Ch. 4, Exercise 4.4, no. 4. A woman tells you she can predict the sex of a baby by how high it 'rides' in the mother's uterus. 'High' means a boy and 'low' means a girl. You suspect she is only guessing, but you are not completely sure;
+
+###(a) Place a prior distribution on the values of her success rate (p) in the table below that reflects this belief that she is probably just guessing.
+
+Success rate (p)	0	0.25	0.5	0.75	0.9	1
+Pr(p) (prior)	0	0.1	0.75	0.1	0.04	0.01
+
+This is just one example. We give 0 prior to p=0 as even if she is just guessing she will have a positive success rate. The smallest positive probability is on p=1, just in case her theory is accurate. The prior is plot below.
+
+Use commands 
+
+```{r}
+p <- c(0,0.25,0.5,0.75,0.9,1)
+prior <- c(0,0.1,0.75,0.1,0.04,0.01)
+plot(p,prior,type='l')
+```
+
+(if you cut and paste these lines and get an error, you might need to re-type the plot line, as Word uses its own quotation marks)
+
+###(b)	You conduct an experiment with 10 pregnant women, and the woman is correct 7 times out of 10 in predicting the sex of the unborn baby. Update your probabilities in the table.
+
+```{r, echo = FALSE}
+srate <- c(0,0.25,	0.5,	0.75,	0.9,	1)
+prior <- c(0,	0.1,0.75,	0.1,	0.04,	0.01)
+like <- c(0,	0.00309,	0.117,	0.25,	0.0574,	0)
+prod <- c(0,	0.00031,	0.0878,	0.025,	0.00230,	0)
+post <- c(0,	0.00267,	0.761,	0.217,0.0199,	0)
+data <- cbind(srate,prior,like,prod,post)
+names_data <- c("Success rate (p)","Pr(p) (prior)", "Likelihood","Product",	"Posterior")
+knitr::kable(data,row.names = FALSE, col.names = names_data)
+```
+
+The binomial model is assumed here, so
+
+$$
+Pr(y=7\mid p) = \binom{10}{7}p^7(1-p)^3			
+$$	
+
+which was used in the Likelihood row above.
+
+Use the function 
+
+```{r}
+like <- dbinom(7,10,p)
+```
+
+in R where p is each possible value for p to evaluate the likelihood function.
+
+Then
+
+```{r}
+posterior <- like*prior
+posterior <- posterior/sum(posterior)
+```
+
+The likelihood reflects that the data support p = 0.75 the most, while the posterior still favours that she is guessing. The plot below shows prior, likelihood and posterior. To get three plots
+on one window type 
+
+```{r}
+par(mfrow=c(3,1))
+```
+
+in R. Then 
+
+```{r}
+plot(p,prior,type='l')
+plot(p,like,type='l')
+plot(p,posterior,type='l')
+```
+
+(again, you might need to replace the quotation marks if cutting and pasting)
+
+###(c)	How likely is she to have some skill in gender prediction? How likely is she to be just guessing?
+
+We could interpret skill as p>0.5.
+
+$$
+Pr( skill \mid y=7) = Pr(p>0.5 \mid y = 7) = 0.217+0.02 = 0.237. \\
+Pr (guessing \mid y=7) = Pr( p =0.5\mid y=7) = 0.761
+$$
+
+The posterior still favours that she is guessing.
+
+###(d) Repeat (b) and (c) with a flat prior on p.
+```{r}
+srate <- c(0,0.25,	0.5,	0.75,	0.9,	1)
+prior <- c(0.167,	0.167,0.167,	0.167,	0.167,	0.167)
+like <- c(0,	0.00309,	0.117,	0.25,	0.0574,	0)
+prod <- c(0,	0.000515,	0.0195,	0.0417,	0.00957,	0)
+post <- c(0,	0.0072,	0.274,	0.585,0.134,	0)
+data <- cbind(srate,prior,like,prod,post)
+names_data <- c("Success rate (p)","Pr(p) (prior)", "Likelihood","Product",	"Posterior")
+knitr::kable(data,row.names = FALSE, col.names = names_data)
+```
+$$
+Pr(skill \mid y=7) = Pr(p>0.5 \mid y = 7) = 0.719. \\
+
+Pr (guessing \mid y=7) = Pr( p =0.5\mid y=7) = 0.274
+$$
+
+The posterior (likelihood) now favours that she has some skill. Think about how much evidence you would REALLY need to be convinced that she has some skill in predicting sex. Is 7 out of 10 enough? If we really believed in a flat prior then maybe it is, but remember that the sample size is only 10.
+
+## Q3
+
+###(a) A basketball fan watches Michael Jordan and randomly chooses 100 of his free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
+
+If we let Y_{j} = number of successful free throws for Jordan then we can assume Y_{j} \sim Bin(n =100, \theta_{J}) and \theta_{J} \sim Unif(0,1) = Beta(1,1)
+
+p(\theta_{J} \mid Y_{j} ) \propto p( Y_{j} \mid \theta_{J} ) p(\theta_{J} ) \propto \theta_{J}89 (1' \theta_{J} )11\theta_{J}1'1 (1' \theta_{J} )1'1 = \theta_{J}90'1 (1' \theta_{J} )12'1 So, \theta_{J} \mid Y_{j} \sim Beta( 90, 12). We can plot this on a grid of points as follows in R:
+
+```{r}
+x <- (0:1000)/1000 # (easier: seq(0,1,.0001)) 
+px <- dbeta(x,90,12)
+
+plot(x,px,type='l')
+title("Jordan free throws, Beta(90,12)")
+```
+
+The density is peaked at 0.89 as expected, the posterior mean estimate is 90/102 = 0.88. Use
+
+```{r}
+qbeta(0.025,90,12)
+```
+
+and
+
+```{r}
+qbeta(0.975,90,12)
+```
+
+to generate the 95% credible interval for the $Beta(90,12)$ distribution.
+
+###(b) The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for their success proportion using a uniform prior and a 95% credible interval. Plot this density.
+
+If we let Y_{O} = number of successful free throws for O'Neal then we can assume Y_{O} \sim Bin(n =100, \theta_{O}) and \theta_{O} \sim Unif(0,1) = Beta(1,1)
+
+p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1' \theta_{O} )60 \theta_{O}1'1 (1 ' \theta_{O} )1'1 = \theta_{O}41'1 (1 ' \theta_{O} )61'1 So, \theta_{O} \mid yO \sim Beta( 41, 61). We can plot this on a grid of points as follows in R:
+
+```{r}
+x<-(0:1000)/1000 
+px<-dbeta(x,41,61) 
+plot(x,px,type='l')
+
+title("O'Neal free throws, Beta(41,61)")
+```
+
+
+The density is peaked at $0.4$, with posterior mean $41/102 = 0.402$.
+
+Use $qbeta(0.025,41,61) =$ `r qbeta(0.025,41,61)` and $qbeta(0.975,41,61) =$ `r qbeta(0.975,41,61)` in R to generate the 95% (central) credible interval for the $Beta(41,61)$ distribution.
+
+
+###(c) Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a)-(b).
+
+Suppose you suspect that Jordan's percentage is somewhere between $0.75$ and $0.95$. Choose a prior mean of $0.85$ with prior variance of $0.0025 = [(0.95-0.75)/4]^2$
+
+This means that:
+$$
+	\frac{a}{a + b}	= 0.85;	\> \frac{ab}{(a + b)^{2}(a + b + 1)} = 0.0025 \\	
+b =	\frac{3a}{17}\implies a = 42.5,\>b = 7.5 \> (*)		
+$$
+
+(For general purposes, it's probably easier to write $\mu$ and $\sigma^{2}$ as functions of a and b.) Now, $Y_{j} \sim Bin(n =100, \theta_{J})$ and $\theta_{J} \sim Beta(42.5, 7.5), p( \theta_{J} \mid Y_{j} ) \propto p(Y_{j} \mid \theta_{J})p(\theta_{J}) \propto \theta_{J}^{89}(1- \theta_{J})^{11}\theta_{J}^{41.5}(1- \theta_{J})^{6.5} = \theta_{J}^{130.5}(1- \theta_{J})^{17.5}$
+
+So, $\theta_{J} \mid Y_{j} \sim Beta( 131.5, 18.5)$. The prior, likelihood and posterior are plotted below. The model estimate is now $130.5/148 = 0.882$; posterior mean is $131.5/150 = 0.877$ and a 95% posterior CrI is $qbeta(0.025,131.5,18.5) =$ `r qbeta(0.025,131.5,18.5)` and $qbeta(0.975,131.5,18.5) = $ `r qbeta(0.975,131.5,18.5)`.
+
+(*) A more general method is based on recognising that
+
+$$mu =	\frac{a}{a+b},	\sigma^{2}	=	\frac{ab}{(a + b)^2 (a + b + 1)}	\implies \sigma^{2} =	\frac{\mu(1 - \mu)}{(a + b + 1)	}$$
+i.e.
+$$
+
+a + b =	\frac{\mu(1-\mu)}{\sigma^2}-1 \text{ and } a = \mu(a + b) = \mu\left[\frac{\mu(1- \mu)}{\sigma^2}-1\right]; \>	b =	(1-\mu)\left[\frac{\mu(1-\mu)}{\sigma^2}-1\right]
+$$
+
+```{r}
+par(mfrow=c(3,1))
+x<-(0:1000)/1000 
+px <- dbeta(x,42.5,7.5)
+pl<-dbeta(x,90,12) 
+pp <- dbeta(x,131.5, 18.5)
+
+plot(x,px,type='l') 
+plot(x,pl,type='l') 
+plot(x,pp,type='l')
+```
+The posterior distribution is slightly narrower than that for the Uniform prior for Jordan's unknown free throw rate. The above analysis is an example of a specific prior only.
+
+Now suppose that you suspect that O'Neal's percentage is very close to 50% and certainly between $40$ and 60%. We choose a prior mean of 0.5 with prior variance of $0.0025 = [(0.6-0.4)/4]^2$
+
+This means that:
+
+$$
+	\frac{a}{a + b}	= 0.5;	\> \frac{ab}{(a + b)^{2}(a + b + 1)} = 0.0025 \\	
+b =	a\implies a = 49.5,\>b = 49.5		
+$$		
+Now, $Y_{O} \sim Bin(n =100, \theta_{O})$	and $\theta_{O} \sim Beta(49.5, 49.5), p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1-\theta_{O} )^{60} \theta_{O}^{48.5} (1 - \theta_{O} )^{48.5} = \theta_{O}^{88.5} (1- \theta_{O} )^{108.5}$
+
+So, $\theta_{O} \mid yO  \sim Beta(89.5, 109.5)$. The prior, likelihood and posterior are plotted below.
+
+The model estimate is now $88.5/197 = 0.449$; posterior mean is $89.5/199 = 0.450$ and a 95% posterior CrI is $qbeta(0.025,89.5,109.5) = $ `r qbeta(0.025,89.5,109.5)` & $qbeta(0.975, 89.5,109.5) = $ `r qbeta(0.975, 89.5,109.5)`.
+
+```{r}
+par(mfrow=c(3,1))
+x<-(0:1000)/1000 
+px <- dbeta(x,49.5,49.5)
+pl<-dbeta(x,41,61) 
+pp <- dbeta(x,89.5, 109.5)
+
+plot(x,px,type='l') 
+plot(x,pl,type='l') 
+plot(x,pp,type='l')
+```
+
+###(d) What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
+
+$$
+Pr(\theta_{J} >0.9\mid \theta_{J} \sim Beta(90,12)) = 1-pbeta(0.9,90,12) = 0.309 \\
+Pr(\theta_{J} >0.9\mid \theta_{J} \sim Beta(131.5,18.5)) = 1-pbeta(0.9,131.5,18.5) = 0.196
+$$
+We are not sure in either case; 0.9 seems close to the centre of the possible values for $\theta_{J}$.
+
+###(e) How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal?
+
+We can compare the 2 posterior distributions. Assuming the uniform prior, $\theta_{J} \sim Beta(90,12)$ and $\theta_{O} \sim Beta(41,61)$. We might wish to know $Pr(\theta_{J} > \theta_{O} \mid Y_{j}, yO) = Pr(\theta_{J} - \theta_{O} > 0 \mid Y_{j}, yO)$.
+
+The classical approach here would look for the sampling distribution of the estimate of $\theta_{J} - \theta_{O}$, which is intractable without using Normal approximations. However as these samples are clearly independent we just compare the posterior distributions $\theta_{J} \sim Beta(90,12)$ and $\theta_{O} \sim Beta(41,61)$.
+
+Clearly $Pr(\theta_{J} > \theta_{O} \mid Y_{j}, yO) \sim= 0$. (Formal analysis in next week's lab.) Jordan has a better free throw percentage than O'Neal, based on this data. The plot was created using the following R code
+
+```{r}
+x<-(0:1000)/1000 
+px1<-dbeta(x,41,61) 
+px2<-dbeta(x,90,12) 
+plot(x,px2,type='l') 
+lines(x,px1)
+```
+
+##Q4 (Honours/Postgraduates only)
+
+Let  $Y \sim Binomial (n=10, \theta)$.
+
+####(i)	
+Derive the prior predictive distribution p(y), under a Unif(0,1) prior on \theta, and plot it
+ 
+$$
+\begin{aligned}
+Pr(Y &= y) = p(y) = \int\limits_{0}^{1}p(y,\theta)d\theta = \int\limits_{0}^{1} p(y \mid \theta)p(\theta)d\theta = \binom{10}{y}\int\limits_{0}^{1}\theta^y(1-\theta)^{10-y}d\theta \\ 
+&= \binom{10}{y}\frac{\Gamma(y + 1)\Gamma(11-y)}{\Gamma(12)}=\frac{10!y!(10-y)!}{y!(10-y)!11!} \\ 
+&=	1/11; \qquad y = 0,1,2,\cdots,10
+\end{aligned}
+$$ 
+
+####(ii)
+Derive the posterior predictive density $p(y*\mid y)$ and plot it.
+$$
+\begin{aligned}
+Pr(Y_2 &= x \mid Y_1 = y) = \int\limits_{0}^{1}p(x,\theta\mid Y_1 = y)p(\theta \mid Y_1 = y)d\theta \\
+&= \binom{10}{y}\int\limits_{0}^{1}\theta^x(1-\theta)^{10-x}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\theta^y(1-\theta)^{10-y}d\theta \\ 
+&= \binom{10}{y}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\int\limits_{0}^{1}\theta^{x+y}(1-\theta)^{20-x-y}d\theta \\ 
+&=\binom{10}{y}\frac{\Gamma(12)}{\Gamma(y + 1)\Gamma(11-y)}\frac{\Gamma(x + y + 1)\Gamma(21-x-y)}{\Gamma(22)}; \qquad x,y = 0,1,2,\cdots,10
+\end{aligned}
+$$ 
+
+You can program this in R using a function named bb, thus:
+
+```{r}
+bb=function(x,y) {
+  g=lgamma(11)+lgamma(12)+lgamma(x+y+1)+lgamma(21-x-y)
+  g=g-lgamma(x+1)-lgamma(11-x)-lgamma(y+1)-lgamma(11-y)
+  g=g-lgamma(22)
+  exp(g)
+}
+```
+
+We can draw the graph for each possible $y$. Here, distributions will be drawn for $y=0, 1, 2, 5, 8, 9, 10$.
+
+```{r}
+x <- seq(0,10,1)
+y <- c(0,1,2,5,8,9,10)
+par(mfrow=c(3,3))
+px <- vector(mode='numeric', length = 11)
+for(i in 1:length(y)){
+  for(k in 1:length(x)){
+    px[k] <- bb(x[k],y[i])
+  }
+    plot(x, px, type = 'l')
+}
+```
+
+# Lab Exercises 3 Solutions
+
+## Q1
+We looked at this question last week. Use Monte Carlo simulation to get the same answers as last week to 2 decimal places.
+
+### (a) A basketball fan watches Michael Jordan and of 100 randomly chosen free throws in 20 games, Jordan makes 89 of them. Given a uniform prior, find the posterior density for the true proportion of successful free throws and a 95% credible interval. Plot this density.
+
+Recall that the posterior is a $Beta(90,12)$ and the answer in R is
+
+```{r}
+qbeta(0.025,90,12)
+qbeta(0.975,90,12)
+```
+
+We need to simulate a $Beta(90,12)$ here. The R command $rbeta(k,a,b)$
+Simulates a sample of size k from a Beta(a,b) density. Let's start with 100 MC sample
+
+```{r}
+thetaj <- rbeta(100,90,12)
+quantile(thetaj,c(0.025,0.975))
+```
+
+which returns (for example: remember, this is a random sample) $(0.819, 0.938)$, and so even 100 MC samples gives 1-2 decimal places of accuracy. Let's try 1000 samples:
+
+```{r}
+thetaj <- rbeta(1000,90,12)
+quantile(thetaj,c(0.025,0.975))
+```
+
+which gives $(0.8200480, 0.9327415)$ again 1-2 decimal accuracy. Now 10000 samples
+
+```{r}
+thetaj <- rbeta(10000,90,12)
+quantile(thetaj,c(0.025,0.975))
+```
+
+which gives $(0.8144603, 0.9369110)$ and we have 3 decimal places of accuracy. We can plot the histogram of our sample to approximate the true density:
+
+```{r}
+hist(thetaj,50)
+```
+
+where 50 is the number of bines in the histogram hist(theta) uses a default number of bins.
+
+R has a density estimator/smoother:
+
+```{r}
+plot(density(thetaj))
+```
+
+The plot below shows a $beta(90,12)$ density overlaid onto the density estimate above from 100000 MC samples. The commands are
+
+```{r}
+plot(density(thetaj),xlim=c(0.7,0.97))
+theta1 <- seq(0,1,.001)
+lines(theta1,dbeta(theta1,90,12),type='l',lty=2)
+```
+
+ 
+###(b) The same fan watches Shaquille O'Neal make only 40 out of 100 randomly chosen free throws from 20 games. Find the posterior density for his success proportion using a uniform prior and a 95% credible interval. Plot this density.
+
+Recall that $\theta_{O} \mid y_{O} \sim Beta( 1, 61)$ and a 95% CrI was $(0.309, 0.498)$. So,
+
+```{r}
+thetao <- rbeta(100,41,61)
+quantile(thetao,c(0.025,0.975))
+```
+
+gives $(0.3280602, 0.4925870)$ and we have 1-2 place accuracy.
+
+```{r}
+thetao <- rbeta(10000,41,61)
+quantile(thetao,c(0.025,0.975))
+```
+
+gives $(0.3088187, 0.4962563)$ and we have 2 decimal places of accuracy.
+
+```{r}
+thetao <- rbeta(100000,41,61)
+quantile(thetao,c(0.025,0.975))
+```
+
+gives $(0.3093610, 0.4979226)$ and 3 places of accuracy.
+
+
+###(c)	Use what you know about these two players (if anything) to construct a Beta prior distribution for their success proportions at making free-throws and repeat the analysis in (a) and (b).
+
+We refer you to Lab 2 Solutions: Suppose you suspect that Jordan's percentage is somewhere between 0.75 and 0.95. Based on a prior mean of 0.85 and prior variance of $0.0025 = [(0.95-0.75)/4]^2$, we derived $a = 42.5 and b.= 7.5$.
+
+Now, $Y_{j} \sim Bin(n =100, \theta_{J})$	and $\theta_{J} \sim Beta(42.5, 7.5)$, $p(\theta_{J}  \mid Y_{j} ) \propto p( Y_{j}  \mid \theta_{J} ) p(\theta_{J} ) \propto \theta_{J}89 (1' \theta_{J} )11\theta_{J}41.5 (1' \theta_{J} )6.5 = \theta_{J}130.5 (1' \theta_{J} )17.5$
+
+So, $\theta_{J}  \mid Y_{j} \sim Beta( 131.5, 18.5)$.
+
+The mode estimate is now $130.5/148 = 0.882$; posterior mean is $131.5/150 = 0.877$ and a 95% posterior CrI is $qbeta(0.025,131.5,18.5) = 0.820$ and $qbeta(0.975,131.5,18.5) = 0.924$.
+
+Re-doing it with 10000 MC samples
+
+```{r}
+thetaj <- rbeta(10000,131.5,18.5)
+quantile(thetaj,c(0.025,0.975))
+```
+
+which gives $(0.8200350, 0.9244421)$ We refer you to Lab 2 Solutions.
+
+Now suppose that you suspect that O'Neal's percentage is very close to 50% and very likely between 40 and 60%. We choose a prior mean of 0.5 with prior variance of [(0.6-0.4)/4]^2 = 0.0025.
+
+This means that (from before):
+
+$$Y_{O} \sim Bin(n =100, \theta_{O})	and \theta_{O} \sim Beta(49.5, 49.5)$$
+
+p(\theta_{O} \mid yO ) \propto p( yO \mid \theta_{O} ) p(\theta_{O} ) \propto \theta_{O}40 (1' \theta_{O} )60 \theta_{O}48.5 (1' \theta_{O} )48.5 = \theta_{O}88.5 (1' \theta_{O} )108.5
+
+So, $\theta_{O} \mid yO \sim Beta(89.5, 109.5)$.
+ 
+The mode estimate is now 88.5/197 = 0.449; posterior mean is $89.5/199 = 0.450$ and a 95% posterior CrI is $qbeta(0.025,240.5,260.5) = 0.381$ & $qbeta(0.975,240.5,260.5) = 0.519$.
+
+Re-doing it with 10000 MC samples
+
+```{r}
+thetao <- rbeta(10000,89.5,109.5)
+quantile(thetao,c(0.025,0.975))
+```
+
+which gives $(0.3800281, 0.5193504)$
+
+###(d) What is the probability that Jordan's free-throw percentage is above 90% from part (a)? from part (c)?
+
+Instead of the Lab 2 Solutions, Question 3 (d), e.g. 
+
+```{r}
+1-pbeta(0.9,90,12)
+```
+
+given our vector $\theta$ we can approximate this by
+
+```{r}
+sum(thetaj>0.9)/10000 # (or: mean(theta>0.9))
+```
+
+###(e) How many iterations did you need to get 2 decimal places of accuracy? What about 3 or more? How many places of accuracy do we need?
+
+It took 100 iterations to get 1-2 places and up to 1000000 to get 3 places of accuracy. In this problem, 2 decimal places is clearly enough accuracy to make decisions about a proportion which is between 0 and 1.
+
+###(f) How can we compare the two success proportions? Is Jordan significantly better than O'Neal? What is the probability that Jordan is better than O'Neal? Use MC simulation to answer.
+
+We just need to estimate $Pr(\theta_{J} > \theta_{O})$ . In the samples of size 100000, all 100000 iterates had $\theta_{J} > \theta_{O}$, i.e.
+
+```{r}
+length(thetaj[thetaj>thetao])	# (or: mean(thetaj>theta0))
+```
+
+returned 100000, so our estimate is $Pr(\theta_{J} > \theta_{O}) \sim = 1$.
+
+###(g) More interestingly, do this analysis for if O'Neal's performance had been 80 out of 100. Provide an appropriate graph.
+
+E.g.
+
+```{r}
+thetaj <- rbeta(1000000,90,12)
+quantile(thetaj,c(0.025,0.975))
+thetao <- rbeta(1000000,81,21)
+quantile(thetao,c(0.025,0.975))
+```
+
+I.e., substantial overlap (see graph too)
+
+```{r}
+mean(thetaj>thetao)
+```
+
+I.e., we still have 'statistical significance'!
+
+```{r}
+theta <- seq(0,1,.001)
+plot(theta,dbeta(theta,90,12),type='l')
+lines(theta,dbeta(theta,81,21),type='l')
+```
+
+## Q2 
+Consider again the placenta previa example, where y = no. of female births and $\theta	= Pr(female birth)$; we will take a sample of $n=1000$.
+
+###(a)	After consultation with a specialist in Placenta previa, you place a $Beta(100,100)$ prior on \theta. Show that this means that you (and the doctor) are more than 95% sure that $0.4 < \theta < 0.6$; but that you are undecided whether $\theta > 0.5$ OR $\theta < 0.5$.
+
+If we have $\theta \sim Beta(100,100)$ we can easily answer questions such as $Pr(0.4 < \theta < 0.6) = pbeta(0.6,100,100) - pbeta(0.4,100,100) = 0.9956798 > 0.95$
+And
+$Pr(\theta < 0.5) = pbeta(0.5,100,100) = 0.5$
+thus verifying the two statements in the question. We could also do this via MC simulation:
+
+```{r}
+theta <- rbeta(10000,100,100) 
+length(theta[theta<0.5])/10000 #(or: mean...) 
+(length(theta[theta<0.6])-length(theta[theta<0.4]))/10000
+```
+
+Which gives $0.5032$ and $0.9949$ which are correct to 2-3 decimal places.
+
+###(b) Is this a reasonable prior distribution?
+
+Good question. It represents an expert's opinion and puts almost all probability between 0.4 and 0.6. It is pictured below
+
+```{r}
+x1 <- seq(0.01,1,0.01)
+px <- dbeta(x1,100,100)
+plot(x1,px,type = 'l', xlim=c(0.3,0.7))
+```
+
+###(c)	(Masters).
+What does this prior imply about the possible observations, y, before we observe any data? Does this seem reasonable?
+
+Recall the prior predictive density is a beta-binomial							
+$$p(y_1) =	\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + a)\Gamma(n-y_1 + b)}{\Gamma(a+b+n)},\qquad y_1 = 0,\dots,
+n$$
+For a=b=100 we have
+
+$$
+p(y_1) =	\frac{\Gamma(200)}{\Gamma(100)\Gamma(100)}\frac{\Gamma(n + 1)}{\Gamma(y_1	+ 1)(n - y_1 + 1)}\frac{\Gamma(y_1 + 100)\Gamma(n-y_1 + 100)}{\Gamma(100+100+n)},\qquad y_1 = 0,\dots,n
+$$
+
+Let's consider $n=10, 100, 1000, 10000$
+ 
+```{r}
+bb2 <- function(y,n,a,b) {
+  g1 <- lgamma(a+b)-(lgamma(a)+lgamma(b))
+  g2 <- lgamma(n+1)-(lgamma(y+1)+lgamma(n-y+1))
+  g3 <- (lgamma(y+a)+lgamma(n-y+b))-lgamma(a+b+n)
+  g <- g1+g2+g3
+  exp(g)
+}
+```
+
+```{r}
+
+n <- c(10,100,1000,10000)
+a <- 100
+b <- 100
+
+par(mfrow=c(2,2))
+
+for(i in 1:length(n)){
+  y <- seq(0,n[i],1)
+  py <- vector(mode='numeric', length = n[i])
+  for(k in 1:length(y)){
+    py[k] <- bb2(y[k],n[i],a,b)
+  }
+    plot(y, py, type = 'l', main = paste("n = ",n[i]))
+}
+```
+
+
+The prior predictive puts most probability on y for y/n = 0.4 to 0.6 as would be expected from the Beta(100,100) prior which does the equivalent thing.
+
+###(d)	The sample of $n=1000$ is taken and 511 males are born. Update your opinion about whether $\theta > 0.5$ OR $\theta < 0.5$.
+
+$\theta	\mid y=489, n=1000 \sim Beta(489+100, 511+100) = Beta(589, 611), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,589,611) = 0.263$. The density is plotted below with prior on top and posterior on bottom.
+```{r}
+par(mfrow=c(2,1))
+x <- seq(0.001,1,0.001)
+plot(x,dbeta(x,100,100),type='l')
+plot(x,dbeta(x,589,611),type='l')
+```
+###(e) Repeat (d) under a (i) Beta(1,1) prior (ii)	Beta(a,b) prior where a and b are chosen so that the prior mean = 0.5 and prior standard deviation = 0.1
+
+####(i)	
+Under a $Beta(1,1)$ prior, $\theta \mid y=489, n=1000 \sim Beta(489+1, 511+1) = Beta(490, 512), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,490,512) = 0.243$
+
+(ii)	$\frac{a}{a+b} = 0.5 \implies a = b$	and	$\frac{a + b}{(a + b)^2 (a + b + 1)}=\frac{a^2}{4a^2(2a+1)}=\frac{1}{8a+4}=0.1^2\implies a = b = 12$
+Under a $Beta(12,12)$ prior prior, $\theta \mid y=489, n=1000 \sim Beta(489+12, 511+12) = Beta(501, 523), Pr(\theta >0.5 \mid y=489, n=1000) = 1 - pbeta(0.5,501,523) = 0.246$
+
+###(f) How sensitive are the results to choice of prior?
+
+The results seem not sensitive to prior choice, especially for priors with mean close to 0.5.
+
+
+## Q3 Adapted from BDA, Section 1.12, question 1.
+Let $y \sim N (\theta ,4)$ , so that $y$ is Normally distributed with unknown mean $\theta$ and known variance $4$. Let the prior distribution on the mean $\theta$ be
+
+$$
+\theta \quad 1 \quad 2 \\
+Pr(\theta)\quad 0.5\quad 0.5
+$$
+
+Thus $\theta$ can only take the values $1$ or $2$, both with equal probability.
+
+###(a) A single sample of $y=1$ is observed. Update the discrete probability distribution for $\theta$ using Bayes' rule. i.e. find $p(\theta \mid y = 1)$.
+$$
+p(\theta \mid y = 1)	\propto p( y = 1\mid \theta ) p(\theta ) = (8\pi )^{-0.5}exp\left(-\frac{1}{8}(y-\theta )^2\right)p(\theta )	\\
+=dnorm(1,\theta,\sqrt4)/2
+$$
+
+for	$\theta = 1$ and then $\theta = 2$
+So the posterior is $Pr ( \theta =1 \mid y=1) = 0.531, Pr (\theta =2 \mid y=1) = 0.469$.
+
+###(b) A single observation of $y=1.5$ is observed. Update the prior, ignoring the data point in part (a).
+$p(\theta \mid y = 1.5) \propto p( y = 1.5 \mid \theta ) p(\theta ) = (8\pi )^{-0.5}exp\left(-\frac{1}{8}(1.5	- \theta)^2 p(\theta )$
+```{r}
+names <- c("theta",	"Prior", "Likelihood","Product","Posterior")				
+one <- c(1,	0.5,	0.1933,		0.09665	,0.5	)					
+two <- c(	2	,0.5,	0.1933,		0.09665,	0.5	)					
+sum <- c("","",	"Sum",	0.1933,"")
+
+data <- rbind(one,two,sum)
+knitr::kable(data,row.names = FALSE,col.names = names)
+```
+
+$=dnorm(1.5,\theta,sqrt(4))*0.5	for  \theta = 1 and then \theta = 2$						
+So the posterior is $Pr (\theta =1 \mid y=1.5) = 0.5,Pr ( \theta =2 \mid y=1.5) = 0.5$.
+
+Clearly this point doesn't give us ANY ex_{t}ra info about \theta since it is exactly half way between 1 and 2!
+
+###(c) Update the prior using Bayes' rule after observing both sample points in (a) and (b). That is we have a sample of size $2, y1 = 1; y2 = 1.5.$
+
+$$p(\theta \mid y = 1,1.5)	\propto p( y = (1,1.5) \mid \theta ) p(\theta ) = (8\pi)^{-1}exp\left(-\frac{1}{8}\left[(1	- \theta)^2 +(1.5	- \theta)^2\right]\right)p(\theta )	
+$$
+
+	\theta	Prior	Likelihood	Product	Posterior	
+	1	0.5	0.0386	0.0193	0.531	
+	2	0.5	0.0340	0.017	0.469	
+			Sum	0.0363		
+$=dnorm(1,\theta,sqrt(4))* dnorm(1.5,\theta,sqrt(4))*0.5$  for	$\theta = 1$ and then $\theta = 2$
+
+So the posterior is $Pr ( \theta =1 \mid y=1) = 0.531,Pr ( \theta =2 \mid y=1) = 0.469$.
+This is the same as in (a). The point 1.5 is exactly between 1 and 2 and gives NO information either way about $\theta =1$ or $2$, as shown in (b).
+
+###(d) Use probability rules to find the marginal likelihood p(y), i.e. the likelihood unconditional on $\theta$. Plot this likelihood over a sensible grid of points.
+
+###(e) What is the mean and variance of $p(y)$?
+
+###(f) Can you simulate from $p(y)$? If so, simulate a sample of size $10000$ and check the sample mean and variance are close to the theoretical values in (b). Estimate a 95% CrI for y based on the sample.
+
+Solution :
+
+###(d)
+Use probability rules to find the marginal likelihood p(y), i.e. the likelihood unconditional on \theta. Plot this likelihood over a sensible grid of points.
+ 
+
+p( y) = \sum p( y \mid \theta ) p(\theta ) = \sum	(8\pi )	'0.5				'	1	( y '	\theta )	2		p(\theta )	
+			exp		8						
+																						
+= 0.5(8\pi )	'0.5			'	1	( y ' 1)	2					'	1	( y	' 2)	2					
+		exp		8				+ exp		8								
+																						
+e.g.
+y=seq(-15,10,.001) py=(dnorm(y,1,sqrt(4))+dnorm(y,2,sqrt(4)))*0.5 plot(y,py,type='l')
+
+###(e)
+What is the mean and variance of p(y)?
+
+E(Y) = E[E(Y \mid \theta )] = E(\theta )
+
+= 1* 0.5 + 2 * 0.5 = 1.5
+
+Var(Y) = Var[E(Y \mid \theta )]+ E[Var(Y \mid \theta )] = Var(\theta ) + E[4]
+
+=	E(\theta 2 ) ' E(\theta )2 + 4
+
+=	12 * 0.5 + 22 * 0.5 ' 1.52 + 4
+
+=	4.25
+
+You could use integration here but it gets messy!
+
+###(f)
+Can you simulate from p(y)? If so, simulate a sample of size 10000 and check the sample mean and variance are close to the theoretical values in (e). Estimate a 95% CrI for y based on the sample.
+
+To simulate note that 50% of values (on average) should come from the N(1,4) and 50% on average from the N(2,4). So first simulate 10000 uniform numbers in (0,1). Each time the uniform number > 0.5
+simulate from the N(1,4) otherwise simulate from N(2,4). A histogram of this sample is ->
+
+The R code is
+
+```{r}
+y <- 0
+for(k in 1:10000) {
+  if(runif(1,0,1)>0.5) {
+    y[k]=rnorm(1,2,sqrt(4))
+    } else {
+      y[k] <- rnorm(1,1,sqrt(4))
+    }
+  }
+```
+
+The mean and variance of my sample is 1.51 and 4.24 respectively as expected. A 95% CrI for y is quantile(y,c(0.025,0.975)) = (-2.61,5.42)
+
+This is an example of a mixture of 2 Normal distributions.
+
+
+# Lab Exercises 4 Solutions
+
+## Q1 [Classical method revision]																			
+
+### (a) and (b)	
+
+$$
+\begin{aligned}
+	f(x_{1},x_{2},\cdots x_{n} \mid \mu,\sigma) 
+  	&= \prod\limits_{i=1}^{n}
+  	  \frac
+  	    {1}
+  	    {\sigma^{2} \pi}
+  	 exp\left(
+  	      -\frac
+  	         {1}{2}
+  	       \left[
+  	       \frac
+  	         {x_{i}-\mu}
+  	         {\sigma}
+  	       \right]^{2}
+  	    \right) \\
+	l(\mu,\sigma) 
+	  &= -n\text{log}\sigma 
+	     -\frac
+	        {n}{2}
+	     \text{log}2\pi 
+	     -\frac
+	        {1}{2\sigma^{2}}
+	     \sum(x_{i}-\mu)^{2} \\
+  \frac{\delta l}{\delta \mu} 
+    &= \frac
+        {1}{\sigma^{2}}
+       \sum(x_{i} - \mu); \qquad
+    \frac
+      {\delta l}{\delta \sigma}
+     = -\frac
+          {n}{\sigma}
+       + \sigma^{-3}\sum(x_{i} ' \mu)^{2} \\
+  \hat{\mu}_{ML} 
+    &= \bar{x}; \qquad 
+  \hat{\sigma}_{ML} 
+     =\frac
+        {1}{n}
+      \sum\limits_{i=1}^{n}(x_{i} - \bar{x})^{2}
+\end{aligned}
+$$
+
+
+###(c)
+Recall that the sampling distribution of the mean for a given variance is $\frac{\bar{X}- \mu}{\sigma/\sqrt{n}}\sim N(0,1)$
+
+$$
+P\left(z_{\alpha / 2}	\leq \frac{\bar{X}- \mu}{\sigma/\sqrt{n}} \leq z_{(1 - \alpha / 2)}\right) = 1 - \alpha \\
+P(\bar{X} - z_{(1-\alpha / 2)}\sigma /\sqrt{n} \leq \mu \leq \bar{X} - z_{\alpha / 2)}\sigma /\sqrt{n}) = 1 - \alpha \\
+100(1- \alpha ) \% CI : (\bar{X} - z_{(1-\alpha / 2)}\sigma /\sqrt{n} , \bar{X} + z_{(1-\alpha / 2)}\sigma /\sqrt{n})
+$$ 
+
+###(d)
+It can also be shown that with $\hat{\sigma} = \sqrt{ \frac{1}{n}\sum\limits_{i=1}^{n}(x_{i} - \bar{x})^{2}}$  , we have a known sampling distribution in	$\frac{n\hat{\sigma}^{2}}{\sigma^{2}}\sim \chi_{n}^{2}$. This is the chi-squared distribution with $n$ degrees of freedom.
+
+Thus:
+
+$$
+P\left(\chi_{n}^{2}(\alpha / 2)\leq \frac{n\hat{\sigma}^{2}}{\sigma^{2}} \leq \chi_{n}^{2}(1 - \alpha / 2)\right) = 1 - \alpha \\
+P\left(\frac{n\hat{\sigma}^{2}}{\chi_{n}^{2}(1 - \alpha / 2)} \leq \sigma^{2} \leq \frac{n\hat{\sigma}^{2}}{\chi_{n}^{2}(\alpha / 2)}\right) = 1 - \alpha \\
+100(1- \alpha ) \% CI : \left(\frac{n\hat{\sigma}^{2}}{\chi_{n}^{2}(1 - \alpha / 2)},\frac{n\hat{\sigma}^{2}}{\chi_{n}^{2}(\alpha / 2)}\right)
+$$ 
+
+##Q2
+The data in this question is contained in the file "chicken.txt" (or "stat3120data.xls") which you can download from the Blackboard site. It is taken from question 3, section 3.10 of BDA. Consider the calcium flow data set in this file. The effects of a magnetic field on calcium flow in chicken brains have been measured. Assuming a diffuse prior distribution on the unknown means and that the sample variances equal the true variances:
+
+###(a)
+Find point estimates and 95% CrIs for the treatment and control means $(\mu_{T}\> \text{and} \> \mu_{C})$ in the calcium flow example. Plot the posterior densities.
+
+From Lecture 4 we know in general that:
+
+$$
+  \mu \mid y, \sigma^{2} \sim N\left(\mu_{1}=\frac{n\bar{y}/\sigma^{2} + \mu_{0}/\sigma_{0}^{2}}{n/\sigma^{2}+1/\sigma_{0}^{2}},\> \sigma_{1}^{2} = \frac{1}{n/\sigma^{2}+1/\sigma_{0}^{2}} \right)
+$$  
+
+and that under a diffuse prior $\sigma_{0}^{2} \implies \infty$ , so that $\mu \mid y \sim N (\bar{y},	\sigma^{2}/n)$.	
+To input the data, copy and paste from Excel using	
+
+```{r, eval = FALSE}
+y_{t} <- scan(file="") or even y_{t}<-scan()
+```
+
+followed by enter, paste, and enter (and the same for yc); or alternatively read from a tex_{t} file:
+
+```{r}
+chicken <-readRDS("Labs/LabData/chicken.rds") 
+yt <-chicken[1:36,2] # treatment data 
+yc <- chicken[1:32,1] # control data
+```
+
+The sample means and variances are :
+
+Treatment: $\bar{y}_{T}  = 1.173; s_{T}^{2}  = 0.04$
+
+in R: 
+
+```{r}
+mean(yt)
+var(yt)
+```
+
+Control: $\bar{y}_{C} = 1.013; s_{C}^{2}  = 0.0576$
+
+Thus the posterior densities are treatment: $\mu_{T}  \mid y \sim N (1.173, 0.04 36)$.
+
+And control: $\mu_{C} \mid y_{C}  \sim N (1.103,	0.0576 32)$. These densities are plotted below:
+
+```{r}
+x=seq(0.5,1.5,by=0.005)
+
+par(mfrow=c(2,1))
+plot(x,dnorm(x,mean(yt),sqrt(var(yt)/length(yt))),type='l')
+title('treatment')
+
+plot(x,dnorm(x,mean(yc),sqrt(var(yc)/length(yc))),type='l')
+title('control')
+```
+
+Point estimates for the unknown means are $\hat{\mu}_{T}  = y_{t}  = 1.173; \muC  = yC  = 1.013$.
+
+95% probability intervals are $\mu_{T}  \pm 1.96	\sigma^{2}		\sigma^{2}	
+	T ; \mu_{C} \pm 1.96	C	
+	n_{t}	nC$	
+In R this is:	
+
+```{r}
+mean(yt)+qnorm(0.975)*sqrt(var(yt)/length(yt)) 
+mean(yt)-qnorm(0.975)*sqrt(var(yt)/length(yt))
+```
+
+This leads to (1.108, 1.238) for the treatment mean and (0.930, 1.096) for the control mean.
+
+###(b)	
+Use simulation to find the same estimates and CrIs (to 2 decimal places). How long must you run the simulation to achieve this accuracy?
+
+1000 Monte Carlo samples for the treatment mean:
+
+```{r}
+mut <- rnorm(1000,mean(yt),sqrt(var(yt)/length(yt)))
+```
+
+Find the quantiles using:
+
+```{r}
+quantile(mut,c(0.025,0.975))
+```
+
+
+###(c)	
+Estimate $Pr(\muΤ > 1 \mid y, \sigma^{2})$ for the treatment group using the exact result and simulation.
+
+$$Pr(\muΤ > 1 \mid y, \sigma2) = 1-Pr(\muΤ < 1 \mid y, \sigma2)$$
+```{r}
+1-pnorm(1,mean(yt),sqrt(var(yt)/length(yt)))
+```
+= 0.9999999 using R.
+
+Using an MC sample of 10000 we obtain
+
+```{r}
+mut <- rnorm(10000,mean(yt),sqrt(var(yt)/length(yt))) 
+length(mut[mut>1])/10000 # or simply mean(mut>1)
+```
+
+which gives 1, and so our estimate is >9999/10000 = 0.9999
+
+###(d)
+The scientist who collected the data reports that, from physical theory, the mean fluid flow in chicken brains can only be between 0.4 and 1.8. Repeat parts (a) and (c) using this information to construct a suitable prior distribution for the means. Plot your new prior and new posterior. How sensitive are your results to the different priors?
+
+If we allow 6 standard errors between 0.4 and 1.8 this gives a prior variance of $\sigma 02 = 0.0544$, with a prior mean of (0.4+1.8)/2 = 1.1. So
+
+$$
+36 *1.173	/ 0.04 + 1.1/ 0.0544		2		1		
+\mu	T	\mid y	T	,\sigma		\sim N	\mu	1	=	36 / 0.04 + 1/ 0.0544	,\sigma	1	=			
+														36 / 0.04 + 1/ 0.0544		
+																
+						= N (\mu1	= 1.1715,\sigma12	= 0.00109)
+$$
+
+This is identical to 2 decimal places to that using the diffuse prior. For the control mean we have
+
+$$
+		\mid y			2					32 *1.013/ 0.0576 + 1.1/	0.0544		2		1		
+\mu	C		C	,\sigma		\sim N	\mu	1	=	32 / 0.0576 + 1/ 0.0544	,\sigma	1	=			
+														32 / 0.0576 + 1/ 0.0544		
+																
+						= N (\mu1	= 1.0157;\sigma12 = 0.00174)							
+$$
+
+The posterior is a little tighter than previously. Plots of each prior and posterior are below using R commands
+
+
+```{r}
+x <- seq(0,2.0,by=0.005)
+par(mfrow=c(4,1))
+plot(x,dnorm(x,1.1,sqrt(0.0544)),type='l')
+plot(x,dnorm(x,1.1715,sqrt(0.00109)),type='l')
+title('treatment')
+plot(x,dnorm(x,1.1,sqrt(0.0544)),type='l')
+plot(x,dnorm(x,1.0157,sqrt(0.00174)),type='l')
+title('control')
+```
+
+95% probability intervals are now treatment (1.107, 1.236) and control (0.934, 1.098). These intervals are not sensitive to the different priors we have considered (not shown).
+
+## Q3
+For the football spread data in Lecture 1 (also Section 1.6 in BDA), we have n = 672 differences, d, between the point spread and the actual spread. From these we have a sample
+
+mean of d = 0.07 and a sample variance of s2=13.862.
+
+###(a)
+Assuming that $\sigma^2 =142$, find the posterior distribution for the unknown mean difference.
+$$									2				2											
+	2					nd /\sigma		+ \mu0 /\sigma		2					1			2		
+									0											
+Again \mu \mid y,\sigma					=						2			2		,\sigma1	=			2		2		, and, when \sigma 0	→ ∞ ,	
+			\sim N \mu1				n /\sigma								n /\sigma		+ 1/					
+										+ 1/\sigma 0							\sigma 0				
+		2						2			\sigma^{2}												
+																							
+				\mu1	= d ,\sigma1	=														
+\mu \mid y,\sigma  \sim N				n													
+																										
+Thus, in this case,																							
+		2										2		142												
+\mu \mid y,\sigma			\mu1	= 0.07,\sigma1	=		= 0.2917								
+		\sim N$$																					
+
+###(b)
+Find a 90% probability interval for the unknown mean difference, $\mu, and the posterior mean and modal estimates, given that $\sigma^{2}=142$.
+
+2			2		142				
+\mu \mid y,\sigma		\mu1	= 0.07,\sigma1	=		= 0.2917		means that a 90% interval is	
+	\sim N				672				
+									
+
+0.07 ± z0.95 *   0.2917 = 0.07+-qnorm(0.95,0,1)*sqrt(0.2917) = (-0.818, 0.958).
+ 
+STAT3120– Lab 4	6.
+
+##Q4
+From Q3 now consider that d $\sim N(0, \sigma^2)$.
+
+###(a) 
+Find the posterior distribution for the unknown variance parameter. Plot this density.
+ 
+
+Using the prior $\sigma^2 \mid \mu, y$ where we have
+
+$$
+\sigma^{2} \mid \mu =
+
+p(\sigma^{2} ) \propto (\sigma^{2} )'1	leads to the posterior	
+\sim			, B = \sum( yi ' \mu)	2		,	
+	I.G. A = n					
+		2			2					
+											
+					672		2			
+				672 , B =		\sumdi			
+0, d \sim I.G. A	=			i=1			.	
+					2			
+				2							
+$$
+
+We know that $n=672$, $d = 0.07$; $s2 = 13.862 = 6711$ $\sum(di ' d )2$ , and so $671*13.862 = \sumdi 2 ' 672 * 0.072$ and $\sumdi 2 = 671*13.862 + 672 * 0.072 = 128902.12$. Thus, $\sigma^{2} \mid \mu = 0$, $d \sim I.G.(A = 336, B = 64451.06)$, which is equivalent to $1/\sigma^{2} \mid \mu = 0, d \sim Gamma(A = 336, B = 64451.06)$.
+
+We can use the function code in Lecture 4,
+
+```{r}
+invgamm<-function(x,a,b) {
+  lg=a*log(b)-lgamma(a)-(a+1)*log(x)-b/x 
+  return(exp(lg))
+} # followed by
+A <- 336
+B <- 64451.06
+x <- seq(100,300,by=0.01)
+plot(x,invgamm(x,A,B),type='l')
+```
+
+###(b)
+Find a 90% CrI for the unknown variance parameter, $\sigma^2$, and estimates of the posterior mean and mode.
+
+####(1)	
+Find a 90% interval for a $Gamma(336, 64451.06)$ and invert it:
+
+```{r}
+1/qgamma(c(0.95,0.05),A,B)
+```
+
+which gives $(175.7556, 210.3299)$; alternatively,
+
+####(2) 
+simulate an MC sample from a Gamma(336, 64451.06) and invert the sample 
+
+```{r}
+g <- rgamma(10000,A,B)
+quantile(1/g,c(0.05,0.95))
+```
+
+###(3)
+which gives (176.1946, 210.7591). (Note: fairly noisy even for 10^6 samples!) 
+
+```{r}
+mean <- B/(A-1)
+mode <- B/(A+1)
+```
+
+###(c)	
+A betting expert from Centrebet suggests to you that it is virtually impossible for the variance of d to go below 160. Use this information to construct a suitable prior for $\sigma^{2}$ and then find the new posterior. How sensitive are your results to the different priors?
+
+One approach would be to use the same prior density, but restrict it to be 0 when $\sigma^2<160$. This
+basically means that we have the same posterior too, but again restricted to 0 for $\sigma^2<160$. This is plotted below.
+
+
+It looks the same because the probability
+$$Pr(\sigma^{2} < 160 \mid \mu = 0, d ) = Pr(I.G.(A = 336, B = 64451.06) < 160) = Pr(Gamma(A = 336, B = 64451.06) > 1/160)$$
+
+is $1-Pr(Gamma(1/160,336, 64451.06)) = 1 - 0.99972 = 0.00028$: almost all of the posterior distribution is above 160 anyway. We could also take an MC sample and reject any sampled points that were below $160$: 
+
+```{r}
+g <- rgamma(10000,336,64451.06)
+g <- g[g<1/160]
+quantile(1/g,c(0.05,0.95))
+```
+
+which gives $(176.1973, 210.7595)$, which is basically unchanged. (One point was deleted here!)
+
+End of Lab 4.
+
+
+#Lab Exercises 5 Solutions
+
+##Q1
+
+###(a)
+The variance is known.
+
+Suppose that we have a sample of size n, independently generated from a N(\mu,\sigma2) distribution. The likelihood term now is
+$$
+p(y \mid \mu,\sigma^{2}	1		n(\mu ' y)	2) \propto exp2\sigma	2		
+$$									
+
+####(i) 
+Using the conjugate prior on the mean is also a Normal: $\mu \sim N(\mu_{0},\sigma_{0}^{2})$
+$$
+				2		2							
+		ny /\sigma							1			
+\mu \mid \sigma	2			+ \mu0 /\sigma 0	,						
+			2		2			2				
+		, y \sim N	n /\sigma		+ 1/			n /\sigma		+ 1/	2	
+						\sigma 0					\sigma 0		
+$$
+
+####(ii)
+Using the noninformative prior let \sigma 02 → ∞ , we see that
+$$
+	2			2	'1/ 2		n			2			
+p(\mu \mid \sigma		, y)	→  (\sigma		n)	exp '			(\mu ' y)			,	
+							2\sigma	2					
+$$											
+
+i.e.,
+
+$\mu	\mid \sigma^{2} , y \sim N ( y, \sigma^{2}  n)$.
+
+###(b)	
+The mean is known. The likelihood here is:
+$$
+	2		2		'n / 2		n	( yi ' \mu)	2		
+p( y \mid \mu,\sigma		) \propto (\sigma		)			' \sum				
+									2			
+						exp		2\sigma			.	
+							i=1	$$				
+[it is not the same as the likelihood of part(a) as the variance is now a parameter]
+
+####(i) 
+Conjugate prior
+
+The conjugate prior for the inverse gamma distribution is 
+$$p(\sigma	2		2		'(\alpha +1)				\beta	,	
+		) \propto (\sigma		)		exp	'					
+								\sigma^{2}$$	
+
+ 
+and so in general the posterior is	
+$$p(\sigma^{2} \mid \mu, y) \propto p( y \mid \mu,\sigma^{2} ) p(\sigma^{2} \mid \mu)					
+	2		'( n	+\alpha +1)			1		\sum	( y	i	' \mu)2		,			
+\propto (\sigma		)	2														
+					exp '	\sigma^{2}				2	+ \beta				
+																	
+									= n + \alpha , B =	\sum	( yi ' \mu)	2		
+				2 \mid \mu, y \sim I.G. A					+ \beta$$	
+which is equivalent to $\sigma^{2}$.
+
+####(ii) 
+The natural choice of prior is $\alpha = \beta = 0$ which corresponds to	$p(\sigma^{2} ) \propto (\sigma^{2} )'1$ . This	is the most popular choice among Bayesians for the prior of a variance parameter, and we will discuss this choice in more detail later. It leads to:
+
+$$
+\sigma^{2}			, B =	\sum( yi ' \mu)	2		,	
+	\mid \mu, y \sim I.G. A = n						
+		2		2	$$			
+
+###(c) 
+Both unknown
+
+For this case, our aims are to find:
+
+	joint posterior	$\mu,\sigma^{2} \mid y$										
+	marginal posterior	distributions	$\mu \mid y$ or	$\sigma^{2}	\mid y$	
+	conditional posterior distributions $\mu \mid y,\sigma^{2}$	or $\sigma^{2}	\mid \mu, y$	
+####(i) 
+Noninformative prior	$p(\mu,\sigma2) \propto 1/\sigma^{2}$.						
+The marginal posterior are
+$$\mu \mid y \sim tn'1 ( y, s2  n).												
+					n '1				(n '1)s	2						
+	2	\mid y  \sim				, \beta										
+\sigma			I.G. \alpha	=			=									
+					2			2	$$						
+The conditional posteriors are										
+$$\mu \mid y,\sigma^{2} \sim	N ( y,\sigma^{2}  n)											
+				\sum( y_{t} ' \mu)	2								
+\sigma^{2} \mid y, \mu \sim I.G n ,										
+			2		2$$
+Using the above results and MC methods, we are able to find the joint posterior $\mu	,\sigma^{2} \mid y$ numerically.
+
+####(ii)
+For a family of conjugate priors, please see BDA Section 3.3.
+
+## Q2
+Simulate from the Monte Carlo scheme 1. $p(\mu\mid y)$ 2. $p(\sigma^2 \mid y,\mu)$ for the treatment sample in the chicken flow example (in the file stat3120data.xls). Save the results for use in Q3.
+
+###(a)	
+Obtain both the histogram estimate and the mixture estimate of $\mu_{T}$.
+
+###(b)
+Obtain both the histogram estimate and the mixture estimate of $\sigma_{T}^{2}$.
+
+###(c)
+Obtain 95% intervals around both the histogram and mixture estimates for $\sigma_{T}^{2}$. Compare the intervals produced for the histogram and mixture estimates.
+###(d)
+Discussion: Why are the intervals so different?
+
+(a)	and (b) We know that
+
+$$1.	\mus ' ny \sim tn'1$$
+
+$$2.\sigma^{2}			, B =	\sum( yi ' \mu)	2		
+	\mid \mu, y \sim I.G A = n					
+		2		2$$			
+							
+Simulating from this for the treatment sample $y_{t}$ gives:
+
+```{r}
+nt <- length(yt)
+mut <- mean(yt)+sd(yt)*rt(10000,nt-1)/sqrt(nt) 
+sigt <- 0
+for(k in 1:10000) {
+  b=sum((yt-mut[k])^2)/2 
+  sigt[k]=1/rgamma(1,nt/2,b)
+}
+```
+
+Histogram estimates are
+
+```{r}
+mean(mut)
+mean(sigt)
+```
+
+Mixture estimates are	
+
+$$
+E(\mu_{T} \midy) = E[E( \mu_{T} \mid\sigma^{2}, y)] =	y  = mean(y_{t}) (an example of no change over the iterates!)	
+						\sum( yi ' \mu)	2			1	\sum	\sum( yi ' \mu	[k ]	)	2	
+E(\sigma	2	\mid y) = E(E(\sigma	2	\mid \mu, y))				\sim								
+					= E	n ' 2			10000		n ' 2				
+$$	
+
+To get this in R: 
+
+```{r}
+msigt <- 0
+for(k in 1:10000) {
+  msigt[k]=sum((yt-mut[k])^2)/(nt-2)
+}
+mean(msigt)
+```
+
+###(c) 
+95% intervals are 
+
+```{r}
+quantile(sigt,c(0.025,0.975))
+quantile(msigt,c(0.025,0.975))
+```
+
+###(d)	
+The interval for msigt will be MUCH MUCH tighter: it is an interval for a MEAN of a distribution, sigt is an interval for an individual variance parameter. Both methods numerically integrate out the mean $\mu$.
+
+ 
+##Q3
+Simulate from the Monte Carlo scheme $1. p(\mu\midy) 2. p(\sigma2\mid y,\mu)$ as in Q2, now for the control sample in the calcium flow data.
+
+###(a) 
+Obtain a classical 95% confidence interval for the difference in means \mu_{T}  ' \mu_{C} .
+
+Classically,	y_{t}  ' yc		' (\mu_{T}  ' \mu_{C} )	\sim tdf . Df is determined by the complicated Welch	
+		s	2			s	2			
+										
+		T		+	c			
+								
+		n	T			n	c		
+									
+formula. 
+
+In R use 
+
+```{r}
+t.test(yt,yc) 
+```
+
+to obtain 95% CI (0.05214, 0.26795)
+
+###(b)	
+Plot the histogram of the sample of mean differences, using the sample obtained in Q1.
+
+Using the command 
+
+```{r}
+nc <- length(yc)
+muc <- mean(yc)+sd(yc)*rt(10000,nc-1)/sqrt(nc)
+sigc <- 0
+for(k in 1:10000) {
+  b=sum((yc-muc[k])^2)/2 
+  sigc[k]=1/rgamma(1,nc/2,b)
+}
+hist(mut-muc,25)
+```
+
+leads to the following Normal looking plot:
+
+###(c) 
+Use the simulated means to obtain a 95% posterior credible interval for the difference in means.
+
+```{r}
+quantile(mut-muc,0.025)
+quantile(mut-muc,0.975)
+```
+
+same as above classical result to 2 significant figures. Larger simulation leads to $(0.0505,0.2696)$ and should equate Behrens-Fisher results (more accurate than Welch method).
+
+###(d)
+Estimate $Pr(\mu_{T} > \mu_{C} \mid y_{t} , yc )$ using a classical method. (What is meant here, is its equivalent, i.e. a one-sided P-value.)
+
+```{r}
+t.test(yt,yc)
+```
+
+gives p-value = 0.004308.
+
+This is actually $Pr(\mid y_{t} ' yc \mid /   sT2 / n_{t} + sc2 / nc > tdf \mid \mu_{T} = \mu_{C} )$ . This would seem to suggest to a Bayesian that $Pr(\mu_{T} > \mu_{C} \mid y_{t} , yc ) \sim 1-0.004308/2 = 0.9978$.
+
+ 
+###(e)	
+Estimate $Pr(\mu_{T} > \mu_{C} \mid y_{t} , yc )$ using the simulated means. Does your answer agree with that in (d)?
+
+Using the samples 
+
+```{r}
+length(mut[mut>muc])/10000 
+```
+
+(remarkably similar to (d)!)
+
+###(f)
+Do a classical F-test to judge whether the treatment and control variances are significantly different.
+
+The F statistic is $F = sT2 / sc2 = 0.694444$. This value is from an F35,31 sampling distribution, under the null hypothesis $\sigmaT2 = \sigmac2$ ). The p-value is
+
+$Pr(F < F35,31 \mid \sigma_{T}^{2} = \sigma_{C}^{2} ) + Pr(1/ F > F31,35 \mid \sigma_{T}^{2} = \sigma_{C}^{2} )=	pf(0.694444,35,31)+ (1-pf(1/0.694444,31,35)) = 0.296.$
+
+###(g)	
+Discussion: Can a classical confidence interval for $\sigma_{T}^{2} /\sigma_{C}^{2}$ be produced?
+
+Yes, this is in fact one of those cases where classical and Bayesian results are identical.
+
+Both approaches	benefit from the fact that	$(sc2 /\sigma_{C}^{2} ) /(sT2 /\sigma_{T}^{2} )$ follows an $F(nc-1,n_{t}-1)$
+distribution. The	95% credible interval for	$\sigma_{T}^{2} /\sigma_{C}^{2}$  is thus $(0.694 \times qf(0.025,31,35) =
+0.344, 0.694 \times qf(0.975,31,35) = 1.382)$. 
+(This exact classical interval leads to the same conclusion as the hypothesis test: we can't reject the true population variances “being equal” at the 5% level.) The fact remains, however, that the Bayesian simulation approach below does not generally rely on underlying Normality.
+
+###(h)
+Use the simulated variances to obtain an estimate and 95% interval for the ratio $\sigma_{T}^{2} /\sigma_{C}^{2}$ . Is your conclusion in (g) the same as that in (f)? Is the CrI the same as in (g)?
+
+The exact classical/credible interval at (g) leads to the same conclusion as the hypothesis test: we can't reject the true population variances “being equal” at the 5% level.
+
+Approximate credible limits derived from the histogram (create “sigc” first as well!) are 
+```{r}
+nt <- length(yt)
+mut <- mean(yt)+sd(yt)*rt(10000,nt-1)/sqrt(nt) 
+
+```
+
+```{r}
+quantile(sigt/sigc,c(0.025,0.975))
+```
+
+
+####(i)
+Plot the histogram of the sample of variance ratios. How likely is it that \sigma_{T}^{2} > \sigma_{C}^{2} based on the sample data? Is the conclusion the same as in (f)?
+
+By simulation:
+
+```{r}
+length(sigt[sigt>sigc])
+```
+
+so $Pr(\sigma_{T}^{2} > \sigma_{C}^{2} \mid y_{t} , yc ) \sim 0.1423$.
+
+This is consistent with the 2-sided p-value above.
+
+# Lab Exercises 6 Solutions
+
+
+##Q1 
+The table below is taken from BDA. It contains results of a survey on bicycle traffic around Berkeley, CA in 1993. From the table in BDA we consider only the first four rows of data for residential streets. This consists of bicycle counts on a particular day on different streets around Berkeley. Also recorded is whether the street has a certified bicycle lane or not.
+
+Bike route?	Bicycle count	Bike route?	Bicycle count
+Yes	16	Yes	55
+Yes	9	No	12
+Yes	10	No	1
+Yes	13	No	2
+Yes	19	No	4
+Yes	20	No	9
+Yes	18	No	7
+Yes	17	No	9
+Yes	35	No	8
+
+We wish to compare the amount of bicycle traffic on the sections of road that are designated bike routes, with that for roads without bike routes.
+
+Type the data in R:
+
+```{r}
+y <- c(16,9,10,13,19,20,18,17,35,55) # for bike route 
+z <- c(12,1,2,4,9,7,9,8) # for non-bike route
+```
+
+###(a)	
+Consider the group bike route ='Yes' (Y) first. What distribution are the bicycle counts most likely to follow?
+
+Assuming the counts are independent and identically distributed, we would use a Poisson distribution here. So, Y \sim Poisson (\theta_{Y})
+
+###(b)
+Assume that the bicycle counts on bike routes are independent and identically distributed for different streets. What is the conditional likelihood formula for the counts Y?
+
+ 
+$$p( y \mid \theta_{Y} ) = \pi\theta_{Y}yi  exp('\theta_{Y} )	=	\theta_{Y}ny exp('n\theta_{Y} )	\propto \theta_{Y}212 exp('10\theta_{Y} )
+yi !		\pi yi !$$
+
+This is in the form of a $Gamma(213,10)$ density in $\theta_{Y}$.
+
+###(c) 
+What prior information do we have? Construct a prior distribution for \theta_{Y} the parameter of interest for the counts y.
+
+In this case we seem to have no prior information about \theta_{Y} . Our preferred noninformative prior is Gamma(1,0).
+
+###(d)	
+Update the prior with the observed counts to find the posterior distribution for \theta_{Y} \mid y. Generate an estimate and 95% interval for \theta_{Y} \mid y.
+
+The posterior for $\theta_{Y} \mid y$ is Gamma (213, 10)$. $E(\theta_{Y} \mid y) = 213/10 = 21.3$ 
+
+```{r}
+qgamma(0.025,213,10)
+qgamma(0.975,213,10)
+```
+
+A 95% interval is $(18.54, 24.25)$
+
+###(e)  
+Let Z = bicycle counts on non-bike routes. How can we compare Y and Z?
+
+Naturally, we compare \theta_{Y} and \theta_{Z} , the rates of bicycle usage for bike routes and non-bike routes.
+
+###(f)	
+Estimate a 95% confidence interval on the difference \theta_{Y} – \theta_{Z}. What conclusions can you draw based on this interval?
+
+Rather than attempt to find the true distribution of $\theta_{Y} – \theta_{Z} \mid y,z$ we can use Monte Carlo simulation here. Just simulate from $\theta_{Y} \mid y \simGamma(213,10)$ and $\theta_{Z} \mid z \sim Gamma (53, 8)$. Then simply subtract each iterate of $\theta_{Z}$ from each iterate of $\theta_{Y}$ obtaining a sample from $\theta_{Y} – \theta_{Z} \mid y,z$.
+
+i.e. 
+
+```{r}
+ty<-rgamma(10000,213,10) 
+tz<-rgamma(10000,53,8) 
+tymz<-ty-tz
+```
+
+The quantile function is then used as follows 
+
+```{r}
+quantile(tymz,0.025)
+quantile(tymz,0.975)
+```
+
+A point estimate is
+```{r}
+mean(tymz)
+```
+
+A histogram follows
+```{r}
+hist(tymz)
+```
+
+
+Clearly bike routes are used significantly more than non-bike routes.
+
+###(g)
+Estimate the probability that $\theta_{Y} – \theta_{Z}$ is greater than 10 given the data.
+
+Using the sample in (f)
+
+```{r}
+length(tymz[tymz>10])/length(tymz) # (or: mean(tymz>10)!)
+```
+
+We are very confident that bike usage is at least 10 per day per street more on bike routes than non-bike routes.
+
+###(h) 
+Perform the equivalent t-test. Discuss why inference appears different from (g).
+
+```{r}
+t.test(y,z,"greater",10)
+```
+
+
+gives a p-value of $0.1645$. This would need to be compared with $0.003$ based on (g)! In hindsight, there is a problem with the Poisson assumption (rather than the t-test, in our opinion, as it's very robust). E.g. mean(y) = `mean(y)` and $var(y) = `var(y)`: there seems to be overdispersion.
+
+##Q2 
+###(a) 
+The likelihood contributes a $Gamma (213, 10)$ to the posterior.
+
+A $Gamma(a,b)$ prior means the posterior is $\theta_{Y} \mid y \sim Gamma (212+a, 10+b)$. So we have $Gamma(0,0)$ prior $ \theta_{Y} \mid y \sim Gamma (212, 10)$ and $Gamma(0.5,0)$ prior $ \theta_{Y} \mid y \sim Gamma (212.5, 10)$. 95% intervals for these are (using $m=10,000,000$ – even then not always enough for 2 dps!), prior	posterior	95% interval $\theta_{Y} \mid y	95%$ interval $\theta_{Y} – \theta_{Z} \midy,z	Pr(\theta_{Y} – \theta_{Z} >10)$
+0,0	212,10	18.44, 24.15	11.38, 18.09	0.997
+0.5,0	212.5,10	18.49, 24.20	11.36, 18.09	0.997
+1,0	213,10	18.54, 24.25	11.33, 18.08	0.997
+
+ 
+Results seem quite insensitive to these prior choices.
+
+R code for Gamma(0,0) 
+
+```{r}
+qgamma(c(0.025,0.975),212,10)
+ty1 <- rgamma(10000,212,10)
+tz1 <- rgamma(10000,52,8) 
+tymz1 <- ty1-tz1
+```
+
+The quantile function is then used as follows
+
+```{r}
+quantile(tymz1,c(0.025,0.975)) ##
+
+length(tymz1[tymz1>10])/length(tymz1)	###
+```
+
+For Gamma(0.5,0) 
+
+```{r}
+qgamma(c(0.025,0.975),212.5,10)
+ty2 <- rgamma(10000,212.5,10)
+tz2 <- rgamma(10000,52.5,8) 
+tymz2 <- ty2-tz2
+```
+
+The quantile function is then used as follows 
+
+```{r}
+quantile(tymz2, c(0.025,0.975))
+length(tymz2[tymz2>10])/length(tymz2)
+```
+
+###(b) 
+Under a $Gamma(20,2)$ prior $\theta_{Y} \mid y \sim Gamma (232, 12)$ and under a $Gamma(20,3)$ prior $\theta_{Z} \mid z \sim Gamma (72, 11)$
+
+For informative priors $Gamma(20,2)$ for $Y$ and $Gamma(20,3)$ for $Z$
+
+For Y:
+
+```{r}
+qgamma(c(0.025,0.975),232,12)
+
+ty3 <- rgamma(10000,232,12)
+tz3 <- rgamma(10000,72,11) 
+tymz3 <- ty3-tz3
+```
+
+The quantile function is then used as follows:
+
+```{r}
+quantile(tymz3, c(0.025,0.975))
+
+length(tymz3[tymz3>10])/length(tymz3)
+```
+ 
+The table now is
+
+Prior	posterior	95% interval \theta_{Y} \mid y	95% interval \theta_{Y} – \theta_{Z} \mid	Pr(\theta_{Y} – \theta_{Z} >10)
+			y, z	
+0,0	212,10	18.44, 24.15	11.38, 18.09	0.997
+0.5,0	212.5,10	18.49, 24.20	11.36, 18.09	0.997
+1,0	213,10	18.54, 24.25	11.33, 18.08	0.997
+20,2	232, 12	16.93, 21.90	9.91, 15.74	0.971
+20,3	72, 11			
+
+Results have changed somewhat with the expert prior. The prior on $\theta_{Y}$ has a mean at 20/2 = 10 which is well below the mean of y (21.3), which explains why the posterior has been shrunk towards 0.
+
+
+
+213, 10)	0.30				
+dgamma(x,	0.20				
+	0.10				
+	0.00				
+	15	20	25	30	35
+			x		
+
+The posteriors for $\theta_{Y} \mid y$ are shown above. The blue line is the $Gamma(232,12)$ from the expert prior. The posteriors based on the 3 candidate noninformative priors are almost indistinguishable.
+
+```{r}
+x <- seq(15,35,0.01)
+plot(x, dgamma(x,213,10),type="l",ylim=c(0,0.35)) 
+curve(dgamma(x,212,10),col="red", add=TRUE) 
+curve(dgamma(x,212.5,10),col="green", add=TRUE) 
+curve(dgamma(x,232,12),col="blue", add=TRUE)
+```
+
+#Lab Exercises 7 Solutions
+
+## Q1 
+In this question we will illustrate that all cdf functions really are uniformly distributed.
+
+Firstly, simulate 5000 points from a Unif(0,1) distribution in R. (runif(k,0,1))
+
+```{r}
+x <- runif(5000,0,1)
+```
+
+###(a) 
+Plot the histogram of this sample. Does it look uniform?
+
+```{r}
+hist(x)
+```
+
+Yes, seems uniform
+
+###(b) 
+Transform this sample using the inverse cdf function of a N(0,1) distribution Φ'1
+
+```{r}
+y=qnorm(x,0,1)
+```
+
+###(c)
+What is the mean and standard deviation of your transformed set of points? Find a 95% interval for the mean and standard deviation. Do they include 0 and 1 as was expected?
+
+```{r}
+mean(y)
+sd(y)
+```
+
+We can do the usual MC sample for the mean and variance of a Normal distribution
+
+```{r}
+mu <- rt(5000,4999)*sqrt(var(y)/5000)+mean(y)
+sig <- 0
+
+for( k in 1:5000) {
+  a <- 5000/2 
+  b <- sum((y-mu[k])^2)/2 
+  sig[k] <- 1/rgamma(1,a,b)
+}
+```
+
+then use
+
+```{r}
+quantile(mu,c(0.025,0.975)) 
+quantile(sig,c(0.025,0.975))
+```
+
+###(d) 
+Plot the histogram of the transformed data. Does it look like a N(0,1)?
+
+```{r}
+hist(y)
+```
+
+Yes, as expected.
+
+###(e)
+Using the original Unif(0,1) sample, transform again, this time using the inverse cdf of a χ210 distribution (qchisq)
+```{r}
+y <- qchisq(x,10)
+```
+###(f)
+Plot the histogram of the transformed sample, and below plot the true density for a χ210 distribution. Do they look similar? Is the estimated mean of the sample close to 10 as expected?
+ 
+```{r}
+hist(y)
+mean(y)
+var(y)
+``` 
+
+##Q2 
+Consider the following 6 samples of counts of 'rejections' after heart transplant surgery from hospitals in Australia in 2000 - 2002.
+
+Hospital	Count	Total	ML	Bayes	95%CrI	EB	EB 95%CrI	Expert	Expert
+			est.	flat		est.		prior	prior
+				prior				est.	95%CrI
+				est.					
+1	1	10	0.1	2/12=	(0.023, 0.41)	0.058	(0.0035, 0.181)	0.053	(0.024,
+				0.17					0.093)
+2	0	5	0	1/7=	(0.004, 0.46)	0.019	(0, 0.111)	0.048	(0.021,
+				0.14					0.087)
+3	0	3	0	1/5=	(0.006, 0.60)	0.021	(0, 0.124)	0.049	(0.021,
+				0.20					0.088)
+4	2	35	0.057	3/37=	(0.018, 0.19)	0.049	(0.0077, 0.124)	0.051	(0.025,
+				0.08					0.087)
+5	0	12	0	1/14=	(0.0019, 0.25)	0.014	(0, 0.080)	0.046	(0.020,
+				0.07					0.083)
+6	0	17	0	1/19=	(0.0014,0.19)	0.011	(0, 0.067)	0.045	(0.019,
+				0.05					0.081)
+
+We will fill out this table in this question and compare inferences. First enter the data in R
+
+```{r}
+y <- c(1,0,0,2,0,0)
+n <- c(10,5,3,35,12,17)
+mle <- y/n
+```
+
+###(a) 
+Find the 95% intervals for each rejection rate, treating the samples as independent and having no prior information about the rejection rates (i.e. use a Beta(1,1) prior).
+ 
+The model is $y_{j}  \sim Binomial(n j ,\theta_{j} );\theta_{j}  \sim Beta(1,1) ≡ Unif [0,1] , j=1,…,6$. Clearly this prior is conservative as we know rejection rates are NOT 100% or even 90% and probably not even 50%, and that all rates between 0 and 1 are NOT equally likely. The posterior for each rate proportion is
+
+$\theta_{j} \mid y_{j}	\sim Beta( y_{j} + 1, n_{j} - y_{j} + 1)$ leading to the posterior mean estimates $\thetaˆj \mid y_{j}	=	y_{j} + 1	n j + 2$
+
+CrIs are obtained for hospital 1 as 
+
+```{r}
+qbeta(0.025,2,10)
+
+qbeta(0.975,2,10)
+
+for(k in 1:6) {
+  print(qbeta(c(0.025,0.975),y[k]+1,n[k]-y[k]+1))
+}
+be <- (y+1)/(n+2)
+```
+
+###(b)	
+Use the Empirical Bayes method to choose parameters (a,b) in a parent Beta(a,b) distribution in a hierarchical Beta-binomial model for the hospital rates. The parameters (a,b) should be chosen so that the Beta(a,b) density has the same mean and variance as that of the sample of ml estimates in the table. Using this prior, fill out the table columns headed EB. Do you see any potential problems with this prior?
+
+The mean of the ml estimates above is 0.0262, and the variance is 0.0018 using mean(mle);var(mle)
+
+We can find a Beta density with these characteristics by matching up the mean and variance. So, we have
+
+		a		= 0.0262;	ab			= 0.0018	⇒ a = 0.345,b = 12.829	
+	a + b		(a + b)2 (a	+ b +1)			
+													
+Note this follows most easily from:									
+\sigma	2	=	\mu(1' \mu)	,i.e. a + b =	\mu(1'	\mu)	'1 and	\mu(1' \mu)	'1		etc	
+			a + b + 1		\sigma^{2}				a = \mu	\sigma^{2}				
+																
+This Beta(0.345, 12.829) distribution is shown below 
+
+```{r}
+x <- seq(0, 1, length=100)
+
+px <- dbeta(x,0.345,12.829) 
+plot(x,px,type='l')
+```
+ 
+It indicates low rates are expected. (As noted, beta parameters < 1 may be more informative than intended, but we continue the analysis for demonstration purposes.)
+
+The model is now
+
+$$y_{j}	\sim Binomial(n j ,\theta_{j} );\theta_{j}  \sim Beta(0.345,12.829)$$ ,	
+leading to the posterior densities	
+$$\theta_{j}	\mid y_{j}	\sim Beta( y_{j} + 0.345, n j ' y_{j} + 12.829)$$ and posterior mean estimates	
+$$\hat{\theta}_{j}	\mid y_{j}	=	y_{j} + 0.345	n_{j} + 13.174$$	
+				
+The CrIs in the table above are now shrunk considerably towards the prior. Six posterior densities are shown below.
+
+```{r}
+ebe <- (y+0.345)/(n+13.174)								
+
+for(k in 1:6) {
+  print(qbeta(c(0.025,0.975),y[k]+0.345,n[k]-y[k]+12.829))
+}	
+
+#Plotting EB prior and 6 posterior in the same plot
+
+plot(x,dbeta(x,0.345,12.892),type='l') 
+for(k in 1:6) {
+  lines(x,dbeta(x,y[k]+0.345,n[k]-y[k]+12.829),col=k+1)
+}
+```
+
+Note that great care needs to be taken with this prior, due to a = 0.345. We recommend against using beta priors with any parameters less than 1 as they have undue weight near the corresponding extreme(s), which could lead to intervals that are too short when data are ex_{t}reme. In these circumstances (trying to achieve a certain mean & variance pair, in the context of small proportions), use of a beta(1,a) & beta(1,b) mixture pair would avoid the issue, which is beyond the scope of this exercise.
+
+###(c)	
+You have extensive discussions with cardiac experts, nurses and staff assisting in heart transplant operations over the previous 10 years. They agree that the true rejection rate these days, with all the advances in technology, is certainly less than 10% for all hospitals in Australia. A few said the rejection rate could be as low as 1% for particular hospitals,
+ 
+although the consensus was that this was unlikely. Most experts said the true rate was somewhere between 3% and 7%, depending on the state of the hospital, funding, equipment and other factors. Fit a Beta(a,b) distribution to reflect this prior knowledge.
+
+Our choice here would be to go for a prior mean of 5%, and for 99% of the distribution to be between 1% and 10%.
+
+This means that we need	a	= 0.05 in our parent Beta(a,b) prior density.	
+	a + b		
+
+There are so many possibilities of a and b satisfied the above equation. Starting with a Beta(1,19) and using trial and error [use R commands to check the desired approximate 99% coverage with as pbeta(0.01,a,b) and pbeta(0.1,a,b) commands], we note that a Beta(7.5,142.5) density has 99.00% of its probability between 0.01 and 0.1 and, of course, a mean of 7.5/150 = 0.05.
+
+We will use this as the parent prior, shown below. Note that this prior is much more informative than any of the likelihood functions for each hospital, it's like observing 6.5 ex_{t}ra rejections and 141.5 ex_{t}ra non-rejections for each hospital. This prior gives us a 95% interval of (0.021, 0.090).	1
+
+The posterior densities are now	$\theta_{j} \mid y_{j}	\sim Beta( y_{j}	+ 7.5, n j ' y_{j} + 142.5)$	and	posterior	mean	estimates	$\thetaˆj \mid y_{j}	=	y_{j} + 7.5$. The posteriors are shown below				
+		n j + 150					
+								
+
+#### Expert prior 
+
+```{r}
+expert <- (y+7.5)/(n+150) 
+
+for (k in 1:6) {
+  print(qbeta(c(0.025,0.975),y[k]+7.5,n[k]-y[k]+150))
+}
+
+plot(x,dbeta(x,7.5,142.5),type='l', ylim=c(0,30)) 
+
+for(k in 1:6) {
+  lines(x,dbeta(x,y[k]+7.5,n[k]-y[k]+142.5),col=k+1)
+}
+```
+
+They are all now much closer together and very similar indeed to the prior, as expected, since $\alpha$ and $\beta$ are much larger in the prior than in the likelihood.
+
+###(d)	
+Fill out the remaining columns of the table above using the prior distribution for the rates your group developed in part (c).
+
+As expected, the CrIs and estimates are all very close to each other.
+
+###(e)
+Which method is preferable, flat prior, Empirical Bayes or expert prior?
+
+The last method appears preferable, but only if the prior information is valid. The EB approach is a useful compromise between strong prior information and NO prior information. However, the $a=0.345$ parameter is a concern.
+
+###(f)	
+How could we determine whether a significant difference existed between the hospitals? For instance, is hospital 1 significantly different to the others?
+
+One way to quantify this would be to use MC simulation. Generate MC samples for each hospital and check the proportion of time that $\theta_1 > \theta_2$ and $\theta_1 > \theta_3$ and so on up to $\theta_1 > \theta_6$
+
+Using the EB prior 
+
+```{r}
+thet1 <- rbeta(5000,y[1]+0.345,n[1]-y[1]+12.829) 
+thet2 <- rbeta(5000,y[2]+0.345,n[2]-y[2]+12.829) 
+thet3 <- rbeta(5000,y[3]+0.345,n[3]-y[3]+12.829) 
+thet4 <- rbeta(5000,y[4]+0.345,n[4]-y[4]+12.829) 
+thet5 <- rbeta(5000,y[5]+0.345,n[5]-y[5]+12.829) 
+thet6 <- rbeta(5000,y[6]+0.345,n[6]-y[6]+12.829)
+
+length(thet1[thet1>thet2]) #(OR: mean(thet1>thet2) etc)
+length(thet1[thet1>thet2&thet1>thet3])
+length(thet1[thet1>thet2&thet1>thet3&thet1>thet4])
+
+length(thet1[thet1>thet2&thet1>thet3&thet1>thet4&thet1>thet5])
+
+length(thet1[thet1>thet2&thet1>thet3&thet1>thet4&thet1>thet5&thet1>thet6])
+```
+
+So, the estimated $Pr(\theta_1 > \theta_2 \&\theta_1 > \theta_3 \&\theta_1 > \theta_4 \&\theta_1 > \theta_5 \&\theta_1 > \theta_6 ) = 0.409$ , which is reasonably high.
+
+If we were worried about multiple testing issues we might do the following:
+
+Assume the rates are all equal to (3/82 OR 0.1 OR 0.084, the average posterior mean). Then we could simulate from 6 binomial distributions, each with nj observations as in the table above, and determine how often we get a maximum observed difference of 0.1 or greater. This would account for the fact that we had chosen the maximum difference from 6 hospitals. We did this using 3/82 for 1000 replications and obtained 444 maximum observed differences above 0.1. The associated p-value would be 0.444. Clearly there is no evidence of any significant differences here among hospitals under this method. This method is quite artificial since we KNOW the rates are NOT equal to each other.
+
+Bayesians can account for these issues by looking at all possible combinations, e.g. all possible pairs of rejection rates and looking at probabilities as a group rather than individually (as for example by taking the difference between the largest and smallest observed rates).
+
+
+## Q3
+The following are rates of divorces in 8 US states, per 10,000 population, for 1995-2000.
+
+State	Rate	Gamma(1,0)	95%CrI	EB	EB 95%CrI	Expert	Expert prior
+		prior est.		est.		prior est.	95%CrI
+1	58	59	(44.9,75.0)	61.3	(47.9,74.7)	60.0	(45.6, 74.3)
+2	66	67	(51.9,84.0)	67.5	(53.4,81.5)	67.3	(52.0, 82.4)
+3	78	79	(62.5,97.3)	76.8	(61.7,91.7)	78.2	(61.7, 94.5)
+4	56	57	(43.2,72.7)	59.8	(46.5,73.0)	58.2	(44.0, 72.3)
+5	70	71	(55.5,88.4)	70.6	(56.2,84.9)	70.9	(55.2, 86.5)
+6	71	72	(56.3,89.6)	71.4	(56.9,85.8)	71.8	(56.1, 87.5)
+7	54	55	(41.4,70.5)	58.2	(45.2,71.2)	56.4	(42.4, 70.2)
+8	101	102	(83.2,122.7)	94.5	(77.8,111.1)	99.1	(80.5, 117.5)
+
+Rather than assuming these rates all come for the same distribution, we will build a hierarchical model for these data.
+
+###(a)	
+What model should we assume these data follow? What distribution does this suggest we use for the parameters of the model?
+
+We would suggest a Poisson-like distribution for the data, with potentially different rate parameters for each state (given the variation in divorce laws, religious devoutness, free love, etc. among states in the US). Compared with the
+ 
+Lecture 7 rate and exposure model, it would appear that the data we have been given is of the form $y_{j} = count j / x_{j}$ , such that this ratio is a rate per 10,000.
+
+I.e. $y_{j} \sim$ Poisson(\theta_{j}), j=1,\cdots,8$. Recall that the Poisson likelihood is a
+
+Gamma density in terms of the rate parameter \theta_{J}, suggesting a parent Gamma density for these rates.
+```{r}
+y <- c(58,66,78,56,70,71,54,101)
+```
+###(b)	
+Proceed with a standard Bayesian analysis, assuming a diffuse prior for each state separately, and fill out the first 2 columns of the table.
+ 
+
+The	diffuse	prior	considered	is the	$Gamma(1,0)$
+
+$$\theta_{j} \mid y_{j}  \sim Gamma( y_{j} + 1,1)$$
+and posterior mean estimates $\hat{\theta}_{j}$.
+
+These densities, essentially just the likelihoods,
+
+are shown here. Perhaps significant differences exist between state 8 and states 1, 4 and 7.
+
+We have some good data here and the CrIs are quite informative.
+
+(Similar example code shown at (c).)
+
+```{r}
+for(k in 1:8){
+  print(qgamma(c(0.025,0.975),y[k]+1,1))
+  }
+```
+
+###(c)	
+Perform a standard empirical Bayes analysis and fill out the next 2 rows of the table.
+The EB analysis uses a different Gamma (a,b) prior distribution. Again we set a and b so that the average (a/b) and variance (a/b2) are equal to that observed among the 8 states divorce rates,
+```{r}
+mean(y)
+var(y)
+```
+This requires that $\frac{a}{b} = 69.25; \frac{a}{b^2} = 233.4 \implies a = 20.55,b = 0.297$ We have shown this density above.
+ 
+The prior $Gamma(20.55,0.297)$ density, leads to $\theta_{j} \mid y_{j} \sim Gamma( y_{j} + 20.55,1.297)$ and posterior mean estimates
+$\hat{\theta}_{j} \mid y_{j}  = y_{j} + 20.55$. The estimates for the rates and the CrIs have not changed much at $1.297$ all, neither have the posterior densities, shown here. Much the same conclusions would be reached, comparing the states.
+
+```{r}
+b <- mean(y)/var(y)
+a <- b*mean(y) 
+
+for(k in 1:8) {
+  print(qgamma(c(0.025,0.975),y[k]+a,1+b))
+  }
+
+x <- seq(0,150,.001)
+
+px <- dgamma(x,a,b) #(prior only shown earlier)
+plot(x,px,type='l',ylim=c(0,.1)) 
+
+for(k in 1:8) {
+  lines(x,dgamma(x,y[k]+a,1+b),col=k+1)
+}
+```
+
+###(d)
+Previous studies in the US show that the divorce rate, by state, could be anywhere between 10 and 150 per 10,000 people. Build a prior distribution and hierarchical model to reflect this information.
+
+We would choose a prior that had, say, 99% of its probability between 10 and 150, perhaps with a prior mean at about 70, the average rate. Starting with a Gamma(70,1) we discovered that a Gamma(7, 0.1) has 99.2% of its density between 10 and 150, shown below.
+
+
+We would not be surprised to see the 8 rates above come from this prior distribution.
+ 
+###(e)
+Fill in the last 2 columns of the table.
+
+The prior Gamma(7,0.1) density, leads to  $\theta_{j} \mid y_{j}  \sim Gamma( y_{j} + 7,1.1)$ and	posterior mean estimates $\hat{\theta}_{j} \mid y_{j}	=	y_{j} +	7$. 
+
+The estimates for the rates and the CrIs have not changed much at all, neither have the posterior densities, shown here.
+
+Much the same conclusions would be reached, comparing the states.
+
+The 8th state, by the way, is Nevada, which has a set of the most liberal divorce laws of any state in the US, perhaps contributing to its apparent departure from the others.
+
+
+# Lab Exercises 8 Solutions
+
+## Q1
+In the lecture, the linear regression model's $p(\beta \mid y)$ and $p(\sigma^{2} \mid y, \beta )$ were derived. Derive the pair $p(\beta \mid y,\sigma^{2})$ and $p(\sigma^{2} \mid y)$ instead. Explain why both pairs are useful. Hint:
+
+Remember the expression for a multivariate Normal $X \sim Nk (\mu,V )$ :
+$$
+p(x \mid \mu,V ) \propto	1	exp['	1	(x ' \mu)'V	'1	(x ' \mu)]	
+	1/ 2		2				
+	\mid V \mid
+$$
+
+One method to derive the marginal posterior would be: 
+$$
+p(\sigma^{2} \mid y) \propto \int p(\beta ,\sigma^{2} \mid y)d\beta
+		\propto \int (\sigma^{2} )'(n / 2+1)		exp['			1	( y	' X\beta )'( y ' X\beta )]d\beta		
+							2				
+																		2\sigma														
+			2		'(n / 2+1)						(n	'		\sigmaˆ	2					1				ˆ	ˆ	
+													q)		]\int exp['								
+		\propto (\sigma		)						exp['					2\sigma^{2}			2\sigma^{2}	(\beta	' \beta )' X ' X (\beta	' \beta )]d\beta	
+																									(n	'		\sigmaˆ 2				
+		\propto (\sigma^{2} )'(n / 2+1)		\mid \sigma^{2} (X ' X )'1 \mid1 / 2		exp['			q)		]		
+								2\sigma^{2}				
+																															
+		\propto (\sigma^{2} )'(	n'q	+1)	exp['			(n ' q)\sigmaˆ	2		]									
+				2																	
+												2\sigma^{2}												
+																															
+							'	q			(n-\sigmaˆ 2
+$$
+							
+I.e. $\sigma^{2} \mid y \sim I.G.(n,q))$																														
+It follows immediately from the joint likelihood, being proportional to
+
+$$
+p(\beta \mid \sigma^{2} , y), that	
+\beta \mid \sigma	22	(X -	X )	-1	), y \sim N (\beta ,\sigma)
+$$			
+
+Both pairs are useful: usually the two marginal posteriors are sufficient for inference.
+
+ 
+## Q2 
+Consider the binomial regression example in lecture 8.
+
+Log dosage	No. of animals	No. of deaths
+		
+x	n	y
+		
+-0.863	5	0
+		
+-0.296	5	1
+		
+-0.053	5	3
+		
+0.727	5	5
+		
+
+We will model this data as a binomial regression model as follows: 
+$$
+y_{t} \mid p_{t} \sim Bin(5, p_{t} );p_{t}	
+			
+logit( p_{t} ) = log	1' p_{t}	
+		
+ 
+
+= \alpha + \beta x t
+$$
+###(a)	
+Perform a classical analysis of this data set, and find CIs for $\alpha$ and $\beta$. Feel free to use SPSS, JMP, R etc.
+
+In R, e.g.:
+```{r}
+bioassay <- data.frame( y = c(0,1,3,5),
+n = c(5,5,5,5),
+x = c(-0.863,-0.296,-0.053,0.727))
+summary(glm(y/n ~ x, data = bioassay, family = binomial, weights = n))
+```
+This gives, amongst other things:
+
+For Wald intervals we apply +/- 1.96SE, and obtain CIs $(-1.165, 2.912)$ for $\alpha$ and $(-2.009, 17.834)$ for $\beta$. It appears that the SPSS CIs (from a few years ago) are based on slight typos. Either way, the results at (d) are quite different, for $\beta$ in particular.
+
+It should be noted, however, that using the EXACT option in SAS's PROC LOGISTIC, which would handle the y=0 and y=5 observations better, does pick up the statistical significance of $\beta$. In addition to the same estimates, SEs and p-values as above (except for 5.0620 instead of 5.0619), the EXACT option gives the following output:
+
+Exact Conditional Tests
+
+Effect Test	Statistic	p-Value
+
+Exact	Mid
+
+x	Score 10.7326 0.0004 0.0002 Probability 0.000298 0.0075 0.0074
+
+Required SAS code is as follows:
+
+data bio;
+
+input x y n; datalines;
+
+-.863 0 5 -.296 1 5 -.053 3 5 0.727 5 5
+
+;
+
+proc logistic data=bio;
+
+model y/n=x;
+exact x; run;
+
+###(b)	
+Show that under this model the likelihood function, which, assuming independence for the $k = 4$ groups, is:
+$$
+\begin{aligned}
+f(y \mid p) 
+  &= \prod\limits_{t=1}^{k}f(y_{t}\mid p_{t}) 
+  = \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}p_{t}^{y_{t}}(1-p_{t}) \\		
+  &\propto \frac{exp\left(\alpha \sum\limits_{t} y_{t} + \beta \sum\limits_{t} x_{t} y_{t}\right)}{\prod\limits_{t}[1 + exp(\alpha + \beta x_{t})]^{n_{t}}}
+\end{aligned}
+$$
+is equivalent to
+$$
+\begin{aligned}
+f(y \mid p) 
+&= \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}p_{t}^{y_{t}}(1-p_{t}) 
+= \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}\left(\frac{exp(\alpha + \beta x_{t})}{1 + exp(\alpha + \beta x_{t})}^{y_{t}}\frac{1}{1 + exp(\alpha + \beta x_{t})}\right)^{n_{t}-y_{t}} \\
+&\propto \prod\limits_{t=1}^{k} exp(y_{t}(\alpha + \beta x_{t}))\left(\frac{1}{1 + exp(\alpha + \beta x_{t})}\right)^{n_{t}}=\frac{exp\left(\alpha \sum\limits_{t=1}^{k} y_{t} + \beta \sum\limits_{t=1}^{k} x_{t} y_{t}\right)}{\prod\limits_{t=1}^{k}[1 + exp(\alpha + \beta x_{t})]^{n_{t}}}
+\end{aligned}
+$$
+as required.
+###(c) 
+Plot	the	bivariate	surface		representing	the likelihood	function,	in terms of	$\alpha$ and $\beta$ , over a grid of points from $\alpha \in (-5,10)$ and $\beta \in (-3,50)$. Allow 1000 equally spaced points for each parameter.
+
+```{r}
+y=c(0,1,3,5) 
+x=c(-0.863,-0.296,-0.053,0.727) 
+px=seq(1,1000^2) 
+dim(px)=c(1000,1000) 
+a=seq(-5,10,by=15/999) 
+b=seq(-3,50,by=53/999) 
+sy=sum(y)
+
+sxy=sum(x*y)
+for(k in 1:1000) {
+  for(j in 1:1000) {
+    px[k,j]=a[k]*sy+b[j]*sxy-5*sum(log(1+exp(a[k]+b[j]*x)))
+  }
+}
+px <- exp(px)
+
+contour(a,b,px)
+```
+
+###(d)	
+Perform inference for this model under a flat prior and find point estimates and 95% intervals for each parameter.
+
+We treat the likelihood as a joint bivariate discrete probability density in $\alpha$ and $\beta$. We also note that
+$$
+p(\alpha,\beta \mid y) = p(\alpha \mid y) p(\beta \mid \alpha ,y)
+$$
+
+where
+
+$$
+p(\alpha \mid y) 
+  = \int p(\alpha, \beta \mid y)d\beta \approx \sum\limits_{j=2}^{1000}p(\alpha, \beta_j \mid y)(\beta_j - \beta_{j-1} )
+$$
+We can thus generate an MC sample as follows, using the approximate cdf function.
+
+First we need the marginal density $p(\alpha \mid y)$, we just sum each row of the bivariate density px and then normalize to let the probabilities sum to 1.
+
+```{r}
+pxa=0
+for(k in 1:1000) {
+  pxa[k]=sum(px[k,])
+}
+
+pxa=pxa/sum(pxa)
+```
+
+A plot follows:
+
+```{r}
+plot(a,pxa,type='l')
+```
+
+The cdf function is the cumulative sum as follows: 
+
+```{r}
+cdfa <- cumsum(pxa) 
+plot(a,cdfa,type='l')
+```
+
+We can simulate an MC sample of 5000 from $p(\alpha \mid y)$ as follows:
+
+```{r}
+u <- runif(5000,0,1)
+a1 <- 0
+for(j in 1:5000) {
+  st=0;k=1
+  while(st==0) {
+    if(cdfa[k+1]>u[j]&cdfa[k]<u[j]) {
+      a1[j]=a[k];st=1
+    } else {
+      k=k+1
+    }
+  }
+}
+```
+
+This gives the histogram below
+		
+An estimate and 95% interval for $\alpha$ are
+
+```{r}
+mean(a1)																			
+quantile(a1,c(0.025,0.975))
+```
+
+To simulate from $p(\beta \mid y,\alpha)$ we note that, under a flat prior on $\beta$,	$p(\beta \mid y,\alpha =  \alpha_{i}) \propto p(\alpha_{i},\beta \mid y)$	which is just the joint density evaluated at the point $\alpha_{i}$.	
+
+```{r}
+a1 <- 0
+b1 <- 0
+u <- runif(5000,0,1) 
+for(j in 1:5000){ 
+  st=0;k=1
+  while(st==0) {
+    if(cdfa[k+1]>u[j]&cdfa[k]<u[j]) {
+      a1[j]=a[k];st=1 
+    } else {
+        k=k+1
+    }
+  }
+  pxb=px[k,];pxb=pxb/sum(pxb)
+  cdfb=cumsum(pxb)
+  st1=0;k1=1
+  u1=runif(1,0,1)
+  while(st1==0) {
+    if(cdfb[k1+1]>u1&cdfb[k1]<u1) {
+      b1[j]=b[k1]
+      st1=1
+    } else {
+        k1=k1+1
+    }
+  }
+}
+```
+ 
+This gives the histogram for $\beta$
+
+An estimate and 95% interval for $\beta$ are		
+
+```{r}
+mean(b1)			
+quantile(b1,c(0.025,0.975))
+```
+
+We can plot the sample against the likelihood contour plot as follows:
+
+```{r}
+par(mfrow=c(2,1))
+contour(a,b,px) 
+plot(a1,b1,xlim=c(-5,10),ylim=c(-3,50))
+```
+ 
+### (e)	
+Discuss the (non)informativeness of a flat prior for $\alpha$ and $\beta$. Hint: also consider the case of a single predictor variable that, like the response variable, is 0/1.
+
+Given the logit metric of the response variable it is not clear whether flat priors are so noninformative here. In the extreme case of the 0/1 predictor variable we have, in effect a two-proportion comparison. A flat prior in the logit metric framework would seem to correspond to the Haldane prior in the regular proportion metric quite informative for extreme data. Also see an editorial by Gelman (from BDA) & Jakulin (2007, Statistica Sinica) at http://www.stat.columbia.edu/~gelman/research/published/radical.pdf
+
+### (f)	
+Find an estimate and 95% interval for the LD50 (the dosage where 50% of the animals die, i.e. p = 0.5).
+
+LD50 = dosage required for p = 0.5. But we know that
+
+$$
+p = 0.5 = \frac{exp(\alpha + \beta x)}{1 + exp(\alpha + \beta x)} \implies log\left(\frac{p}{1-p}\right) = 0 = \alpha + \beta x \implies x = -\frac{\alpha}{\beta}
+$$
+
+The LD50 point is the negative ratio of the parameters. We can generate a sample of this using our MC sample of $\alpha$ and $\beta$ above:
+
+```{r}
+ld50 <- -a1/b1 
+mean(ld50)
+quantile(ld50,c(0.025,0.975))
+hist(ld50)
+```
+
+###(g)
+What is the conclusion of this experiment?
+
+The drug has a significantly positive effect on probability of death in these animals (since $\beta > 0$). In fact $Pr( \beta > 0\mid y) = length(b1[b1>0])/5000 = 1 > 4999/5000 = 0.9998$.

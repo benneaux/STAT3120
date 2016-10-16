@@ -1,0 +1,318 @@
+---
+title: "<center> STAT3120 Applied Bayesian Methods </center>"
+author: "Benjamin G. Moran; <right> c3076448@uon.edu.au </right>"
+date: "22nd August 2016"
+output:
+  html_document:
+    graphics: yes
+    highlight: pygments
+    includes:
+      before_body: eqnnumber.js
+    mathjax: default
+    smart: yes
+subtitle: <center> Semester 2, 2016 </center>
+---
+
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+```
+
+Due Friday $16^{th}$ September 2016 (on-campus by 3pm, distance by 5pm)
+
+Late assignments will not be accepted without prior written permission of the lecturer.
+
+***
+
+###Total marks: 45
+
+Marking Criteria:
+
+1.	Answers must be written in clear English with all appropriate working and/or supporting computer output shown.
+2.	Raw computer output without explanatory text is unacceptable.
+3.	Students are required to understand the content in Weeks 2-7 to answer these questions.
+4.	As part of your workings you should include applicable R-code.
+
+***
+ 
+##Question 1 Total: 12 marks
+
+(a)	Consider a sample of $n=15$ data points, $y$, from the Normal distribution with unknown mean $\mu$ and variance $\sigma^{2}$ . For this sample we wish to allow the 14th and 15th data points, $(y_{14}, y_{15})$, to have an inflated variance, namely $10 \sigma^{2}$ .
+
+    (i) Write down the likelihood $p( y \mid \mu,\sigma^{2})$ , including all constants. [2 marks]
+    
+    **Answer:** The likelihood is:
+    
+    $$
+      \begin{aligned}
+        p(y \mid \mu, \sigma^{2}) 
+          &= \prod
+               \limits_{i=1}^{13}
+             (2\pi\sigma^{2})^{-\frac{1}{2}}
+             exp
+              \left\{
+                -\frac{1}{2\sigma^{2}}
+                (y_{i}-\mu)^2
+              \right\}
+             \times
+             \prod\limits_{i=14}^{15}
+             (20\pi\sigma^{2})^{-\frac{1}{2}}
+             exp
+              \left\{
+                -\frac{1}{20\sigma^{2}}
+                (y_{i}-\mu)^{2}
+              \right\} \\
+          &= (2\pi\sigma^{2})^{-\frac{13}{2}}
+             exp
+              \left\{
+                -\frac{1}{2\sigma^{2}}
+                \sum\limits_{i=1}^{13}
+                  (y_{i}-\mu)^2
+              \right\}
+             \times
+             (20\pi\sigma^{2})^{-\frac{2}{2}}
+             exp
+              \left\{
+                -\frac{1}{20\sigma^{2}}
+                \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}
+              \right\} \\
+          &= 20^{-1}(2)^{-\frac{13}{2}}(\pi\sigma^{2})^{-\frac{15}{2}}
+             exp
+              \left\{
+                -\frac
+                {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+                - \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}}
+                {20\sigma^{2}}
+              \right\} \\
+          &\propto (\sigma^{2})^{-\frac{15}{2}}
+             exp
+              \left\{
+                -\frac
+                {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+                - \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}}
+                {20\sigma^{2}}
+              \right\}
+      \end{aligned}
+    $$
+    
+To perform inference on $p(\mu,\sigma^{2} \mid y)$ we partition using $p(\mu \mid y)$ and $p(\sigma^{2} \mid y, \mu)$.
+        
+(ii) Mathematically derive the density  $p(\sigma^{2} \mid y, \mu)$ assuming the non-informative prior $p(\sigma^{2} ) \propto 1/\sigma^{2}$ . Derive $E(\sigma^{2} \mid y, \mu)$ and $V(\sigma^{2} \mid y, \mu)$. [4 marks]
+    
+    **Answer:** We can express the joint posterior density as:
+    
+    $$
+      \begin{aligned}
+        p(\sigma^{2} \mid y, \mu) 
+          &\propto p(y \mid \mu, \sigma^{2})\,p(\sigma^{2}) \\
+          &\propto (\sigma^{2})^{-\frac{15}{2}}
+             exp
+              \left\{
+                -\frac
+                {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+                - \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}}
+                {20\sigma^{2}}
+              \right\}
+            \times
+            \frac
+              {1}{\sigma^{2}} \\
+          &\propto (\sigma^{2})^{\left(-\frac{15}{2} + 1\right)}
+             exp
+              \left\{
+                -\frac
+                {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+                - \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}}
+                {20\sigma^{2}}
+              \right\}          
+      \end{aligned}
+    $$
+Therefore, the density of $p(\sigma^{2} \mid y, \mu)$ has the form of an Inverse Gamma, such that:
+
+$$
+  \sigma^{2} \mid y, \mu \sim I.G.\left(\alpha = \frac{15}{2}, \beta = \frac
+                {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+                + \sum\limits_{i=14}^{15}
+                  (y_{i}-\mu)^{2}}
+                {20}
+                \right)
+$$
+
+We know that the mean of an Inverse Gamma is given by $\frac{\beta}{\alpha -1}$ and the variance by $\frac{\beta^{2}}{(\alpha - 1)^{2}(\alpha - 2)}$. Therefore
+
+$$
+  \begin{aligned}
+    E(\sigma^{2} \mid y, \mu) 
+      &= \frac
+          {\frac
+            {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+              + \sum\limits_{i=14}^{15}
+              (y_{i}-\mu)^{2}}
+            {20}}
+          {\frac
+            {15}{2} - 1
+          } \\
+     &=\frac
+         {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+           + \sum\limits_{i=14}^{15}
+           (y_{i}-\mu)^{2}}
+       {130} \\
+    V(\sigma^{2} \mid y, \mu) 
+      &= \frac
+        {\left(\frac
+          {10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}}
+          {20}\right)^{2}}
+        {\left(\frac{15}{2} - 1\right)^{2}
+          \left(\frac{15}{2} - 2\right)} \\
+      &= \frac
+        {3200\left(
+          10\sum\limits_{i=1}^{13}(y_{i}-\mu)^2
+            + \sum\limits_{i=14}^{15}
+            (y_{i}-\mu)^{2}\right)}
+        {1859}
+  \end{aligned}
+$$
+
+***
+    
+(b) A biologist believes that lifetimes in days of fruitflies follow an exponential distribution. The density for a single observation y drawn from an exponential distribution is 
+$$
+  p(y; \lambda) = \lambda e^{-\lambda y},	\qquad y > 0.
+$$
+  For data, the biologist observes $100$ randomly selected fruitflies and records how many days they live.
+
+    (i)	Write the likelihood of \lambda if there are 100 data values, represented symbolically as $y_{1},\cdots,y_{100}$. What parametric family is the conjugate prior for the exponential likelihood? (Just name the family.)	[2 marks]
+    
+        **Answer:** For the likelihood function of an exponential distribution is:
+$$
+  \begin{aligned}
+    L(\lambda; y_{n}) 
+      &= \prod
+            \limits_{i=1}^{n} 
+          \lambda \, 
+          e^{-\lambda\,y_{i}} \\
+      &= \lambda^{n} \, 
+         e^{-\lambda \sum\limits_{i=1}^{n}y_{i}}
+  \end{aligned}
+$$
+with $n=100$ we get:
+$$
+  \begin{aligned}
+    L(\lambda; y_{100}) 
+      &= \lambda^{100} \,
+         e^{-\lambda \sum\limits_{i=1}^{100}y_{i}} \\
+      &= \lambda^{100} \, 
+         e^{-100\lambda\bar{y}}
+  \end{aligned}
+$$
+The cojugate prior for the exponential likelihood is Gamma distribution. 
+    (ii) The biologist states that a prior distribution with mean 3 days and standard deviation 2 would reflect their previous knowledge about fruitfly lifetimes. What parameters should they specify in their prior? (numeric answer; show your work) [2 marks]
+    
+        **Answer:** We know that the mean and variance of $Gamma(a,b)$ are given by 
+$$
+  Mean = 
+    \frac
+      {a}{b}
+    ; \quad
+  Variance = 
+    \frac
+      {a}{b^{2}}
+$$ 
+So we simply need to solve the simultaneous equations 
+$$
+  \begin{aligned}
+    \frac{a}{b} &= 3 \implies a = 3b \\
+    \frac{a}{b^{2}} &=2
+  \end{aligned}
+$$
+If we sub the value for $a$ into the second equation, we get:
+$$
+  \frac
+    {3b}{b^{2}}
+    = 2
+  \implies 
+    b= \frac
+          {3}{2}
+  \implies 
+    a = \frac
+          {9}{2}
+$$
+which leaves us with a prior of $Gamma(\frac{9}{2},\frac{3}{2})$.
+  
+    (iii) Based on the likelihood and the prior that you have specified, find the posterior density $p(\lambda \mid y_{1},\cdots,y_{100})$. Name it and give the numeric values of the parameters. [2 marks]
+    
+    **Answer:** Suppose that we have data $X_{i} \sim Exp(\lambda)$, and that the prior distribution for $\lambda$ is $Gamma(\alpha, \beta)$. Then the posterior distribution of $\lambda$ is given as
+$$
+  \begin{aligned}
+    p(\lambda \mid \vec{x}, \alpha, \beta) 
+      &\propto \lambda^{n}
+        exp
+          \left(
+            -\lambda\sum\limits_{i=1}^{n}x_{i}
+          \right) \, 
+          \lambda^{\alpha-1} 
+          exp
+            \left(
+              -\beta\lambda
+            \right) \\
+      &= \lambda^{n +\alpha-1}
+        exp
+          \left(
+            -\lambda
+              \left(
+                \beta + \sum\limits_{i=1}^{n}x_{i}
+              \right)
+          \right) \\
+      &= \lambda^{n +\alpha-1}
+        exp
+          \left(
+            -\lambda
+              \left(
+                \beta + n\bar{x}
+              \right)
+          \right)      
+  \end{aligned}
+$$
+which is equivalent to a $Gamma(\alpha + n,\beta + n\bar{x})$. Subbing in the values we determined above gives us:
+
+$$
+  \begin{aligned}
+    p(\lambda \mid \vec{y}, 9/2, 3/2) 
+      &\propto \lambda^{100}
+        exp
+          \left(
+            -100\lambda\bar{y}
+          \right) \, 
+          \lambda^{7/2} 
+          exp
+            \left(
+              -3/2  \lambda
+            \right) \\
+      &= \lambda^{100 + 7/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right) \\
+      &= \lambda^{207/2}
+        exp
+          \left(
+            -\lambda
+              \left(
+                3/2 + 100\bar{x}
+              \right)
+          \right)      
+  \end{aligned}
+$$
+which is equivalent to $Gamma(207/2,3/2 + 100\bar{x})$.
+    

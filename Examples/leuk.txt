@@ -1,0 +1,19 @@
+model{
+  beta.0 ~ dgamma(a.0, tau.0)
+  beta.benz ~ dgamma(a.benz, tau.benz)
+  a.0    <- 0.575
+  tau.0  <- a.0*2
+  a.benz <- 0.575
+  tau.benz <- a.benz*
+  
+  for (i in 1:I)
+      {
+      count[i] ~ dpois(lambda[i])
+      lambda[i] <- p[i]*expect[i]
+      for (j in 1:J)
+          {
+          prop[j,i] <- gamma[j,i]*(benz[j] - benzbar)
+          }
+      p[i]<- beta.0 + beta.benz*sum(prop[,i])
+      }
+  }

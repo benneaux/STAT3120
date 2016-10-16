@@ -1,0 +1,41 @@
+---
+title: "Assignment 3 - Question 4"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+```
+##Question 4
+
+The observed breaking strengths (in grams) of 20 pieces of yarn randomly sampled from spinning machines in a certain production area are as follows:
+$$
+46\quad58\quad40\quad47\quad47\quad53\quad43\quad48\quad50\quad55\quad49\quad50\quad52\quad56\quad49\quad54\quad51\quad50\quad52\quad50
+$$
+
+Assume that breaking strengths are known to follow a Normal distribution, and that the mean breaking strength of yarn produced by machines in this area is known to be 51 grams. We are trying to estimate the variance, which we will now call $\theta$.
+
+##### (a) What is the conjugate family of prior distributions for a Normal variance (not precision) when the mean is known?
+
+##### (b)	Suppose previous experience suggests that the expected value of $\theta$ is *12* and the variance of $\theta$ is *4*. What parameter values are needed for the prior distribution to match these moments?
+
+
+##### (c) What is the posterior distribution $p(\theta \mid y)$ for this data under the prior from the previous step?
+
+
+##### (d) Find the posterior mean and variance of $\theta$.
+
+##### (e)	Now use WinBUGS to carry out the analysis. You will have to specify the model in terms of the precision.
+
+i.	What is the conjugate family of prior distributions for a Normal precision when the mean is known? (You will then use the same parameters in this prior as you used for the	prior on the variance in a previous step.)
+
+ii.	Include the computation of the variance in your WinBUGS program.	
+
+iii. Compare the posterior mean and variance obtained by WinBUGS for the variance with what you obtained analytically.
+
+
+###End of Assignment 3

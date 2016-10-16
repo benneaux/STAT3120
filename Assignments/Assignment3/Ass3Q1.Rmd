@@ -1,0 +1,36 @@
+---
+title: "Assignment 3 - Question 1"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+```
+##Question 1
+
+The bioassay data below was presented and analysed at various times during the course.
+
+```{r Q1table, echo=FALSE}
+q1.table <- matrix(
+  c(-0.863,5,0,-0.296,5,1, -0.053,5,3,0.727,5,5),
+    ncol = 3,
+    nrow = 4
+  )
+colnames(q1.table) <- c("Log dosage",	"No. of animals","No. of deaths")
+kable(q1.table, format="markdown", align = rep("c", dim(q1.table)[2] + 1), row.names = FALSE)
+```		
+This was an experiment done on 20 animals to estimate the toxicity of a certain drug. The data is the number of deaths (out of n) corresponding to a different dosage levels of the drug. We modelled this data as a binomial regression model as follows:
+
+$$y_{t} | p_{t}  \sim Bin(5, p_{t} ) ;\\
+logit( p_{t} ) = log\left(\frac{p_{t}}{1− p_{t}}\right)	= \alpha + \beta x_{t}
+$$ 
+
+#####(a) Perform inference for this model under a flat prior and find point estimates and 95% intervals for each parameter using WinBUGS.
+#####(b) Compare the results obtained by WinBUGS and the MC sampling scheme (Lab 8 solutions). Comments on the results.
+#####(c)	Repeat part (a) after multiplying each *n* above by *5* (i.e. $n = 25$).
+#####(d) Repeat part (a) after multiplying each *n* **AND** each *y* above by *5*.
+#####(e)	Compare inferences for $\alpha$, $\beta$ and *LD50*: how have they changed from **(a)** to **(c)** and **(d)**? Do these	changes make logical sense?

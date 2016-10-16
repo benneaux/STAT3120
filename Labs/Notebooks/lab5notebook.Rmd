@@ -1,0 +1,247 @@
+---
+title: "Lab Exercises 5 Solutions"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r SETUP, include = FALSE}
+data <- readRDS("Labs/LabData/chicken.rds")
+require(broom)
+```
+## Question 1
+
+#### (a) The variance is known.
+
+Suppose that we have a sample of size n, independently generated from a $N(\mu,\sigma^2)$ distribution. The likelihood term now is
+$$
+p(y \mid \mu,\sigma^{2})\propto		exp\left(-\frac{1}{2\sigma^2}n(\mu - \bar{y})^2\right)
+$$									
+
+##### (i) Using the **conjugate prior** on the mean is also a Normal: $\mu \sim N(\mu_{0},\sigma_{0}^{2})$
+
+$$
+\mu \mid \sigma^{2},y 
+  \sim N\left(\frac{n\bar{y}/\sigma^{2} + \mu_{0}/\sigma_{0}^{2}}{n/\sigma^{2}+1/\sigma_{0}^{2}},\>  \frac{1}{n/\sigma^{2}+1/\sigma_{0}^{2}} \right)
+$$	
+
+##### (ii) Using the **noninformative prior** let \sigma 02 → ∞ , we see that
+$$
+p(\mu \mid \sigma^2, y)	\rightarrow  (\sigma^2/n)^{-1/2}exp\left[-\frac{n}{2\sigma^2}(\mu -\bar{y})^2\right],
+$$
+
+i.e.,
+
+$$\mu	\mid \sigma^{2},y \sim N (\bar{y},\sigma^{2}/n)$$.
+
+#### (b)	**The mean is known**. The likelihood here is:
+$$
+p(y \mid \mu, \sigma^2)	\propto  (\sigma^2)^{-n/2}exp\left(-\sum\limits_{i=1}^{n}\frac{(y_i-\mu)^2}{2\sigma^2}\right).
+$$	
+**[it is not the same as the likelihood of part(a) as the variance is now a parameter]**
+
+##### (i) **Conjugate prior**
+
+The conjugate prior for the inverse gamma distribution is 
+$p(\sigma^2) \propto (\sigma^2)^{-(\alpha +1)}exp\left(-\frac{\beta}{\sigma^2}\right)$, and so in general the posterior is	
+$$
+\begin{aligned}
+p(\sigma^{2}\mid \mu, y) &\propto p(y\mid \mu,\sigma^{2})p(\sigma^2\mid \mu) \\
+&\propto (\sigma^2)^{(\frac{n}{2}+\alpha+1)}\,exp\left(-\frac{1}{\sigma^{2}}\left(\frac{\sum(y_i-\mu)^2}{2} + \beta \right)\right)				
+\end{aligned}				
+$$	
+which is equivalent to $\sigma^{2} \mid \mu,y \sim I.G.\left(A=\frac{n}{2} + \alpha,\> B=\frac{\sum(y_i-\mu)^2}{2} + \beta\right)$.
+
+##### (ii) The natural choice of prior is $\alpha = \beta = 0$ which corresponds to	$p(\sigma^{2} ) \propto (\sigma^{2} )'1$ . This	is the most popular choice among Bayesians for the prior of a variance parameter, and we will discuss this choice in more detail later. It leads to:
+
+$$
+\sigma^2 \mid \mu,y \sim I.G.\left(A=\frac{n}{2},\> B=\frac{\sum(y_i-\mu)^2}{2}\right)
+$$				
+
+#### (c) **Both unknown**
+
+For this case, our aims are to find:
+
+joint posterior	$\mu,\sigma^{2} \mid y$										
+marginal posterior	distributions	$\mu \mid y$ or	$\sigma^{2}	\mid y$
+
+conditional posterior distributions $\mu \mid y,\sigma^{2}$	or $\sigma^{2}	\mid \mu, y$
+	
+##### (i) Noninformative prior	$p(\mu,\sigma^2) \propto 1/\sigma^{2}$.						
+The marginal posterior are:
+$$\mu \mid y \sim t_{n-1}(\bar{y}, s^2/n).\\												
+\sigma^2 \mid y \sim I.G.\left( \alpha = \frac{n-1}{2},\> \beta = \frac{(n-1)s^2}{2}\right)$$						
+The conditional posteriors are										
+$$\mu \mid y,\sigma^2 \sim N(\bar{y}, \sigma^2/n).\\												
+\sigma^2 \mid y, \mu \sim I.G.\left(\frac{n}{2},\> \frac{\sum(y_t-\mu)^2}{2}\right)$$		
+Using the above results and MC methods, we are able to find the joint posterior $\mu	,\sigma^{2} \mid y$ numerically.
+
+##### (ii) For a family of conjugate priors, please see BDA Section 3.3.
+
+## Question 2
+Simulate from the Monte Carlo scheme 1. $p(\mu\mid y)$ 2. $p(\sigma^2 \mid y,\mu)$ for the treatment sample in the chicken flow example (in the file stat3120data.xls). Save the results for use in Q3.
+
+#### (a)	Obtain both the histogram estimate and the mixture estimate of $\mu_{T}$.
+
+#### (b) Obtain both the histogram estimate and the mixture estimate of $\sigma_{T}^{2}$.
+
+(a)	and (b) We know that
+
+$$
+1.\quad	\frac{\mu-\bar{y}}{s/\sqrt{n}} \sim t_{n_1} \\
+2.\quad \sigma^2 \mid \mu, y \sim I.G.\left(A=\frac{n}{2},\> B = \frac{\sum(y_i-\mu)^2}{2}\right)
+$$
+Simulating from this for the treatment sample $y_{t}$ gives:
+
+```{r}
+yt <- na.omit(data$treatment)
+nt <- length(yt)
+mut <- mean(yt)+sd(yt)*rt(10000,nt-1)/sqrt(nt) 
+sigt <- 0
+for(k in 1:10000) {
+  b=sum((yt-mut[k])^2)/2 
+  sigt[k]=1/rgamma(1,nt/2,b)
+}
+```
+Histogram estimates are
+
+```{r}
+mean(mut)
+mean(sigt)
+```
+Mixture estimates are	
+
+$$
+E(\mu_{T} \mid y) = E\left[E(\mu_{T} \mid \sigma^{2},y)\right] =	\bar{y} = \text{ mean}(y_{t})\text{ (an example of no change over the iterates!)} \\	
+E(\sigma^2	\mid y) = E(E(\sigma^2	\mid \mu, y)) = E\left(\frac{\sum( y_i-\mu)^2}{n-2}\right)\approx	\frac{1}{10000}\sum\frac{\sum(y_i-\mu^{[k]})^2}{n-2}				
+$$	
+To get this in R: 
+
+```{r}
+msigt <- 0
+for(k in 1:10000) {
+  msigt[k]=sum((yt-mut[k])^2)/(nt-2)
+}
+mean(msigt)
+```
+
+#### (c) Obtain 95% intervals around both the histogram and mixture estimates for $\sigma_{T}^{2}$. Compare the intervals produced for the histogram and mixture estimates.
+
+95% intervals are 
+
+```{r}
+quantile(sigt,c(0.025,0.975))
+quantile(msigt,c(0.025,0.975))
+```
+
+
+#### (d) **Discussion:** Why are the intervals so different?
+
+The interval for msigt will be MUCH MUCH tighter: it is an interval for a MEAN of a distribution, sigt is an interval for an individual variance parameter. Both methods numerically integrate out the mean $\mu$.
+
+ 
+## Question 3 
+Simulate from the Monte Carlo scheme $1. \> p(\mu\mid y). \> 2.\> p(\sigma^2 \mid y,\mu)$ as in Q2, now for the control sample in the calcium flow data.
+
+####(a) Obtain a classical 95% confidence interval for the difference in means $\mu_{T} - \mu_{c}$.
+
+Classically,	$\frac{y_{t} - y_c - (\mu_{T} - \mu_{C})}{\frac{s_T^2}{n_T}+\frac{s_c^2}{n_c}}	\sim t_{df}$ . Df is determined by the complicated Welch formula. 
+
+In R use 
+
+```{r}
+yc <- na.omit(data$control)
+model_summary <- broom::tidy(t.test(yt,yc))
+model_summary
+```
+to obtain 95% CI $(`r model_summary$conf.low`, `r model_summary$conf.high`)$.
+
+#### (b) Plot the histogram of the sample of mean differences, using the sample obtained in Q1.
+
+Using the command 
+
+```{r}
+nc <- length(yc)
+muc <- mean(yc)+sd(yc)*rt(10000,nc-1)/sqrt(nc)
+sigc <- 0
+for(k in 1:10000) {
+  b=sum((yc-muc[k])^2)/2 
+  sigc[k]=1/rgamma(1,nc/2,b)
+}
+hist(mut-muc,25)
+```
+
+leads to the following Normal looking plot:
+
+#### (c) Use the simulated means to obtain a 95% posterior credible interval for the difference in means.
+
+```{r}
+quantile(mut-muc,c(0.025,0.975))
+```
+same as above classical result to 2 significant figures. Larger simulation leads to $(0.0505,0.2696)$ and should equate Behrens-Fisher results (more accurate than Welch method).
+
+#### (d) Estimate $Pr(\mu_{T} > \mu_{C} \mid y_{t},y_c)$ using a classical method. (What is meant here, is its equivalent, i.e. a one-sided P-value.)
+
+```{r}
+model_summary <- tidy(t.test(yt,yc))
+model_summary
+```
+
+gives p-value = `r model_summary$p.value`.
+
+This is actually 
+$$
+Pr(\mid \bar{y}_{T} - \bar{y}_c \mid / \sqrt{s_T^2/n_{T} + s_c^2 /n_c} > t_{df} \mid \mu_{T} = \mu_{c}).
+$$ 
+This would seem to suggest to a Bayesian that $Pr(\mu_{T} > \mu_{c} \mid y_{t} , y_c ) \sim 1-0.004308/2 = 0.9978$.
+
+ 
+#### (e) Estimate $Pr(\mu_{T} > \mu_{C} \mid y_{t} , yc )$ using the simulated means. Does your answer agree with that in (d)?
+
+Using the samples 
+
+```{r}
+length(mut[mut>muc])/10000 
+```
+
+(remarkably similar to (d)!)
+
+#### (f) Do a classical F-test to judge whether the treatment and control variances are significantly different.
+
+The F statistic is $F = s_T^2 / s_c^2 = 0.694444$. This value is from an F35,31 sampling distribution, under the *null hypothesis* $\sigma_T^2 = \sigma_c^2$). The p-value is
+
+$$
+Pr(F < F_{35,31} \mid \sigma_{T}^{2} = \sigma_{C}^{2} ) + Pr(1/F > F_{31,35} \mid \sigma_{T}^{2} = \sigma_{C}^{2}) \\ =	pf(0.694444,35,31)+ (1-pf(1/0.694444,31,35)) \\ = 0.296.
+$$
+
+#### (g) **Discussion:** Can a classical confidence interval for $\sigma_{T}^{2} /\sigma_{c}^{2}$ be produced?
+
+Yes, this is in fact one of those cases where classical and Bayesian results are identical.
+
+Both approaches	benefit from the fact that	$(s_c^2 /\sigma_{c}^{2} ) /(s_T^2 /\sigma_{T}^{2} )$ follows an $F(n_c-1,n_{t}-1)$
+distribution. The	95% credible interval for	$\sigma_{T}^{2} /\sigma_{c}^{2}$  is thus $(0.694 \times qf(0.025,31,35) = 0.344, 0.694 \times qf(0.975,31,35) = 1.382)$. 
+(This exact classical interval leads to the same conclusion as the hypothesis test: we can't reject the true population variances “being equal” at the 5% level.) The fact remains, however, that the Bayesian simulation approach below does not generally rely on underlying Normality.
+
+#### (h) Use the simulated variances to obtain an estimate and 95% interval for the ratio $\sigma_{T}^{2} /\sigma_{C}^{2}$ . Is your conclusion in (g) the same as that in (f)? Is the CrI the same as in (g)?
+
+The exact classical/credible interval at (g) leads to the same conclusion as the hypothesis test: we can't reject the true population variances “being equal” at the 5% level.
+
+Approximate credible limits derived from the histogram (create “sigc” first as well!) are
+
+```{r}
+mut <- mean(yt)+sd(yt)*rt(10000,nt-1)/sqrt(nt) 
+```
+```{r}
+quantile(sigt/sigc,c(0.025,0.975))
+```
+##### (i) Plot the histogram of the sample of variance ratios. How likely is it that $\sigma_{T}^{2} > \sigma_{c}^{2}$ based on the sample data? Is the conclusion the same as in (f)?
+
+By simulation:
+
+```{r}
+length(sigt[sigt>sigc])
+hist(sigt/sigc,20)
+```
+
+so $Pr(\sigma_{T}^{2} > \sigma_{C}^{2} \mid y_{t} , y_C) \approx 0.1423$.
+
+This is consistent with the 2-sided p-value above.

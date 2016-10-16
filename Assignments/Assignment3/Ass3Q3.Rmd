@@ -1,0 +1,26 @@
+---
+title: "Assignment 3 - Question 3"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include=FALSE}
+require(tufte)
+require(knitr)
+opts_chunk$set(cache = FALSE)
+opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+#wd <- getwd()
+#setwd(paste0(wd,"/Assignments/Assignment3"))
+```
+
+```{r data, include=FALSE}
+data <- readRDS("C:/R/STAT3120/Assignments/Assignment3/Data/dyestuff.rds")
+```
+##Question 3
+**Variance components model, taken from Box & Tiao (1973).**
+
+Read the complete WinBUGS example “Dyes: variance components model” (Examples Vol. 1). To show the advantages of the Bayesian approach, Box & Tiao also simulated data from a model with a known between batch variance of 4 and a within batch variance of *16*, presented in *dyestuff.txt*.
+
+#####(a) Use WinBUGS to plot estimated posterior densities of the two variance components, including the joint posterior (by scatterplot), and give appropriate 95% intervals.
+
+#####(b)	Actual implementation of unconstrained priors for the variances is not straightforward but, without attempting this, you are asked to speculate on what would change in your results. Relate your discussion to anticipated results from classical methods. [E.g., SAS® software gives point estimates only, varying between values of 13.3 and 14.9 for the within batch component, and 0 or −1.3 for the between batch component.

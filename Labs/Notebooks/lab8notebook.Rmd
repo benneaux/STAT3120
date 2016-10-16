@@ -1,0 +1,279 @@
+---
+title: "Lab Exercises 8 Solutions"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include = FALSE}
+require(knitr)
+require(broom)
+opts_chunk$set(collapse=TRUE, cache = TRUE)
+```
+
+## Question 1
+In the lecture, the linear regression model's $p(\beta \mid y)$ and $p(\sigma^{2} \mid y, \beta)$ were derived. Derive the pair $p(\beta \mid y,\sigma^{2})$ and $p(\sigma^{2} \mid y)$ instead. Explain why both pairs are useful. Hint:
+
+Remember the expression for a multivariate Normal $X \sim N_k (\mu,V)$:
+$$
+p(x \mid \mu,V) \propto	\frac{1}{\mid V \mid}exp\left[-\frac{1}{2}(x-\mu)'V^{-1}(x-\mu)\right]
+$$
+
+One method to derive the marginal posterior would be: 
+$$
+\begin{aligned}
+p(\sigma^{2} \mid y) 
+&\propto \int p(\beta ,\sigma^{2} \mid y)d\beta \\
+&\propto \int (\sigma^{2})^{-(n/2 + 1)}exp\left[-\frac{1}{2\sigma^2}(y-X\beta )'(y-X\beta)\right]d\beta	\\
+&\propto (\sigma^2)^{-(n/2 + 1)} exp\left[-\frac{(n-q)\hat{\sigma}^2}{2\sigma^2}\right]\int exp\left[-\frac{1}{2\sigma^2}(\beta-\hat{\beta})'(\beta-\hat{\beta})\right]d\beta	\\
+&\propto (\sigma^{2})^{-(n/2+1)}\mid \sigma^{2}(X'X)^{-1} \mid ^{1/2} exp\left[-\frac{(n-q)\hat{\sigma}^2}{2\sigma^2}\right] \\
+&\propto (\sigma^{2})^{-\left(\frac{(n-q)}{2}+1\right)} exp\left[-\frac{(n-q)\hat{\sigma}^2}{2\sigma^2}\right]
+\end{aligned}
+$$
+							
+I.e. $\sigma^{2} \mid y \sim I.G.\left(\frac{(n-q)}{2},\frac{(n-q)\hat{\sigma}^2}{2}\right)$																														
+It follows immediately from the joint likelihood, being proportional to$ p(\beta \mid \sigma^{2},y)$, that $\beta \mid \sigma^2, y \sim N(\hat{\beta} ,\hat{\sigma}(X'X )^{-1})$			
+
+Both pairs are useful: usually the two marginal posteriors are sufficient for inference.
+
+ 
+## Question 2 
+Consider the binomial regression example in lecture 8.
+```{r, echo=FALSE}
+cnames <- c("Log dosage","No. of animals","No. of deaths")
+bin1 <- c("x",	"n",	"y")
+bin2 <- c(-0.863,	5,	0)
+bin3 <- c(-0.296,	5,	1)
+bin4 <- c(-0.053,	5,	3)
+bin5 <- c(0.727,	5,	5)
+
+bin_all <- rbind(bin1,bin2,bin3,bin4,bin5)
+colnames(bin_all) <- cnames
+kable(bin_all, row.names = FALSE)
+```
+
+We will model this data as a binomial regression model as follows: 
+$$
+y_{t} \mid p_{t} \sim Bin(5, p_{t});
+logit(p_{t}) = log\left(\frac{p_t}{1-p_{t}}\right)= \alpha + \beta x_t
+$$
+#### (a) Perform a classical analysis of this data set, and find CIs for $\alpha$ and $\beta$. Feel free to use SPSS, JMP, R etc.
+
+In R, e.g.:
+```{r}
+bioassay <- data.frame( y = c(0,1,3,5),
+n = c(5,5,5,5),
+x = c(-0.863,-0.296,-0.053,0.727))
+summary(glm(y/n ~ x, data = bioassay, family = binomial, weights = n))
+```
+This gives, amongst other things:
+
+For Wald intervals we apply +/- 1.96SE, and obtain CIs $(-1.165, 2.912)$ for $\alpha$ and $(-2.009, 17.834)$ for $\beta$. It appears that the SPSS CIs (from a few years ago) are based on slight typos. Either way, the results at (d) are quite different, for $\beta$ in particular.
+
+It should be noted, however, that using the EXACT option in SAS's PROC LOGISTIC, which would handle the y=0 and y=5 observations better, does pick up the statistical significance of $\beta$. In addition to the same estimates, SEs and p-values as above (except for 5.0620 instead of 5.0619), the EXACT option gives the following output:
+
+Exact Conditional Tests
+
+Effect Test	Statistic	p-Value
+
+Exact	Mid
+
+x	Score 10.7326 0.0004 0.0002 Probability 0.000298 0.0075 0.0074
+
+Required SAS code is as follows:
+
+data bio;
+
+input x y n; datalines;
+
+-.863 0 5 -.296 1 5 -.053 3 5 0.727 5 5
+
+;
+
+proc logistic data=bio;
+
+model y/n=x;
+exact x; run;
+
+#### (b) Show that under this model the likelihood function, which, assuming independence for the $k = 4$ groups, is:
+
+$$
+\begin{aligned}
+f(y \mid p) 
+  &= \prod\limits_{t=1}^{k}f(y_{t}\mid p_{t}) 
+  = \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}p_{t}^{y_{t}}(1-p_{t}) \\		
+  &\propto \frac{exp\left(\alpha \sum\limits_{t} y_{t} + \beta \sum\limits_{t} x_{t} y_{t}\right)}{\prod\limits_{t}[1 + exp(\alpha + \beta x_{t})]^{n_{t}}}
+\end{aligned}
+$$
+is equivalent to
+$$
+\begin{aligned}
+f(y \mid p) 
+&= \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}p_{t}^{y_{t}}(1-p_{t})^{n_t-y_t} \\
+&= \prod\limits_{t=1}^{k}\binom{n_{t}}{y_{t}}\left(\frac{exp(\alpha + \beta x_{t})}{1 + exp(\alpha + \beta x_{t})}\right)^{y_{t}}\left(\frac{1}{1 + exp(\alpha + \beta x_{t})}\right)^{n_{t}-y_{t}} \\
+&\propto \prod\limits_{t=1}^{k} exp(y_{t}(\alpha + \beta x_{t}))\left(\frac{1}{1 + exp(\alpha + \beta x_{t})}\right)^{n_{t}} \\
+&=\frac{exp\left(\alpha \sum\limits_{t=1}^{k} y_{t} + \beta \sum\limits_{t=1}^{k} x_{t} y_{t}\right)}{\prod\limits_{t=1}^{k}\left[1 + exp(\alpha + \beta x_{t})\right]^{n_{t}}}
+\end{aligned}
+$$
+as required.
+
+#### (c) Plot	the	bivariate	surface		representing	the likelihood	function,	in terms of	$\alpha$ and $\beta$ , over a grid of points from $\alpha \in (-5,10)$ and $\beta \in (-3,50)$. Allow 1000 equally spaced points for each parameter.
+
+```{r}
+y=c(0,1,3,5) 
+x=c(-0.863,-0.296,-0.053,0.727) 
+px=seq(1,1000^2) 
+dim(px)=c(1000,1000) 
+a=seq(-5,10,by=15/999) 
+b=seq(-3,50,by=53/999) 
+sy=sum(y)
+
+sxy=sum(x*y)
+for(k in 1:1000) {
+  for(j in 1:1000) {
+    px[k,j]=a[k]*sy+b[j]*sxy-5*sum(log(1+exp(a[k]+b[j]*x)))
+  }
+}
+px <- exp(px)
+
+contour(a,b,px)
+```
+
+#### (d) Perform inference for this model under a flat prior and find point estimates and 95% intervals for each parameter.
+
+We treat the likelihood as a joint bivariate discrete probability density in $\alpha$ and $\beta$. We also note that
+$$
+p(\alpha,\beta \mid y) = p(\alpha \mid y) p(\beta \mid \alpha ,y)
+$$
+
+where
+
+$$
+p(\alpha \mid y) 
+  = \int p(\alpha, \beta \mid y)d\beta \approx \sum\limits_{j=2}^{1000}p(\alpha, \beta_j \mid y)(\beta_j - \beta_{j-1} )
+$$
+We can thus generate an MC sample as follows, using the approximate cdf function.
+
+First we need the marginal density $p(\alpha \mid y)$, we just sum each row of the bivariate density px and then normalize to let the probabilities sum to 1.
+
+```{r}
+pxa=0
+for(k in 1:1000) {
+  pxa[k]=sum(px[k,])
+}
+pxa=pxa/sum(pxa)
+```
+
+A plot follows:
+
+```{r}
+plot(a,pxa,type='l')
+```
+
+The cdf function is the cumulative sum as follows: 
+
+```{r}
+cdfa <- cumsum(pxa) 
+plot(a,cdfa,type='l')
+```
+
+We can simulate an MC sample of 5000 from $p(\alpha \mid y)$ as follows:
+
+```{r}
+u <- runif(5000,0,1)
+a1 <- 0
+for(j in 1:5000) {
+  st=0;k=1
+  while(st==0) {
+    if(cdfa[k+1]>u[j]&cdfa[k]<u[j]) {
+      a1[j]=a[k];st=1
+    } else {
+      k=k+1
+    }
+  }
+}
+```
+
+This gives the histogram below
+		
+An estimate and 95% interval for $\alpha$ are
+
+```{r}
+mean(a1)																			
+quantile(a1,c(0.025,0.975))
+```
+
+To simulate from $p(\beta \mid y,\alpha)$ we note that, under a flat prior on $\beta$,	$p(\beta \mid y,\alpha =  \alpha_{i}) \propto p(\alpha_{i},\beta \mid y)$	which is just the joint density evaluated at the point $\alpha_{i}$.	
+
+```{r}
+a1 <- 0
+b1 <- 0
+u <- runif(5000,0,1) 
+for(j in 1:5000){ 
+  st=0
+  k=1
+  while(st==0) {
+    if(cdfa[k+1]>u[j]&cdfa[k]<u[j]) {
+      a1[j]=a[k];st=1 
+    } else {
+        k=k+1
+    }
+  }
+  pxb=px[k,]
+  pxb=pxb/sum(pxb)
+  cdfb=cumsum(pxb)
+  st1=0
+  k1=1
+  u1=runif(1,0,1)
+  while(st1==0) {
+    if(cdfb[k1+1]>u1&cdfb[k1]<u1) {
+      b1[j]=b[k1]
+      st1=1
+    } else {
+        k1=k1+1
+    }
+  }
+}
+```
+ 
+This gives the histogram for $\beta$
+
+An estimate and 95% interval for $\beta$ are		
+
+```{r}
+mean(b1)			
+quantile(b1,c(0.025,0.975))
+```
+
+We can plot the sample against the likelihood contour plot as follows:
+
+```{r}
+contour(a,b,px) 
+plot(a1,b1,xlim=c(-5,10),ylim=c(-3,50))
+```
+ 
+#### (e)	Discuss the (non)informativeness of a flat prior for $\alpha$ and $\beta$. Hint: also consider the case of a single predictor variable that, like the response variable, is 0/1.
+
+Given the logit metric of the response variable it is not clear whether flat priors are so noninformative here. In the extreme case of the 0/1 predictor variable we have, in effect a two-proportion comparison. A flat prior in the logit metric framework would seem to correspond to the Haldane prior in the regular proportion metric quite informative for extreme data. Also see an editorial by Gelman (from BDA) & Jakulin (2007, Statistica Sinica) at http://www.stat.columbia.edu/~gelman/research/published/radical.pdf
+
+#### (f) Find an estimate and 95% interval for the LD50 (the dosage where 50% of the animals die, i.e. p = 0.5).
+
+LD50 = dosage required for p = 0.5. But we know that
+
+$$
+p = 0.5 = \frac{exp(\alpha + \beta x)}{1 + exp(\alpha + \beta x)} \\ 
+\implies log\left(\frac{p}{1-p}\right) = 0 = \alpha + \beta x \\ 
+\implies x = -\frac{\alpha}{\beta}
+$$
+
+The LD50 point is the negative ratio of the parameters. We can generate a sample of this using our MC sample of $\alpha$ and $\beta$ above:
+
+```{r}
+ld50 <- -a1/b1 
+mean(ld50)
+quantile(ld50,c(0.025,0.975))
+hist(ld50, 20)
+```
+
+#### (g) What is the conclusion of this experiment?
+
+The drug has a significantly positive effect on probability of death in these animals (since $\beta > 0$). In fact $Pr( \beta > 0\mid y) = length(b1[b1>0])/5000 = 1 > 4999/5000 = 0.9998$.
