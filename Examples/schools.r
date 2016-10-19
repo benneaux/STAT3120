@@ -1,3 +1,4 @@
+require(R2OpenBUGS)
 data("schools")
 J <- nrow(schools)
 
@@ -14,15 +15,23 @@ inits <- function() {
   )
 }
 
+  
 schools.sim <- bugs(
-  data,
-  inits,
-  model.file = "schools.txt",
-  parameters = c("theta", "mu.theta", "sigma.theta"),
-  n.chains = 3,
-  n.iter = 1000,
-  codaPkg = TRUE
-  )
+    data,
+    inits,
+    model.file = "schools.txt",
+    parameters = c("theta", "mu.theta", "sigma.theta"),
+    n.chains = 3,
+    n.iter = 1000,
+    n.burnin = 100,
+    n.thin = 1,
+    codaPkg = TRUE,
+    useWINE = TRUE,
+    newWINE = TRUE,
+    WINE="/Applications/Wine.app/Contents/MacOS/Wine",
+    WINEPATH = "/Applications/Wine.app/Contents/Resources/bin/winepath",
+    OpenBUGS.pgm="/Users/benjamin/Applications/wine/drive_c/Program Files/OpenBUGS/OpenBUGS323/"
+) 
 
 schools.coda <- read.bugs(schools.sim)
 
@@ -43,3 +52,6 @@ schools.summary <- summary(
 schools.summary$stat["theta[1]",]
 schools.summary$q["theta[1]",]
 schools.summary
+
+validateInstallOpenBUGS(OpenBUGS.pgm="/Users/benjamin/Applications/wine/drive_c/ProgramFiles/OpenBUGS/OpenBUGS323/OpenBUGS.exe",
+                        useWINE=TRUE,debug=TRUE,WINE = "/Application/Wine.app/Content/MacOS/Wine",newWINE=TRUE)
