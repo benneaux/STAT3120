@@ -1,0 +1,12 @@
+model
+{
+    for (i in 1:n) {
+        mu[i] <- beta0 + beta1 * x1[i] + beta2 * x2[i]
+        yi[i] ~ dnorm(mu[i], tau)
+    }
+    beta0 ~ dflat()
+    sigma ~ dunif(0.01, 100)
+    tau <- 1/(sigma * sigma)
+    beta1 ~ dflat()
+    beta2 ~ dflat()
+}

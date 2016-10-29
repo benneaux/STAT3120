@@ -1,0 +1,8 @@
+model
+{
+    for (i in 1:n) {
+        x[i] ~ dnorm(mu, tau)
+    }
+    tau ~ dgamma(alph, bet)
+    theta <- 1/tau
+}

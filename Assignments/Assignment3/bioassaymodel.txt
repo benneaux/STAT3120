@@ -1,0 +1,10 @@
+model
+{
+    for (i in 1:n) {
+        logit(theta[i]) <- beta0 + beta1 * xi[i]
+        yi[i] ~ dbin(theta[i], ni[i])
+    }
+    beta0 ~ dflat()
+    beta1 ~ dnorm(0.00000E+00, 1.00000E-05)
+    LD50 <- (logit(0.5) - beta0)/beta1
+}

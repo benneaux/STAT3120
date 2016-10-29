@@ -1,36 +1,372 @@
 ---
 title: "Assignment 3 - Question 1"
 output:
-  html_document: default
+  pdf_document: default
   html_notebook: default
+  html_document: default
 ---
 ```{r setup, include=FALSE}
 require(tufte)
 require(knitr)
-opts_chunk$set(cache = FALSE)
-opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+require(R2OpenBUGS)
+require(coda)
+opts_chunk$set(cache = TRUE)
+opts_chunk$set(fig.align = 'center', fig.height = 5, fig.width = 12, collapse = TRUE, highlight = TRUE)
 ```
 ##Question 1
 
 The bioassay data below was presented and analysed at various times during the course.
 
 ```{r Q1table, echo=FALSE}
-q1.table <- matrix(
+q1table <- matrix(
   c(-0.863,5,0,-0.296,5,1, -0.053,5,3,0.727,5,5),
     ncol = 3,
-    nrow = 4
+    nrow = 4, byrow = TRUE
   )
-colnames(q1.table) <- c("Log dosage",	"No. of animals","No. of deaths")
-kable(q1.table, format="markdown", align = rep("c", dim(q1.table)[2] + 1), row.names = FALSE)
+colnames(q1table) <- c("Log dosage",	"No. of animals","No. of deaths")
+kable(q1table, format="markdown", align = rep("c", dim(q1table)[2] + 1), row.names = FALSE)
 ```		
-This was an experiment done on 20 animals to estimate the toxicity of a certain drug. The data is the number of deaths (out of n) corresponding to a different dosage levels of the drug. We modelled this data as a binomial regression model as follows:
+This was an experiment done on 20 animals to estimate the toxicity of a certain drug. The data is the number of deaths (out of n) corresponding to a different dosage levels of the drug. We modeled this data as a binomial regression model as follows:
 
-$$y_{t} | p_{t}  \sim Bin(5, p_{t} ) ;\\
-logit( p_{t} ) = log\left(\frac{p_{t}}{1− p_{t}}\right)	= \alpha + \beta x_{t}
+$$y_{t} \mid p_{t}  \sim Bin(5, p_{t});\\
+logit(p_{t}) = log\left(\frac{p_{t}}{1-p_{t}}\right)	= \alpha + \beta x_{t}
 $$ 
 
 #####(a) Perform inference for this model under a flat prior and find point estimates and 95% intervals for each parameter using WinBUGS.
+
+I'll be using the package *R2OpenBUGS* to send data from *R* into *WinBUGS* (or in my case *OpenBUGS*). The model files will be attached at the end of the assignment.
+
+```{r Q1aBUGS, results="hide"}
+#define the model
+bioassaymodel <- function(){
+  for (i in 1:n) {
+    logit(theta[i]) <- beta0 + beta1*xi[i] 
+    yi[i] ~ dbin(theta[i],ni[i]) 
+  } 
+  beta0 ~ dflat()
+  beta1 ~ dnorm(0,0.00001)
+  LD50 <- (logit(0.50)-beta0)/beta1 
+}
+# write the model code out to a file
+write.model(bioassaymodel, "bioassaymodel.txt")
+model.file1 = paste(getwd(),"bioassaymodel.txt", sep="/")
+coda.file = paste(getwd(),"Q1Coda", sep="/")
+
+
+#prepare the data for input into OpenBUGS
+xi <- c(-0.863,-0.296,-0.053,0.727) 
+ni <- c(5,5,5,5)
+yi <- c(0,1,3,5)
+n <- 4
+data <- list ("xi", "yi", "ni","n")
+
+#initialization of variables
+inits <- function(){
+  list(beta0=0,beta1=1)
+}
+
+WINE="/opt/local/bin/wine"
+WINEPATH="/opt/local/bin/winepath"
+OpenBUGS.pgm=paste0("/Users/benjamin/Applications/wine/",
+                    "drive_c/ProgramFiles/OpenBUGS/OpenBUGS323/OpenBUGS.exe")
+
+#these are the parameters to save
+parameters = c("beta0", "beta1","LD50")
+
+#run the model
+bioassay.sim <- bugs(data, 
+                    inits, 
+                    model.file = model.file1,
+                    parameters=parameters,
+                    n.chains = 4, 
+                    n.iter = 2500, 
+                    OpenBUGS.pgm=OpenBUGS.pgm, 
+                    WINE=WINE, 
+                    WINEPATH=WINEPATH,
+                    useWINE=T,
+                    codaPkg = T,
+                    working.directory = coda.file,
+                    debug = FALSE)
+```
+```{r Q1asamp, results="hide"}
+samples <- read.openbugs(paste0(coda.file,"/"))
+```
+```{r Q1aplot, fig.height = 12}
+plot(samples)
+summary(samples)
+```
+
 #####(b) Compare the results obtained by WinBUGS and the MC sampling scheme (Lab 8 solutions). Comments on the results.
+```{r Q1bMCSample, include = FALSE}
+y=c(0,1,3,5) 
+x=c(-0.863,-0.296,-0.053,0.727) 
+px=seq(1,1000^2) 
+dim(px)=c(1000,1000) 
+a=seq(-5,10,by=15/999) 
+b=seq(-3,50,by=53/999) 
+sy=sum(y)
+
+sxy=sum(x*y)
+for(k in 1:1000) {
+  for(j in 1:1000) {
+    px[k,j]=a[k]*sy+b[j]*sxy-5*sum(log(1+exp(a[k]+b[j]*x)))
+  }
+}
+px <- exp(px)
+
+pxa=0
+for(k in 1:1000) {
+  pxa[k]=sum(px[k,])
+}
+pxa=pxa/sum(pxa)
+cdfa <- cumsum(pxa) 
+
+#MC Alpha
+u=runif(5000,0,1) 
+beta0=0 
+for(j in 1:5000){     
+st=0;k=1 
+     while(st==0){ 
+         if(cdfa[k+1]>u[j]&cdfa[k]<u[j]){ 
+           beta0[j]=a[k];st=1}else{k=k+1} 
+     }} 
+
+# MC Beta
+u <- runif(5000,0,1)
+beta0 <- 0
+beta1 <- 0
+u <- runif(5000,0,1) 
+for(j in 1:5000){ 
+  st=0
+  k=1
+  while(st==0) {
+    if(cdfa[k+1]>u[j]&cdfa[k]<u[j]) {
+      beta0[j]=a[k];st=1 
+    } else {
+        k=k+1
+    }
+  }
+  pxb=px[k,]
+  pxb=pxb/sum(pxb)
+  cdfb=cumsum(pxb)
+  st1=0
+  k1=1
+  u1=runif(1,0,1)
+  while(st1==0) {
+    if(cdfb[k1+1]>u1&cdfb[k1]<u1) {
+      beta1[j]=b[k1]
+      st1=1
+    } else {
+        k1=k1+1
+    }
+  }
+}
+```
+
+I have excluded the code from lab 8 for brevity. Running the code gives the following results for the coefficients of regression beta0 and beta1.
+
+```{r Q1MCplot}
+require(ggplot2)
+mean(beta0)
+quantile(beta0,c(0.025,0.975))
+mean(beta1)
+quantile(beta1,c(0.025,0.975))
+
+ld50=-beta0/beta1 
+mean(ld50)
+quantile(ld50,c(0.025,0.975)) 
+```
+```{r Q1bMCcompdata, include=FALSE}
+MCb0 <- as.data.frame(cbind(V1 = beta0,scheme="MC",variable="beta0"))
+MCb1 <- as.data.frame(cbind(V1 = beta1,scheme="MC",variable="beta1"))
+MCld50 <- as.data.frame(cbind(V1 = ld50,scheme="MC",variable="ld50"))
+
+bugsb0 <- as.data.frame(cbind(unlist(samples[,"beta0"]),scheme="BUGS",variable="beta0"))
+bugsb1 <- as.data.frame(cbind(unlist(samples[,"beta1"]),scheme="BUGS",variable="beta1"))
+bugsld50 <- as.data.frame(cbind(unlist(samples[,"LD50"]),scheme="BUGS",variable="ld50"))
+
+biohistbeta <- as.data.frame(rbind(MCb0,MCb1,bugsb0,bugsb1))
+biohistbeta$V1 <- as.numeric(as.character(biohistbeta$V1))
+biohistld50 <- as.data.frame(rbind(MCld50,bugsld50))
+biohistld50$V1 <- as.numeric(as.character(biohistld50$V1))
+```
+
+By plotting histograms obtained from each sampling scheme together we can easily see how the estimates compare.
+
+```{r Q1hists, echo=FALSE, warning = FALSE}
+p <- ggplot(biohistbeta, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+p + 
+  facet_grid(.~variable, scales = "free_x")
+
+q <- ggplot(biohistld50, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+q + 
+  facet_grid(.~variable) +
+  scale_x_continuous(limit = c(-0.75, 0.75))
+```
+
+Both approaches seem comparable, with the WINBUGS scheme centering more around the posterior mean values for each parameter compared the the MC method, but otherwise both methods produce similar results.
+
 #####(c)	Repeat part (a) after multiplying each *n* above by *5* (i.e. $n = 25$).
+
+Here again I have excluded the code for brevity. Running the same code given in part (a) with the adjusted values gives the following results.
+
+```{r Q1c, include=FALSE}
+#prepare the data for input into OpenBUGS
+ni <- c(25,25,25,25)
+data <- list ("xi", "yi", "ni","n")
+
+#initialization of variables
+inits <- function(){
+  list(beta0=0,beta1=1)
+}
+
+WINE="/opt/local/bin/wine"
+WINEPATH="/opt/local/bin/winepath"
+OpenBUGS.pgm=paste0("/Users/benjamin/Applications/wine",
+                    "/drive_c/ProgramFiles/OpenBUGS/OpenBUGS323/OpenBUGS.exe")
+
+#these are the parameters to save
+parameters = c("beta0", "beta1","LD50")
+
+#run the model
+bioassay.sim <- bugs(data, 
+                    inits, 
+                    model.file = model.file1,
+                    parameters=parameters,
+                    n.chains = 4, 
+                    n.iter = 2500, 
+                    OpenBUGS.pgm=OpenBUGS.pgm, 
+                    WINE=WINE, 
+                    WINEPATH=WINEPATH,
+                    useWINE=T,
+                    codaPkg = T,
+                    working.directory = coda.file,
+                    debug = FALSE)
+```
+```{r Q1csamp, include = FALSE}
+samples <- read.openbugs(paste0(coda.file,"/"))
+```
+```{r Q1cplot, fig.height = 12}
+plot(samples)
+summary(samples)
+```
+```{r Q1cData, include=FALSE}
+#attach(bioassay.sim,warn.conflicts = FALSE)
+bugsb0 <- as.data.frame(cbind(unlist(samples[,"beta0"]),scheme="BUGS2 (n*5)",variable="beta0"))
+bugsb1 <- as.data.frame(cbind(unlist(samples[,"beta1"]),scheme="BUGS2 (n*5)",variable="beta1"))
+bugsld50 <- as.data.frame(cbind(unlist(samples[,"LD50"]),scheme="BUGS2 (n*5)",variable="ld50"))
+
+biohistbeta2 <- as.data.frame(rbind(biohistbeta,bugsb0, bugsb1))
+
+biohistbeta <- as.data.frame(rbind(MCb0,MCb1,bugsb0,bugsb1))
+biohistbeta$V1 <- as.numeric(as.character(biohistbeta$V1))
+
+biohistld502 <- as.data.frame(rbind(biohistld50,bugsld50))
+biohistld50 <- as.data.frame(rbind(MCld50,bugsld50))
+biohistld50$V1 <- as.numeric(as.character(biohistld50$V1))
+```
+
+Over plotting the new results with the MC results, we get.
+
+```{r Q1cHists, echo = FALSE, warning = FALSE}
+p <- ggplot(biohistbeta, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+p + facet_grid(.~variable, scales = "free_x")
+q <- ggplot(biohistld50, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+q + 
+  facet_grid(.~variable, scales = "free") +
+  scale_x_continuous(limit = c(-1, 5))
+```
+
+The multiplication in this example has changed the underlying problem, and we can see the change when comparing the histograms for the MC method and the BUGS method. By multiplying each n by 5 we have altered proportion of rats that die for each log-dosage, thereby reducing our estimates of toxicity.
+
 #####(d) Repeat part (a) after multiplying each *n* **AND** each *y* above by *5*.
+Again, code excluded for brevity.
+
+```{r Q1dBUGS, , include = FALSE}
+#prepare the data for input into OpenBUGS
+ni <- c(25,25,25,25)
+yi <- c(0,5,15,25)
+data <- list ("xi", "yi", "ni","n")
+
+#initialization of variables
+inits <- function(){
+  list(beta0=0,beta1=1)
+}
+
+WINE="/opt/local/bin/wine"
+WINEPATH="/opt/local/bin/winepath"
+OpenBUGS.pgm=paste0("/Users/benjamin/Applications/wine/",
+                    "drive_c/ProgramFiles/OpenBUGS/OpenBUGS323/OpenBUGS.exe")
+
+#these are the parameters to save
+parameters = c("beta0", "beta1","LD50")
+
+#run the model
+bioassay.sim <- bugs(data, 
+                    inits, 
+                    model.file = model.file1,
+                    parameters=parameters,
+                    n.chains = 4, 
+                    n.iter = 2500, 
+                    OpenBUGS.pgm=OpenBUGS.pgm, 
+                    WINE=WINE, 
+                    WINEPATH=WINEPATH,
+                    useWINE=T,
+                    codaPkg = T,
+                    working.directory = coda.file,
+                    debug = FALSE)
+```
+```{r Q1dsamp, results="hide"}
+samples <- read.openbugs(paste0(coda.file,"/"))
+```
+```{r Q1dplot, fig.height = 12}
+plot(samples)
+summary(samples)
+```
+```{r Q1dData, include = FALSE}
+bugsb0 <- as.data.frame(cbind(unlist(samples[,"beta0"]),scheme="BUGS3 (n*5;y*5)",variable="beta0"))
+bugsb1 <- as.data.frame(cbind(unlist(samples[,"beta1"]),scheme="BUGS3 (n*5;y*5)",variable="beta1"))
+bugsld50 <- as.data.frame(cbind(unlist(samples[,"LD50"]),scheme="BUGS3 (n*5;y*5)",variable="ld50"))
+
+biohistbeta2 <- as.data.frame(rbind(biohistbeta2,bugsb0, bugsb1))
+
+biohistbeta <- as.data.frame(rbind(MCb0,MCb1,bugsb0,bugsb1))
+biohistbeta$V1 <- as.numeric(as.character(biohistbeta$V1))
+
+biohistld502 <- as.data.frame(rbind(biohistld502,bugsld50))
+
+biohistld50 <- as.data.frame(rbind(MCld50,bugsld50))
+biohistld50$V1 <- as.numeric(as.character(biohistld50$V1))
+```
+```{r Q1dHists, echo=FALSE, warning = FALSE}
+p <- ggplot(biohistbeta, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+p+facet_grid(~variable, scales = "free_x")
+
+q <- ggplot(biohistld50, aes(x = V1, fill = scheme)) + stat_bin(bins = 100) 
+q + 
+  facet_grid(.~variable) +
+  scale_x_continuous(limit = c(-0.75, 0.75))
+```
+We again have a much better estimate compared to part (c) because, by multiplying both the n and y value for each dosage level, we have not fundamentally changed the underlying toxicity estimate from the problem as it was originally stated.
+
 #####(e)	Compare inferences for $\alpha$, $\beta$ and *LD50*: how have they changed from **(a)** to **(c)** and **(d)**? Do these	changes make logical sense?
+
+First let's over plot the histograms of samples from each scheme for each variable.
+
+```{r Q1eHists, echo=FALSE, warning = FALSE}
+biohistbeta2$V1 <- as.numeric(as.character(biohistbeta2$V1))
+biohistld502$V1 <- as.numeric(as.character(biohistld502$V1))
+
+p <- ggplot(biohistbeta2, aes(x = V1, fill = scheme)) + 
+  stat_bin(bins = 100) 
+p + 
+  facet_grid(.~variable, scales = "free")
+
+q <- ggplot(biohistld502, aes(x = V1, group = scheme, fill = scheme)) + 
+  stat_bin(bins = 500) 
+
+q + 
+  facet_grid(.~variable) +
+  scale_x_continuous(limit = c(-0.5, 3))
+```
+Yes, for the reasons stated above. The estimate from part (c) should look much different from the others because the data used to estimate it is skewed compared to the others: more trials for the same number of deaths. Additionally, we can see that the best estimate is the one obtained in part (d), which makes sense because it has the largest sample and therefore the least variability.

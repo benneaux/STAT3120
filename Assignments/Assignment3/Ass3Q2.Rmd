@@ -1,17 +1,23 @@
 ---
 title: "Assignment 3 - Question 2"
 output:
-  html_document: default
+  pdf_document: default
   html_notebook: default
+  html_document: default
 ---
 ```{r setup, include=FALSE}
 require(tufte)
 require(knitr)
+require(LearnBayes)
+require(ggplot2)
 opts_chunk$set(cache = FALSE)
-opts_chunk$set(fig.align = 'center', fig.height = 3.5, fig.width = 3.5, collapse = TRUE, highlight = TRUE)
+opts_chunk$set(fig.align = 'center', fig.height = 7.5, fig.width = 15, collapse = TRUE, highlight = TRUE)
 ```
 ```{r data, include=FALSE}
-data <- readRDS("C:/R/STAT3120/Assignments/Assignment3/Data/birthweight.rds")
+data("birthweight")
+attach(birthweight)
+birthweight$gender <- as.factor(birthweight$gender)
+levels(birthweight$gender) <- c("Male","Female")
 ```
 
 ##Question 2
@@ -26,6 +32,97 @@ where the *e(i)’s* are independent and Normally distributed random variables w
 
 #####(a) Use the R function lm to fit this model by Least-Squares. From the output, assess if the effects AGE and GENDER are significant, and if they are significant, describe the effects of each covariate on birthweight.
 
+```{r Q2a}
+fit <- lm(weight ~ age + gender, data = birthweight, model = TRUE, x=TRUE,y=TRUE)
+summary(fit)
+```
+From the output of the linear model we can see that age is the only covariate that significantly effects birthweight ($\alpha = 0.05$). It has a positive effect on birthweight - i.e. as age increases, so does birthweight. Gender - which is not found to have a significant impact on birthweight - negatively effects birthweight if the child is female; it effects bw positively if the child is male. The value of the intercept is given as $\approx -924.94$.
+
 #####(b)	Suppose a uniform prior is placed on the regression parameters $\beta$ = ($\beta_{0}$, $\beta_{1}$, $\beta_{2}$). Use the LearnBayes package in R (blinreg command) to simulate an MC sample of **5000** draws from the joint posterior distribution of ($\beta$, $\sigma^{2}$). From the simulated sample, compute posterior means and standard deviations of $\beta_{1}$ and $\beta_{2}$. Compare the results with the LS estimates obtained in **(a)**.
 
+```{r Q2b_blinreg}
+theta.sample <- blinreg(fit$y,fit$x,5000)
+sumresids <- sum(fit$residual^2)
+shape <- fit$df.residual/2
+rate <- sumresids/2
+sigma2 <- rigamma(1,shape,rate)
+MSE <-  sum(fit$residuals^2)/fit$df.residual
+vbeta <- vcov(fit)/MSE
+beta <- rmnorm(1,mean=fit$coef,varcov=vbeta*sigma2)
+```
+
+```{r Q2b_plot}
+par(mfrow=c(1,2))
+hist(theta.sample$beta[,2],main="Age",xlab=expression(beta[1]), 30)
+hist(theta.sample$beta[,3],main="Gender", xlab=expression(beta[2]),30)
+hist(theta.sample$sigma,main="Error StdDev", xlab=expression(sigma))
+# CIs for the Beta coefficients
+apply(theta.sample$beta,2,quantile,c(.05,.5,.95))
+# CIs for sigma
+quantile(theta.sample$sigma,c(.05,.5,.95))
+```
+Here we are given values for the Intercept, Age coefficient and Gender coefficient of approximately $-907.2544, 102.49836$ and $-119.5783$ respectively, which are pretty close to the values obtained using the method in part (a).
+
 #####(c) Repeat part **(b)** using WinBUGS. Compare the results with the LS estimates obtained in **(a)** and MC sampling in part **(b)**.
+
+```{r Q1BUGS, cache=TRUE}
+require(R2OpenBUGS)
+require(coda)
+
+#define the model
+birthweightmodel <- function(){
+  for (i in 1:n) {
+    mu[i] <- beta0 + beta1*x1[i] + beta2*x2[i]
+    yi[i] ~ dnorm(mu[i],tau) 
+  } 
+  beta0 ~  dflat()
+  sigma ~ dunif(0.01, 100)
+  tau <- 1/(sigma*sigma)
+  beta1 ~  dflat()
+  beta2 ~  dflat()
+}
+# write the model code out to a file
+write.model(birthweightmodel, "birthweightmodel.txt")
+model.file1 = paste(getwd(),"birthweightmodel.txt", sep="/")
+
+#prepare the data for input into OpenBUGS
+x1 <- fit$model[,2]
+x2 <- as.integer(unclass(fit$model[,3]))
+yi <- fit$model[,1]
+n <- 24
+data <- list("x1","x2","yi","n")
+
+#initialization of variables
+inits <- function(){
+  list(beta0=0, beta1=1,beta2=1,sigma=1)
+}
+
+WINE="/opt/local/bin/wine"
+WINEPATH="/opt/local/bin/winepath"
+OpenBUGS.pgm=paste0("/Users/benjamin/Applications/wine/",
+                    "drive_c/ProgramFiles/OpenBUGS/OpenBUGS323/OpenBUGS.exe")
+
+#these are the parameters to save
+parameters = c("beta0", "beta1","beta2")
+
+#run the model
+birthweight.sim <- bugs(data, 
+                    inits, 
+                    model.file = model.file1,
+                    parameters=parameters,
+                    n.chains = 5, 
+                    n.iter = 10000, 
+                    OpenBUGS.pgm=OpenBUGS.pgm, 
+                    WINE=WINE, 
+                    WINEPATH=WINEPATH,
+                    useWINE=T,
+                    codaPkg = T,
+                    working.directory = getwd(),
+                    debug = F)
+
+samples <- read.openbugs()
+plot(samples)
+summary(samples)
+```
+
+WINBUGS reports values for the Intercept, Age coefficient and Gender coefficient of approximately $-718.8, 100.9$ and $-123.1$ respectively. The value given to the intercept is much lower than the values reported in parts (a) and (b), however the other coefficients are roughly the same as those calculated using the other methods.
