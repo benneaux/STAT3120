@@ -1,0 +1,9 @@
+base
+tufte
+knitr
+R2OpenBUGS
+coda
+ggplot2
+Matrix
+lme4
+LearnBayes

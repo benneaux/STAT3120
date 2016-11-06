@@ -1,0 +1,169 @@
+---
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+opts_chunk$set(cache = TRUE)
+opts_chunk$set(fig.align = 'center', fig.height = 5, fig.width = 12, collapse = TRUE, highlight = TRUE)
+```
+
+STAT3120 APPLIED BAYESIAN METHODS
+Practice Exam, Semester 2 2016
+
+Page 1 of 7
+
+
+### QUESTION 1. [Total marks: 20]
+
+Consider the situation where you are entered in a tennis tournament against players unknown to yourself. You have made it to the final and are drawn against Pat Rafter, a player you have not previously heard of. You would like to assess your chances of beating Rafter based on grading him as either a GOOD, AVERAGE or POOR player. After some reflection you decide on the following prior distribution on the exact number of sets per match LOST by each grade of player. Note that this is based on 5 set matches, which is the format for this tournament.
+
+For GOOD players this distribution is
+
+```{r Q1atable, echo=FALSE, results='asis'}
+q1table <- matrix(
+  c("0","1","2","3",0.3,0.3,0.2,0.2),
+    ncol = 4,
+    nrow = 2, byrow = TRUE
+  )
+rownames(q1table) <- c("No. of sets lost","Probability")
+kable(q1table, format="html", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+```	
+
+For AVERAGE players the distribution is
+
+```{r Q1btable, echo=FALSE}
+q1table <- matrix(
+  c("0","1","2","3",0.1,0.2,0.3,0.4),
+    ncol = 4,
+    nrow = 2, byrow = TRUE
+  )
+rownames(q1table) <- c("No. of sets lost","Probability")
+kable(q1table, format="markdown", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+```	
+
+For POOR players the distribution is
+
+```{r Q1ctable, echo=FALSE}
+q1table <- matrix(
+  c("0","1","2","3",0.05,0.1,0.25,0.6),
+    ncol = 4,
+    nrow = 2, byrow = TRUE
+  )
+rownames(q1table) <- c("No. of sets lost","Probability")
+kable(q1table, format="markdown", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+```	
+
+
+It is known from past tournaments that the probability a GOOD player makes it to the final is 0.6, while the probability they are average or poor is 0.3 and 0.1 respectively. During the tournament Rafter has lost the following sequence of sets per match over 6 matches, 
+
+$$
+0, 1, 1, 2, 1, 2
+$$
+
+(a) Ignoring the data on sets lost per match,
+
+  (i)	what is the probability that Rafter is a good player?	[2 marks]
+  (ii)	what is the expected number of sets that a good player will lose in six matches?
+
+(b) 
+
+  (i) What are the expected numbers of sets that average and poor players will lose in 6 matches of tennis? 
+  (ii) Based on (a) and (b)(i) what grade of player do you think Rafter is?
+
+(c) Based on the match results what is the updated probability that Rafter is a good player? [5 marks]
+
+(d) What are the posterior probabilities that he is an average or poor player?	[6 marks]
+
+(e) Ignoring your own ability, what is the probability that Rafter will lose the final?	[3 marks]
+
+### QUESTION 2. [Total marks: 20]
+
+a)	A social worker did a Bayesian analysis to estimate the proportion $\theta$ of patients discharged from a community hospital who were satisfied with the care they received while in the hospital.
+
+  (i)	Before collecting any new data on the subject, she studied information on complaints filed with the hospital and talked with nurses, chaplains, and others who interacted with patients in order to get a rough idea about $\theta$. Based on the preliminary assessment, she expressed her knowledge about $\theta$ in the form of a Beta prior :
+$$
+\theta \sim Beta(4, 6)
+$$
+  What is the mean of the prior distribution? (numeric answer)	[1 mark]
+
+  (ii)	The social worker then chose a simple random sample of 30 patients who had been discharged from the hospital during the last 12 months. She interviewed each one, and asked whether they were satisfied with the care they received. 18 patients said “yes” and 12 said “no.”
+  What parametric family is appropriate for the likelihood for these data? Write down the mathematical form of the likelihood. [2 marks]
+  (iii)	The social worker combined her prior with the likelihood and to obtain the posterior distribution. Derive this posterior distribution.	[3 marks] 
+  (iv)	Write WinBUGS code to estimate the parameter \theta.	[4 marks]
+
+b) Consider the following sample of data, representing the number of late pizza deliveries per day for a particular driver :
+$$
+y =  4, 3, 4, 6, 5, 6, 7, 4, 1, 2.
+$$
+
+  (i) Assuming they are independent and identically distributed, what distribution would you model these counts as?	[1 mark]
+  (ii) Under a suitable diffuse prior, what is the posterior distribution for the parameter of this distribution? Show your working. [4 marks] 
+  (iii) Estimate the posterior mean and variance of parameter in (ii). [2 marks]
+  (iv) Write R code to estimate the posterior mean and 95% credible interval of the parameter in (ii), using MC sampling.	[3 marks]
+
+### QUESTION 3. [Total marks: 20]
+
+(a)	A statistician believes that the distribution of heights of undergraduate men at University of Newcastle (UoN) is Normal with known population mean $\mu = 69$ inches. They wish to estimate the population precision (inverse of the variance) of this distribution. They will use the symbol $\tau^2$	for the precision. The sampling density for a single observation $y$ drawn from this Normal distribution is 
+$$
+p( y) =\frac{\tau}{\sqrt{2\pi}}e^{−\tau^2( y−69)^2/2}
+$$
+
+For data, the statistician will measure two randomly selected UoN undergraduate men.
+
+i.	Write the likelihood if there are two data values, represented symbolically as $y_1$ and $y_2$. [3 marks] 
+ii.   The statistician puts the following prior on $\tau^2 : \tau^2 \sim Gamma(\frac{1}{2},\frac{9}{2}).
+
+This prior has as much information as how many prior observations? (In other words, what is the equivalent prior sample size?) [2 marks]
+
+  iii.	When the statistician measures his two subjects, their heights are:
+$$
+y1 = 68 \>in, \qquad	y2 = 72 \>in.
+$$
+
+Write a mathematical expression to which the posterior distribution, $p(\tau^2 \mid y_1, y_2)$, is proportional. To which parametric family does this posterior distribution belong? [4 marks] 
+
+  iv.	What are the parameters of the posterior distribution (numeric values)? What are the mean and variance of this posterior distribution?	[3 marks]
+
+(b) Markov Chain Monte Carlo (MCMC) methods are a special case of the Metropolis-Hastings (M-H) method. Suppose we have two parameters $\theta_1$ and $\theta_2$. The MCMC sampling scheme is
+
+  1.	$p(\theta_1 \mid y,\theta_2 )$
+
+  2.	$p(\theta_2 \mid y,\theta_1 )$
+    
+This is equivalent to choosing the proposals in M-H as
+$$
+g_1 (\theta_1 ) = p(\theta_1 \mid y,\theta_2 ) and g_2 (\theta_2 ) = p(\theta_2 \mid y,\theta_1 ) .
+$$
+
+Show that the acceptance probability for $\theta_1^p$  using the M-H algorithm equals 1. [8 marks]
+
+### QUESTION 4. [Total marks: 10]
+
+George et al (1993) discuss Bayesian analysis of hierarchical models where the conjugate prior is adopted at the first level, but for any given prior distribution of the hyperparameters, the joint posterior is not of closed form.
+
+The example they consider relates to 10 power plant pumps. The number of failures $x_i$ is assumed to follow a Poisson distribution $$
+x_i ~ Poisson(\thetai ti)	i = 1, \dots, 10
+$$
+where $\theta_i$ is the failure rate for pump $i$ and $t_i$ is the length of operation time of the pump (in 1000s of hours).
+A conjugate gamma prior distribution is adopted for the failure rates: 
+$$
+\theta_i ~ Gamma(\alpha, \beta), i = 1, \dots, 10.
+$$
+
+George *et al* (1993) assume the following prior specification for the hyperparameters $\alpha$ and $\beta$
+
+$$
+\begin{aligned}
+\alpha \sim Exponential(1.0)$
+\beta \sim Gamma(0.1, 1.0)
+\end{aligned}
+$$
+
+They show that this gives a posterior for $\beta$ which is a gamma distribution, but leads to a non-standard posterior for $\alpha$. Consequently, they use the Gibbs sampler to simulate the required posterior densities.
+
+(a) Write the mathematical forms of the likelihood, the conditional distribution of the parameters\theta_i and the prior densities of $\alpha$ and $\beta$ respectively.	[4 marks]
+
+(b) Derive the joint posterior density function for $\theta = (\theta_1 ,\dots,\theta_{10} ), \alpha \> and \> \beta$	[6 marks]

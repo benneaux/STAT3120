@@ -1,0 +1,398 @@
+---
+title: "Lab Exercises 11"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include = FALSE}
+require(knitr)
+require(broom)
+opts_chunk$set(collapse=TRUE, cache = TRUE, fig.width = 15, fig.height = 7.5)
+```
+
+
+## Question 1
+In  the  Wallsend  electorate  at  the  2003  NSW  state  election,  the  distribution  of  votes  
+(when 20% of the vote was counted) were as follows:  
+
+```{r Q1table, echo=FALSE}
+q1.table <- matrix(
+  c(3024,2021,316,435),
+    ncol = 4,
+    nrow = 1
+  )
+colnames(q1.table) <- c("John Mills (Labor)",	"Bob Georghen (Liberal)","John Tongle (Shooters)", "Other")
+kable(q1.table, align = rep("c", dim(q1.table)[2] + 1), format="markdown", row.names = FALSE)
+```	
+
+a) Find a 95% interval estimate for the true proportion of votes in the population of 
+Wallsend, for each candidate above , using an MCMC algorithm. 
+
+From the lecture notes, with $n = 5796$: 
+$$
+p(\theta \mid y) \propto \theta_1^{^{3024}}\,\theta_2^{^{2021}}\,\theta_3^{^{316}}\,(1-\theta_1-\theta_2-\theta_3)^{^{435}}
+$$
+
+We propose a $beta(1512,1386)$ where $1512 = 3024/2$ and $1386 = 5796/2 - 1512$.
+
+In R:
+
+```{r Q1a}
+r1 <- 0.5; r2 <- 0.35; r3 <- 0.05
+alpha1 <- 1512; beta1 <- 1386
+alpha2 <- 1010.5; beta2 <- 1887.5
+alpha3 <- 158; beta3 <- 2740
+
+for (k in 2:10000) {
+  
+  rn = rbeta(1,alpha1,beta1)
+  
+  alph = 3024 * log(rn) + 
+         435 * log(1 - rn - r2[k - 1]) - 
+         3024 * log(r1[k - 1]) -
+         435 * log(1 - r1[k - 1] - r2[k - 1] - r3[k - 1])
+  alph = alph + 
+         log(dbeta(r1[k - 1], alpha1, beta1)) - 
+         log(dbeta(rn, alpha1, beta1))
+  
+  if (runif(1) < exp(alph)) {
+    r1[k] = rn
+    } else {
+      r1[k] = r1[k-1]
+    }
+  
+  rn = rbeta(1,alpha2,beta2)
+  
+  alph = 2021 * log(rn) + 
+         435 * log(1 - rn - r1[k] - r3[k - 1]) - 
+         2021 * log(r2[k - 1]) -
+         435 * log(1 - r1[k - 1] - r2[k - 1] - r3[k - 1])
+  alph = alph + 
+         log(dbeta(r2[k - 1], alpha2, beta2)) - 
+         log(dbeta(rn, alpha2, beta2))
+  
+  if (runif(1) < exp(alph)) {
+    r2[k] = rn
+    } else {
+      r2[k] = r2[k-1]
+    }
+    
+  rn = rbeta(1,alpha3,beta3)
+  
+  alph = 316 * log(rn) + 
+         435 * log(1 - rn - r1[k] - r2[k]) - 
+         316 * log(r3[k - 1]) -
+         435 * log(1 - r1[k] - r2[k] - r3[k - 1])
+  alph = alph + 
+         log(dbeta(r3[k - 1], alpha3, beta3)) - 
+         log(dbeta(rn, alpha3, beta3))
+  
+  if (runif(1) < exp(alph)) {
+    r3[k] = rn
+    } else {
+      r3[k] = r3[k-1]
+    }
+}
+
+```
+
+```{r Q1aOut}
+
+hist(r1)
+quantile(r1,c(0.025,0.975))
+plot.ts(r1)
+hist(r2)
+quantile(r2,c(0.025,0.975))
+plot.ts(r1)
+hist(r2)
+quantile(r3,c(0.025,0.975))
+plot.ts(r3)
+```
+
+```{r Q1aAlt}
+y = c(3024,2021,316,435)
+r1 = 0.5; r2 = 0.35; r3 = 0.5
+
+for (k in 2:10000) {
+  r1[k] = (1 - r2[k - 1] - r3[k - 1]) * rbeta(1, y[1], y[4])
+  r2[k] = (1 - r1[k] - r3[k - 1]) * rbeta(1, y[2], y[4])
+  r3[k] = (1 - r1[k] - r2[k]) * rbeta(1, y[3], y[4])
+}
+```
+
+```{r Q1aAltOut}
+hist(r1)
+quantile(r1,c(0.025,0.975))
+plot.ts(r1)
+
+hist(r2)
+quantile(r2,c(0.025,0.975))
+plot.ts(r2)
+
+hist(r2)
+quantile(r3,c(0.025,0.975))
+plot.ts(r3)
+
+quantile(r1-r2,c(0.025,0.975))
+```
+
+(b) Find a 95% interval estimate for the ‘Other’ candidates not mentioned above. 
+
+```{r Q1b}
+quantile(1-r1-r2-r3,c(0.025,0.975))
+```
+(c) Estimate Pr (Labor > Liberal | y) in Wallsend. 
+
+```{r Q1c}
+mean(r1>r2)
+```
+(d) Find a 95% interval for $\theta_{Labor} - \theta_{Liberal}$. 
+
+```{r Q1d}
+quantile(r1-r2, c(0.025,0.975))
+```
+
+(e) Estimate Pr(Other > Shooters)
+
+```{r Q1e}
+mean(1-r1-r2-r3>r3)
+```
+
+## Question 2
+Consider the data from the lecture:
+
+```{r Q2table, echo=FALSE}
+row.symbols = c(t1='\U03B8\U2081', t2='\U03B8\U2082', t3="\U03B8\U2083")
+r1 <- c(727,583,137)
+r2 <- c(row.symbols["t1"],row.symbols["t2"],row.symbols["t3"])
+r3 <- c(0.502,0.403,0.095)
+q2.table <- rbind(r1,r2,r3)
+colnames(q2.table) <- c("George Bush",	"Michael Dukakis","Other")
+rownames(q2.table) <- c("Votes","Parameter","pt. est.")
+kable(q2.table, align = rep("c", dim(q2.table)[2] + 1), format="markdown", row.names = TRUE)
+```
+
+```{r Q2Setup}
+y = c(727,583,137)
+r1 = 0.5; r2 = 0.35
+
+for (k in 2:10000) {
+  r1[k] = (1 - r2[k - 1]) * rbeta(1, y[1], y[3])
+  r2[k] = (1 - r1[k]) * rbeta(1, y[2], y[3])
+}
+```
+
+```{r Q2SetupOut}
+hist(r1)
+quantile(r1,c(0.025,0.975))
+plot.ts(r1)
+
+hist(r2)
+quantile(r2,c(0.025,0.975))
+plot.ts(r2)
+```
+
+a) Derive the posterior density under a flat Dirichlet(1,1,1).
+
+Check lecture notes: easy to derive using the process described there.
+
+(b) Update the R code for  MCMC  in  Q2(a)  to  find  point  and  interval  estimates  for  each  
+parameter plus an interval estimate of $\theta_1 - \theta_2$  and point estimate of  Pr($\theta_1 > \theta_2 \mid y$)
+
+
+(c) It is in fact possible to simulate from a Dirichlet distribution using regular MC methods, 
+as  explained  in  Appendix  A  of  BDA.  An  alternative  proposal  follows  below,  from  an  
+earlier suggestion solution. Check that it is inadequate and explain why. 
+
+From the lab notes:
+
+```{r Q2cWrong, eval = FALSE}
+rdirichlet=function(n,p){
+  mat = matrix(NA,n,length(p))
+  for (i in 1:length(p)) { 
+    mat[,i]=rbeta(n, p[i],sum(p)-p[i])
+  }
+  return(mat)
+} 
+
+data <- rdirichlet(10000,y+1)
+```
+
+This will return some probabilities that add up to more than one. To stop this we normalise the data.
+
+(d) Write a correct version of the attempt at (c) and obtain histograms and 95% CrIs for the 
+above data. 
+
+```{r Q2dRight}
+rdirichlet=function(n,p){
+  mat = matrix(NA,n,length(p))
+  for (i in 1:length(p)) { 
+    mat[,i]=rbeta(n, p[i],sum(p)-p[i])
+  }
+  mat = mat/rowSums(mat) # normalising step.
+  return(mat)
+} 
+
+data <- rdirichlet(10000,y+1)
+```
+
+## Question 3
+Simulate $200$ observations  from a $0.25*N(10,2) + 0.75*N(15,3)$ density. Run  an  MCMC analysis on the data using the mixture model. What are your conclusions?
+
+```{r Q3}
+y=0; n=200
+
+for(t in 1:n) {
+  if (runif(1,0,1) < 0.25) {
+    y[t] = rnorm(1,10,sqrt(2))
+    } else {
+      y[t]=rnorm(1,15,sqrt(3))
+      }
+}
+
+n = length(y)   # (for data sample)
+kt = 1
+omeg=rbeta(1,1,1)
+
+for(k in 1:n) {
+  if(runif(1,0,1)>0.5) {
+    kt[k]=1
+    } else {
+      kt[k]=2
+      }
+  }  #some initial values for k
+
+while(var(y[kt==2]) > var(y[kt==1])) {
+  for(k in 1:n) {
+    if(runif(1,0,1)>0.5) {
+      kt[k]=1
+    } else {
+        kt[k]=2
+        }
+  }
+}
+
+mu1 = mean(y); sig1 = var(y)*1.5; d = 1000  # d = (MCMC sample size)
+mu2 = mean(y); sig2 = var(y) * 0.5; mpkty = 0; pyt = 0; pyt2 = 0
+
+for(k in 1:n) {
+  mpkty[k]=0
+  pyt[k]=0
+  pyt2[k]=0
+  }
+
+pkymax = -99999; ktmax = kt
+
+for(j in 2:d) {
+  ktold=kt
+  for(t in 1:n) {
+    kt[t] = 1
+    n1 = length(y[kt==1])
+    n2 = n - n1
+    y1 = y[kt==1] - mean(y[kt==1])
+    y2 = y[kt==2] - mean(y[kt==2])
+    
+    ht1 = -0.5*(log(n1) + log(n2)) + 
+          lgamma((n1-1)/2) + 
+          lgamma((n2-1)/2)
+    
+    ht1 = ht1 -
+          (n1 - 1)/2 * log(sum(y1^2)) - 
+          (n2-1)/2 * log(sum(y2^2))
+    
+    ht1 = ht1 + 
+          log(omeg[j-1])
+    
+    kt[t] = 2
+    n1 = n1-1
+    n2 = n2+1
+    y1 = y[kt==1] - 
+         mean(y[kt==1])
+    y2 = y[kt==2] - 
+         mean(y[kt==2])
+    
+    ht2 = -0.5 * (log(n1) + log(n2)) + 
+          lgamma((n1-1)/2) + 
+          lgamma((n2-1)/2)
+    
+    ht2 = ht2 - 
+          (n1-1)/2 * log(sum(y1^2)) - 
+          (n2-1)/2 * log(sum(y2^2))
+    
+    ht2 = ht2 + 
+          log(1 - omeg[j-1])          
+    
+    pyk = 1/(1 + exp(ht2 - ht1))
+    
+    if(is.nan(pyk)) {
+      if(is.nan(ht1)) {
+        kt[t]=1
+      }
+      if(is.nan(ht2)) {
+        kt[t]=2
+        }
+      } else {
+        if(runif(1,0,1) < pyk) {
+          kt[t] = 1
+          pyt2[t] = pyt2[t] + 
+                    dnorm(y[t], mu1[j - 1], sqrt(sig1[j - 1]))
+        } else {
+            kt[t]=2
+            pyt2[t] = pyt2[t] + 
+                      dnorm(y[t], mu2[j - 1], sqrt(sig2[j-1]))
+            }
+        mpkty[t] = mpkty[t] + pyk
+      }
+    
+    n1 = length(kt[kt==1])
+    
+    if (n1 < 2 | n1 > (n - 3)) {
+      kt[t] = ktold[t]
+    }
+    if (var(y[kt==2]) > var(y[kt==1])) {
+      kt[t] = ktold[t]
+    }
+    pyt[t] = pyt[t] + 
+             omeg[j - 1] * dnorm(y[t], mu1[j - 1], sqrt(sig1[j - 1])) + 
+             (1-omeg[j-1]) * dnorm(y[t],mu2[j-1],sqrt(sig2[j-1]))
+    }
+  
+  n1 = length(kt[kt==1])
+  n2 = n-n1
+  
+  if(n1 < 2 | n1 > (n - 3) | var(y[kt==2]) > var(y[kt==1])) {
+    kt = ktold
+    n1 = length(kt[kt==1])
+    n2 = n - n1
+    }
+  y1 = y[kt==1] - 
+       mean(y[kt==1])
+  y2 = y[kt==2] - 
+       mean(y[kt==2])
+  ht=-0.5*(log(n1)+log(n2)) + lgamma((n1-1)/2) + lgamma((n2-1)/2)
+  ht=ht-(n1-1)/2*log(sum(y1^2))-(n2-1)/2*log(sum(y2^2))
+  lpyk=ht
+  c1=length(kt[kt==1]);c10= length(kt[kt==2]) 
+  lpyk=lpyk+c1*log(omeg[j-1])+c10*log(1-omeg[j-1])
+  if(j==1){pkymax=lpyk;ktmax=kt}else{
+  if(lpyk>pkymax){pkymax=lpyk;ktmax=kt}}
+  n1=length(y[kt==1]);n2=n-n1
+  a=n1+1;b=n2+1;
+          omeg[j]=rbeta(1,a,b)        
+          y1=y[kt==1];y2=y[kt==2]
+          mu1[j]=rt(1,n1-1)*sqrt(var(y1)/n1)+mean(y1)
+          mu2[j]=rt(1,n2-1)*sqrt(var(y2)/n2)+mean(y2)
+          ymu=(y1-mu1[j])^2; D = sum(ymu)
+          sig1[j]=1/rgamma(1,n1/2,D/2)
+          ymu=(y2-mu2[j])^2; D = sum(ymu)
+          sig2[j]=1/rgamma(1,n2/2,D/2)
+          }
+mpkty=mpkty/d
+pyt=pyt/d; pyt2=pyt2/d
+
+yi=sort(y,index.return=T)
+y2=sort(y);
+y3=yi[[2]]
+plot(y2,pyt[y3],type='l',col=4)
+lines(density(y),col=2)
+```

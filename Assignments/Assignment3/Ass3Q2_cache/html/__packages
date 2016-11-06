@@ -1,0 +1,13 @@
+base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
+tufte
+knitr
+LearnBayes
+ggplot2
+R2OpenBUGS
+coda

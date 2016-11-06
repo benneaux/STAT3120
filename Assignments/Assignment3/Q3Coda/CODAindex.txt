@@ -1,0 +1,4 @@
+deviance	1	25000
+sigma2.btw	25001	50000
+sigma2.with	50001	75000
+theta	75001	100000
