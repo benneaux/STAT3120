@@ -1,4 +1,6 @@
 ---
+title: "STAT3120 APPLIED BAYESIAN METHODS"
+subtitle: Practice Exam, Semester 2 2016
 output:
   html_document: default
   html_notebook: default
@@ -9,12 +11,6 @@ require(knitr)
 opts_chunk$set(cache = TRUE)
 opts_chunk$set(fig.align = 'center', fig.height = 5, fig.width = 12, collapse = TRUE, highlight = TRUE)
 ```
-
-STAT3120 APPLIED BAYESIAN METHODS
-Practice Exam, Semester 2 2016
-
-Page 1 of 7
-
 
 ### QUESTION 1. [Total marks: 20]
 
@@ -30,6 +26,7 @@ q1table <- matrix(
   )
 rownames(q1table) <- c("No. of sets lost","Probability")
 kable(q1table, format="html", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+
 ```	
 
 For AVERAGE players the distribution is
@@ -42,6 +39,7 @@ q1table <- matrix(
   )
 rownames(q1table) <- c("No. of sets lost","Probability")
 kable(q1table, format="markdown", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+
 ```	
 
 For POOR players the distribution is
@@ -54,9 +52,21 @@ q1table <- matrix(
   )
 rownames(q1table) <- c("No. of sets lost","Probability")
 kable(q1table, format="markdown", align = rep("c", dim(q1table)[2] + 1), col.names = rep("",4))
+
 ```	
 
-
+Combined 
+```{r Q1dtable, echo=FALSE, results='asis'}
+q1table <- matrix(
+  c(0.3,0.3,0.2,0.2,0.1,0.2,0.3,0.4,0.05,0.1,0.25,0.6),
+    ncol = 4,
+    nrow = 3, byrow = TRUE
+  )
+clnames <- c("0","1", "2","3")
+rownames(q1table) <- c("Good","Average","Poor")
+kable(q1table, format="html", align = rep("c", dim(q1table)[2] + 1), 
+      col.names = clnames, caption = "Pr. Sets Lost by Player Rating")
+```	
 It is known from past tournaments that the probability a GOOD player makes it to the final is 0.6, while the probability they are average or poor is 0.3 and 0.1 respectively. During the tournament Rafter has lost the following sequence of sets per match over 6 matches, 
 
 $$
@@ -66,7 +76,13 @@ $$
 (a) Ignoring the data on sets lost per match,
 
   (i)	what is the probability that Rafter is a good player?	[2 marks]
+  
+  He is in the final, so it is given that the probability he is a good player $=0.6$.
+
   (ii)	what is the expected number of sets that a good player will lose in six matches?
+  
+  Here we raise each outcome (number of sets lost) the probability ascribed to each outcome for a good player and sum the results. This number is the expected number of sets that a good player would lose in a single game. Multiply by 6 to find the corresponding figure across six games.
+  
 
 (b) 
 
@@ -74,8 +90,25 @@ $$
   (ii) Based on (a) and (b)(i) what grade of player do you think Rafter is?
 
 (c) Based on the match results what is the updated probability that Rafter is a good player? [5 marks]
+```{r Q1ai}
+rafter.sets <- c(0,1,1,2,1,2)
+sets <- c(0,1,2,3)
+rafter.prob <- matrix(NA, ncol = 4, nrow = 3)
+rafter.prob.prod <- vector("numeric",length = 3)
+for (i in 1:3){
+  for (j in 1:4){
+    rafter.prob[i,j] = q1table[i,j]^length(which(rafter.sets==sets[j]))
+  }
+  rafter.prob.prod[i] = prod(rafter.prob[i,])
+}
+rafter.prob.prod[1] # Good
+```
 
 (d) What are the posterior probabilities that he is an average or poor player?	[6 marks]
+```{r Q1d}
+rafter.prob.prod[2] # Average
+rafter.prob.prod[3] # Poor
+```
 
 (e) Ignoring your own ability, what is the probability that Rafter will lose the final?	[3 marks]
 
@@ -88,21 +121,106 @@ $$
 \theta \sim Beta(4, 6)
 $$
   What is the mean of the prior distribution? (numeric answer)	[1 mark]
+  
+  The mean of a $Beta(\alpha, \beta)$ distribution is given by $\frac{\alpha}{\alpha + \beta}$. Therefore, for $\theta \sim Beta(4, 6)$, we have $E[\theta] = \frac{4}{10} = 0.4$.
+
+***
 
   (ii)	The social worker then chose a simple random sample of 30 patients who had been discharged from the hospital during the last 12 months. She interviewed each one, and asked whether they were satisfied with the care they received. 18 patients said “yes” and 12 said “no.”
   What parametric family is appropriate for the likelihood for these data? Write down the mathematical form of the likelihood. [2 marks]
+  
+  The Binomial Distribution will be appropriate in this situation (for "yes/no") data. For the Binomial Likelihood we are given that:
+  $$
+  Pr(Y=y \mid p) = \binom{n}{y}p^y(1-p)^{n-y}.
+  $$
+  So for a model with $30$ observations (number of patients in sample) and $18$ "successes" (which we define as the patient answering "yes"), we get:
+    $$
+  Pr(Y=18 \mid p) = \binom{30}{18}p^{18}(1-p)^{12}.
+  $$
+  The **MLE/Classical Estimate** of $p$ here is $18/30 = 0.6$.
+  
   (iii)	The social worker combined her prior with the likelihood and to obtain the posterior distribution. Derive this posterior distribution.	[3 marks] 
+  
+  Combining a conjugate Beta prior with a Binomial likelihood results in:
+  $$
+  \theta \mid y \sim Beta(\alpha = y + a, \beta = n - y + b)
+  $$
+  In our example, we have $n = 30, y = 18, a = 4$ and $b = 6$. This gives us:
+  $$
+  \begin{aligned}
+  \theta \mid y &\sim Beta(\alpha = 18 + 4, \beta = 30 - 18 + 6) \\
+  &\sim Beta(22,18)
+  \end{aligned}
+  $$
+
+  
   (iv)	Write WinBUGS code to estimate the parameter \theta.	[4 marks]
+
+```{r winbugsQ2aiv, eval=FALSE}
+MODEL {
+ theta ~ dbeta(a,b)
+ y ~ dbin(theta,n)
+}
+
+DATA 
+  list(a=4,b=6,x=18,n=30)
+
+INITS
+  list(theta=0.6)
+```
 
 b) Consider the following sample of data, representing the number of late pizza deliveries per day for a particular driver :
 $$
 y =  4, 3, 4, 6, 5, 6, 7, 4, 1, 2.
 $$
 
-  (i) Assuming they are independent and identically distributed, what distribution would you model these counts as?	[1 mark]
-  (ii) Under a suitable diffuse prior, what is the posterior distribution for the parameter of this distribution? Show your working. [4 marks] 
+  (i) Assuming they are independent and identically distributed, what distribution would you model these counts as?	[1 mark] 
+  
+  For independent samples of counts $y_1,y_2,\dots,y_n$ we assume that the data follow a *Poisson Distribution* with an unkown mean $\theta$,
+  $$
+  Pr(y \mid \theta) = \prod\limits_{i}\frac{\theta^{y_i}e^{-\theta}}{y_i!}
+  $$
+  with a conjugate prior distribution $Pr(\theta) = Gamma(a, b)$, which we write as:
+  $$
+  Pr(\theta) = \frac{b^a}{\Gamma(a)}\theta^{a-1}e^{-b\theta}
+  $$
+  
+  
+  (ii) Under a suitable diffuse prior, what is the posterior distribution for the parameter of this distribution? Show your working. [4 marks]
+  
+  For the diffuse prior, let's choose a $Gamma(1,0)$ as a diffuse, non-informative prior. For the Poisson/Gamma model, the posterior is compromise between the prior and the likelihood. The posterior here is:
+  
+  $$
+  \begin{aligned}
+  Pr(\theta \mid y) &\propto Pr(\theta)Pr(y \mid \theta) \\
+  &= \frac{b^a}{\Gamma(a)}\theta^{a-1}e^{-b\theta}\prod\limits_{i}\frac{\theta^{y_i}e^{-\theta}}{y_i!} \\
+  &\propto \theta^{a + n\bar{x}-1}e^{-(b+n)\theta} \\
+  &= Gamma(a + n\bar{x}, b + n) \\
+  &= Gamma(1 + 10*4.2, 0 + 10) \\
+  &= Gamma(43,10)
+  \end{aligned}
+  $$
+  
   (iii) Estimate the posterior mean and variance of parameter in (ii). [2 marks]
+  
+  The mean of a $Gamma(a,b)$ distribution is given by $\frac{a}{b}$. The variance is given by $\frac{a}{b^2}$. For the posterior given above, we get:
+  
+  $$
+  \begin{aligned}
+  E[\theta] = \frac{43}{10} \approx 4.3 \\
+  Var[\theta] = \frac{43}{10^2} \approx 0.43
+  \end{aligned}
+  $$
   (iv) Write R code to estimate the posterior mean and 95% credible interval of the parameter in (ii), using MC sampling.	[3 marks]
+  
+A 95% interval is $(`r qgamma(c(0.025,0.975),43,10)`)$ and the posterior mean is $4.3$. Using MC Sampling, we get:
+
+```{r 2biv}
+post.y <- rgamma(10000,43,10) 
+quantile(post.y,c(0.025,0.975))
+mean(post.y)
+hist(post.y)
+```
 
 ### QUESTION 3. [Total marks: 20]
 
@@ -114,13 +232,14 @@ $$
 For data, the statistician will measure two randomly selected UoN undergraduate men.
 
 i.	Write the likelihood if there are two data values, represented symbolically as $y_1$ and $y_2$. [3 marks] 
-ii.   The statistician puts the following prior on $\tau^2 : \tau^2 \sim Gamma(\frac{1}{2},\frac{9}{2}).
+
+ii.   The statistician puts the following prior on $\tau^2 : \tau^2 \sim Gamma(\frac{1}{2},\frac{9}{2})$.
 
 This prior has as much information as how many prior observations? (In other words, what is the equivalent prior sample size?) [2 marks]
 
   iii.	When the statistician measures his two subjects, their heights are:
 $$
-y1 = 68 \>in, \qquad	y2 = 72 \>in.
+y_1 = 68 \>in, \qquad	y_2 = 72 \>in.
 $$
 
 Write a mathematical expression to which the posterior distribution, $p(\tau^2 \mid y_1, y_2)$, is proportional. To which parametric family does this posterior distribution belong? [4 marks] 
@@ -128,10 +247,9 @@ Write a mathematical expression to which the posterior distribution, $p(\tau^2 \
   iv.	What are the parameters of the posterior distribution (numeric values)? What are the mean and variance of this posterior distribution?	[3 marks]
 
 (b) Markov Chain Monte Carlo (MCMC) methods are a special case of the Metropolis-Hastings (M-H) method. Suppose we have two parameters $\theta_1$ and $\theta_2$. The MCMC sampling scheme is
-
-  1.	$p(\theta_1 \mid y,\theta_2 )$
-
-  2.	$p(\theta_2 \mid y,\theta_1 )$
+    
+    1.	$p(\theta_1 \mid y,\theta_2 )$
+    2.	$p(\theta_2 \mid y,\theta_1 )$
     
 This is equivalent to choosing the proposals in M-H as
 $$
@@ -144,26 +262,27 @@ Show that the acceptance probability for $\theta_1^p$  using the M-H algorithm e
 
 George et al (1993) discuss Bayesian analysis of hierarchical models where the conjugate prior is adopted at the first level, but for any given prior distribution of the hyperparameters, the joint posterior is not of closed form.
 
-The example they consider relates to 10 power plant pumps. The number of failures $x_i$ is assumed to follow a Poisson distribution $$
-x_i ~ Poisson(\thetai ti)	i = 1, \dots, 10
+The example they consider relates to 10 power plant pumps. The number of failures $x_i$ is assumed to follow a Poisson distribution 
+$$
+x_i \sim Poisson(\theta_i, t_i),\quad	i = 1, \dots, 10
 $$
 where $\theta_i$ is the failure rate for pump $i$ and $t_i$ is the length of operation time of the pump (in 1000s of hours).
 A conjugate gamma prior distribution is adopted for the failure rates: 
 $$
-\theta_i ~ Gamma(\alpha, \beta), i = 1, \dots, 10.
+\theta_i \sim Gamma(\alpha, \beta), \quad i = 1, \dots, 10.
 $$
 
 George *et al* (1993) assume the following prior specification for the hyperparameters $\alpha$ and $\beta$
 
 $$
 \begin{aligned}
-\alpha \sim Exponential(1.0)$
-\beta \sim Gamma(0.1, 1.0)
+\alpha &\sim Exponential(1.0) \\
+\beta &\sim Gamma(0.1, 1.0)
 \end{aligned}
 $$
 
 They show that this gives a posterior for $\beta$ which is a gamma distribution, but leads to a non-standard posterior for $\alpha$. Consequently, they use the Gibbs sampler to simulate the required posterior densities.
 
-(a) Write the mathematical forms of the likelihood, the conditional distribution of the parameters\theta_i and the prior densities of $\alpha$ and $\beta$ respectively.	[4 marks]
+(a) Write the mathematical forms of the likelihood, the conditional distribution of the parameters $\theta_i$ and the prior densities of $\alpha$ and $\beta$ respectively.	[4 marks]
 
-(b) Derive the joint posterior density function for $\theta = (\theta_1 ,\dots,\theta_{10} ), \alpha \> and \> \beta$	[6 marks]
+(b) Derive the joint posterior density function for $\theta = (\theta_1 ,\dots,\theta_{10} ), \alpha \> \text{and} \> \beta$	[6 marks]
